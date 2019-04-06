@@ -1,0 +1,116 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Description: HttpMate AWS Lambda integration.
+
+Parameters:
+  StackIdentifier:
+    Type: String
+    Description: Unique string to identify the stack
+
+Resources:
+  ############
+  ## Lambda ##
+  ############
+
+  FunctionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${StackIdentifier}-FunctionRole"
+      ManagedPolicyArns:
+      - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+      - PolicyName: !Sub "${StackIdentifier}-FunctionRolePolicy"
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Action:
+            - sts:AssumeRole
+            Resource: '*'
+            Effect: Allow
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Action:
+          - sts:AssumeRole
+          Effect: Allow
+          Principal:
+            Service:
+            - lambda.amazonaws.com
+
+  Function:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub "${StackIdentifier}-Deployment"
+      Code: "./target/httpmate-aws-lambda.jar"
+      Tags:
+      - Key: StackIdentifier
+        Value: !Ref StackIdentifier
+      MemorySize: 512
+      Handler: com.envimate.httpmate.examples.awslambda.infra.HttpMateIntegration::handleRequest
+      Role: !GetAtt FunctionRole.Arn
+      Timeout: 20
+      Runtime: java8
+
+  FunctionResourcePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:invokeFunction
+      Principal: apigateway.amazonaws.com
+      FunctionName: !Ref Function
+
+  ################
+  ## ApiGateway ##
+  ################
+
+  HttpMateApi:
+    Type: AWS::ApiGateway::RestApi
+    Properties:
+      Name: "HttpMate Integration"
+      FailOnWarnings: true
+
+  ApiResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref HttpMateApi
+      ParentId: !GetAtt HttpMateApi.RootResourceId
+      PathPart: "{proxy+}"
+
+  AnyMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      AuthorizationType: NONE
+      HttpMethod: ANY
+      RestApiId: !Ref HttpMateApi
+      ResourceId: !Ref ApiResource
+      ApiKeyRequired: false
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        PassthroughBehavior: WHEN_NO_MATCH
+        Uri:
+          Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${Function}/invocations"
+
+  ApiStage:
+    Type: AWS::ApiGateway::Stage
+    Properties:
+      DeploymentId: !Ref ApiDeployment
+      RestApiId: !Ref HttpMateApi
+      StageName: !Ref StackIdentifier
+
+  ApiDeployment:
+    Type: AWS::ApiGateway::Deployment
+    DependsOn: AnyMethod
+    Properties:
+      RestApiId: !Ref HttpMateApi
+
+Outputs:
+  Endpoint:
+    Value:
+      Fn::Join:
+      - ''
+      - - https://
+        - Ref: HttpMateApi
+        - .execute-api.
+        - Ref: AWS::Region
+        - .amazonaws.com/
+        - Ref: ApiStage

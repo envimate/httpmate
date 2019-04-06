@@ -1,0 +1,9 @@
+image: maven:3.5.4-jdk-11
+
+pipelines:
+  default:
+  - step:
+      name: Build and Test
+      script:
+        - mvn -B clean package -DskipTests
+        - mvn -B verify

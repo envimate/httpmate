@@ -1,0 +1,172 @@
+<!--
+  ~ Copyright (c) 2018 envimate GmbH - https://envimate.com/.
+  ~
+  ~ Licensed to the Apache Software Foundation (ASF) under one
+  ~ or more contributor license agreements.  See the NOTICE file
+  ~ distributed with this work for additional information
+  ~ regarding copyright ownership.  The ASF licenses this file
+  ~ to you under the Apache License, Version 2.0 (the
+  ~ "License"); you may not use this file except in compliance
+  ~ with the License.  You may obtain a copy of the License at
+  ~
+  ~   http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing,
+  ~ software distributed under the License is distributed on an
+  ~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  ~ KIND, either express or implied.  See the License for the
+  ~ specific language governing permissions and limitations
+  ~ under the License.
+  -->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+                      http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.envimate</groupId>
+        <artifactId>envimate-opensource-parent</artifactId>
+        <version>1.0.4</version>
+    </parent>
+
+    <packaging>pom</packaging>
+
+    <artifactId>httpmate-parent</artifactId>
+    <version>1.0.1</version>
+
+    <name>HttpMate</name>
+
+    <description>
+        HttpMate is a lightweight non-intrusive web framework, which allows you to easily use your services to handle
+        HTTP requests. It delegates the processing of a request based on it's path to one of your services, releasing
+        you from the headache of configuring numerous beans and spoiling your code with annotations.
+    </description>
+
+    <url>https://bitbucket.org/envimate/httpmate</url>
+
+    <organization>
+        <name>envimate GmbH</name>
+        <url>https://www.envimate.com</url>
+    </organization>
+
+    <licenses>
+        <license>
+            <name>Apache License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <name>Richard Hauswald</name>
+            <email>richard.hauswald@envimate.com</email>
+            <organization>envimate GmbH</organization>
+            <organizationUrl>https://www.envimate.com</organizationUrl>
+        </developer>
+        <developer>
+            <name>Nune Isabekyan</name>
+            <email>nune.isabekyan@envimate.com</email>
+            <organization>envimate GmbH</organization>
+            <organizationUrl>https://www.envimate.com</organizationUrl>
+        </developer>
+    </developers>
+
+    <scm>
+        <connection>scm:git:git://bitbucket.org/envimate/httpmate.git</connection>
+        <developerConnection>scm:git:git://bitbucket.org/envimate/httpmate.git</developerConnection>
+        <url>https://bitbucket.org/envimate/httpmate/src</url>
+    </scm>
+
+    <distributionManagement>
+        <snapshotRepository>
+            <uniqueVersion>false</uniqueVersion>
+            <id>sonatype.snapshots</id>
+            <name>Sonatype Snapshots</name>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+            <layout>default</layout>
+        </snapshotRepository>
+        <repository>
+            <uniqueVersion>false</uniqueVersion>
+            <id>sonatype.staging</id>
+            <name>Sonatype Staging</name>
+            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
+            <layout>default</layout>
+        </repository>
+    </distributionManagement>
+
+    <properties>
+        <java.version>11</java.version>
+        <maven.compiler.source>${java.version}</maven.compiler.source>
+        <maven.compiler.target>${java.version}</maven.compiler.target>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.2</version>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.simplify4u.plugins</groupId>
+                <artifactId>pgpverify-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>none</phase>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.8.0</version>
+                <configuration>
+                    <compilerArgs>
+                        <arg>-Xlint:all</arg>
+                        <arg>-Xlint:-processing</arg>
+                        <arg>-Xlint:-serial</arg>
+                        <arg>-parameters</arg>
+                        <arg>--add-modules=jdk.httpserver</arg>
+                    </compilerArgs>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+    <profiles>
+        <profile>
+            <id>development</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+                <property>
+                    <name>!deployToMavenCentral</name>
+                </property>
+            </activation>
+            <modules>
+                <module>core</module>
+                <module>integrations</module>
+                <module>tests</module>
+                <module>examples</module>
+            </modules>
+        </profile>
+        <profile>
+            <id>deployToMavenCentral</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+                <property>
+                    <name>deployToMavenCentral</name>
+                </property>
+            </activation>
+            <modules>
+                <module>core</module>
+                <module>integrations</module>
+            </modules>
+        </profile>
+    </profiles>
+</project>

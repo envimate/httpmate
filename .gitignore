@@ -1,0 +1,11 @@
+*.iml
+target
+.envrc
+.idea/*
+!.idea/checkstyle-idea.xml
+!.idea/findbugs-idea.xml
+!.idea/copyright
+!.idea/inspectionProfiles
+!.idea/runConfigurations
+!.idea/codeStyleSettings.xml
+**.idea/
