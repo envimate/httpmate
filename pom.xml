@@ -33,7 +33,7 @@
     <packaging>pom</packaging>
 
     <artifactId>httpmate-parent</artifactId>
-    <version>1.0.1</version>
+    <version>1.0.9</version>
 
     <name>HttpMate</name>
 

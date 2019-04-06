@@ -64,7 +64,7 @@ public final class UseCaseConfigurator {
         return new UseCaseConfigurator();
     }
 
-    InstantiationConfigurator configureUseCaseInstantiation() {
+    public InstantiationConfigurator configureUseCaseInstantiation() {
         return useCaseInstantiator -> this.useCaseInstantiator = useCaseInstantiator;
     }
 

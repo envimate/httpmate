@@ -63,7 +63,7 @@ public final class UseCaseDrivenBuilder {
         }
 
         @Override
-        public <X> Using<DeserializationStage<Stage2>, RequestMapper<X>> mappingRequestsToUseCaseParametersThat(
+        public <X> Using<DeserializationStage<Stage2>, RequestMapper<X>> mappingEventsToUseCaseParametersThat(
                 final BiPredicate<Class<?>, Map<String, Object>> filter) {
             return mapper -> {
                 useCaseConfigurator.addRequestMapper(filter, mapper);
@@ -72,7 +72,7 @@ public final class UseCaseDrivenBuilder {
         }
 
         @Override
-        public Stage2 mappingRequestsToUseCaseParametersByDefaultUsing(final RequestMapper<Object> mapper) {
+        public Stage2 mappingEventsToUseCaseParametersByDefaultUsing(final RequestMapper<Object> mapper) {
             useCaseConfigurator.setDefaultRequestMapper(mapper);
             return new Stage2();
         }

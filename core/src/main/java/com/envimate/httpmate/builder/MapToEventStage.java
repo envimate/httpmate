@@ -47,5 +47,13 @@ public interface MapToEventStage<T> {
         });
     }
 
+    default T mappingOnlyTheBodyToTheEvent() {
+        return mappingRequestsToEventsUsing(metaData -> {
+            final Map<String, Object> eventMap = new HashMap<>();
+            metaData.getOptional(BODY_MAP).ifPresent(eventMap::putAll);
+            return eventMap;
+        });
+    }
+
     T mappingRequestsToEventsUsing(RequestToEventMapper mapper);
 }

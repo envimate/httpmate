@@ -135,10 +135,10 @@ public final class HttpMateTestConfigurations {
                 .servingTheUseCase(TwoParametersUseCase.class).forRequestPath("/twoparameters").andRequestMethod(GET)
                 .servingTheUseCase(VoidUseCase.class).forRequestPath("/void").andRequestMethod(GET)
                 .servingTheUseCase(MultipartAndMapmateUseCase.class).forRequestPath("/multipart_and_mapmate").andRequestMethod(PUT)
-                .mappingRequestsToUseCaseParametersOfType(Parameter.class).using((targetType, map) -> new Parameter())
-                .mappingRequestsToUseCaseParametersOfType(WildcardParameter.class).using((targetType, map) -> new WildcardParameter((String) map.get("parameter")))
-                .mappingRequestsToUseCaseParametersOfType(QueryParametersParameter.class).using((targetType, map) -> new QueryParametersParameter((Map<String, String>) (Object) map))
-                .mappingRequestsToUseCaseParametersOfType(HeadersParameter.class).using((targetType, map) -> new HeadersParameter((Map<String, String>) (Object) map))
+                .mappingEventsToUseCaseParametersOfType(Parameter.class).using((targetType, map) -> new Parameter())
+                .mappingEventsToUseCaseParametersOfType(WildcardParameter.class).using((targetType, map) -> new WildcardParameter((String) map.get("parameter")))
+                .mappingEventsToUseCaseParametersOfType(QueryParametersParameter.class).using((targetType, map) -> new QueryParametersParameter((Map<String, String>) (Object) map))
+                .mappingEventsToUseCaseParametersOfType(HeadersParameter.class).using((targetType, map) -> new HeadersParameter((Map<String, String>) (Object) map))
                 /*
                 .mappingRequestsToUseCaseParametersOfType(EchoContentTypeValue.class).using((targetType, metaData) -> {
                     final ContentType contentType = metaData.get(HTTP_MATE_CHAIN_KEYS.CONTENT_TYPE);
@@ -148,20 +148,20 @@ public final class HttpMateTestConfigurations {
                 .mappingRequestsToUseCaseParametersOfType(EchoMultipartValue.class).using((targetType, metaData) -> echoMultipartValue(metaData.get(MULTIPART_ITERATOR_BODY)))
                 .mappingRequestsToUseCaseParametersOfType(MultipartPart.class).using((targetType, metaData) -> metaData.get(MULTIPART_ITERATOR_BODY).next())
                 */
-                .mappingRequestsToUseCaseParametersOfType(EchoPathAndQueryParametersValue.class).using((targetType, map) -> new EchoPathAndQueryParametersValue((Map<String, String>) (Object) map))
-                .mappingRequestsToUseCaseParametersOfType(EchoAuthenticationInformationValue.class).using((targetType, map) -> {
+                .mappingEventsToUseCaseParametersOfType(EchoPathAndQueryParametersValue.class).using((targetType, map) -> new EchoPathAndQueryParametersValue((Map<String, String>) (Object) map))
+                .mappingEventsToUseCaseParametersOfType(EchoAuthenticationInformationValue.class).using((targetType, map) -> {
                     final String username = (String) map.getOrDefault("username", "guest");
                     return new EchoAuthenticationInformationValue(username);
                 })
-                .mappingRequestsToUseCaseParametersOfType(Parameter1.class).using(((targetType, map) -> {
+                .mappingEventsToUseCaseParametersOfType(Parameter1.class).using(((targetType, map) -> {
                     final Object param1 = map.get("param1");
                     return new Parameter1((String) param1);
                 }))
-                .mappingRequestsToUseCaseParametersOfType(Parameter2.class).using(((targetType, map) -> {
+                .mappingEventsToUseCaseParametersOfType(Parameter2.class).using(((targetType, map) -> {
                     final Object param2 = map.get("param2");
                     return new Parameter2((String) param2);
                 }))
-                .mappingRequestsToUseCaseParametersByDefaultUsing(theMapMateDeserializerOnTheRequestBody(DESERIALIZER)/*.andInjectingRequestValuesIntoTheJsonBodyUsing((metaData, json) -> {
+                .mappingEventsToUseCaseParametersByDefaultUsing(theMapMateDeserializerOnTheRequestBody(DESERIALIZER)/*.andInjectingRequestValuesIntoTheJsonBodyUsing((metaData, json) -> {
                     final Map<String, String> dtoMap;
                     if(json.containsKey("dataTransferObject")) {
                         dtoMap = (Map<String, String>) json.get("dataTransferObject");

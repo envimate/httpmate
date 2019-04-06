@@ -12,7 +12,7 @@ to a simple `HelloWorld` usecase.
     <dependency>
         <groupId>com.envimate.httpmate.integrations</groupId>
         <artifactId>httpmate-awslambda</artifactId>
-        <version>1.0.1</version>
+        <version>1.0.9</version>
     </dependency>
 ```
 
