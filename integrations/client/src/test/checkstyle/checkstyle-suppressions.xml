@@ -24,16 +24,5 @@
         "-//Puppy Crawl//DTD Suppressions 1.1//EN"
         "http://www.puppycrawl.com/dtds/suppressions_1_1.dtd">
 <suppressions>
-    <suppress checks="." files="HttpMateTestConfigurations.java"/>
-    <suppress checks="LineLength" files="HttpMateTestConfigurations.java" />
-    <suppress checks="MethodLength" files="HttpMateTestConfigurations.java" />
-    <suppress checks="UnnecessaryParentheses" files="HttpMateTestConfigurations.java" />
-    <suppress checks="MagicNumber" files="HttpMateTestConfigurations.java" />
-    <suppress checks="VisibilityModifier" files="DataTransferObject.java" />
-    <suppress checks="VisibilityModifier" files="Parameter1.java" />
-    <suppress checks="VisibilityModifier" files="Parameter2.java" />
-    <suppress checks="VisibilityModifier" files="HeadersInResponseReturnValue.java" />
-    <suppress checks="VisibilityModifier" files="SetContentTypeInResponseValue.java" />
-    <suppress checks="LineLength" files="EchoAuthenticationInformationUseCase.java" />
-    <suppress checks="ClassDataAbstractionCoupling" files="HttpMateTestConfigurations.java" />
+    <suppress checks="FinalParameters" files="SynchronizationWrapper" />
 </suppressions>

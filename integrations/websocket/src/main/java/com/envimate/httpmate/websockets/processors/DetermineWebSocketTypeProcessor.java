@@ -38,7 +38,7 @@ import static com.envimate.httpmate.chains.HttpMateChainKeys.PATH;
 import static com.envimate.httpmate.chains.HttpMateChainKeys.PATH_PARAMETERS;
 import static com.envimate.httpmate.request.PathParameters.pathParameters;
 import static com.envimate.httpmate.util.Validators.validateNotNull;
-import static com.envimate.httpmate.websockets.WEBSOCKET_CHAIN_KEYS.WEBSOCKET_MAPPING;
+import static com.envimate.httpmate.websockets.WebsocketChainKeys.WEBSOCKET_MAPPING;
 
 @ToString
 @EqualsAndHashCode

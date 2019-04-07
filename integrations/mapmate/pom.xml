@@ -42,9 +42,9 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.envimate</groupId>
-            <artifactId>mapmate</artifactId>
-            <version>1.6.8</version>
+            <groupId>com.envimate.mapmate</groupId>
+            <artifactId>core</artifactId>
+            <version>1.6.10</version>
         </dependency>
     </dependencies>
 </project>

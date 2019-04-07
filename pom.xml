@@ -27,7 +27,7 @@
     <parent>
         <groupId>com.envimate</groupId>
         <artifactId>envimate-opensource-parent</artifactId>
-        <version>1.0.4</version>
+        <version>1.0.10</version>
     </parent>
 
     <packaging>pom</packaging>
@@ -106,11 +106,22 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.2</version>
+            <version>1.18.6</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>
 
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.junit</groupId>
+                <artifactId>junit-bom</artifactId>
+                <version>5.5.0-M1</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
     <build>
         <plugins>
             <plugin>

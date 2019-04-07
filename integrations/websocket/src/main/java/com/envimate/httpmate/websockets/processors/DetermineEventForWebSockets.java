@@ -35,7 +35,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static com.envimate.httpmate.chains.HttpMateChainKeys.EVENT_TYPE;
-import static com.envimate.httpmate.websockets.WEBSOCKET_CHAIN_KEYS.IS_WEBSOCKET_MESSAGE;
+import static com.envimate.httpmate.websockets.WebsocketChainKeys.IS_WEBSOCKET_MESSAGE;
 
 @ToString
 @EqualsAndHashCode

@@ -74,7 +74,7 @@ import static com.envimate.httpmate.convenience.Http.StatusCodes.OK;
 import static com.envimate.httpmate.convenience.cors.CorsModule.corsModule;
 import static com.envimate.httpmate.mapmate.MapMateIntegration.theMapMateDeserializerOnTheRequestBody;
 import static com.envimate.httpmate.mapmate.MapMateIntegration.theMapMateSerializer;
-import static com.envimate.httpmate.multipart.MULTIPART_CHAIN_KEYS.MULTIPART_ITERATOR_BODY;
+import static com.envimate.httpmate.multipart.MultipartChainKeys.MULTIPART_ITERATOR_BODY;
 import static com.envimate.httpmate.multipart.MultipartModule.multipartModule;
 import static com.envimate.httpmate.request.ContentType.json;
 import static com.envimate.httpmate.request.HttpRequestMethod.*;

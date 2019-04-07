@@ -54,7 +54,8 @@ public final class MultipartModule implements Module {
         final Chain determineEventChain = chainRegistry.getChainFor(DETERMINE_EVENT);
         final Chain exceptionOccuredChain = chainRegistry.getChainFor(EXCEPTION_OCCURRED);
 
-        final Chain processMultipartChain = chainRegistry.createChain("PROCESS_MULTIPART", jumpTo(determineEventChain), jumpTo(exceptionOccuredChain));
+        final Chain processMultipartChain = chainRegistry
+                .createChain("PROCESS_MULTIPART", jumpTo(determineEventChain), jumpTo(exceptionOccuredChain));
         processMultipartChain.addProcessor(multipartProcessor());
 
         final Chain processBodyChain = chainRegistry.getChainFor(HttpMateChains.PROCESS_BODY);

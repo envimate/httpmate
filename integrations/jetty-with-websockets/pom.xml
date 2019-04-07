@@ -28,6 +28,16 @@
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.19.1</version>
+                <configuration>
+                    <includes>
+                        <include>**/*Specs.java</include>
+                    </includes>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
                     <source>9</source>
@@ -48,6 +58,15 @@
 
     <name>HttpMate - Integrations - Jetty with Websockets</name>
 
+    <properties>
+        <checkstyle.suppressions.location>
+            ${project.basedir}/src/test/checkstyle/checkstyle-suppressions.xml
+        </checkstyle.suppressions.location>
+        <spotbugs.excludeFilterFile>
+            ${project.basedir}/src/test/spotbugs/spotbugs-exclude.xml
+        </spotbugs.excludeFilterFile>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>com.envimate.httpmate</groupId>
@@ -62,12 +81,12 @@
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-server</artifactId>
-            <version>9.4.12.RC2</version>
+            <version>9.4.15.v20190215</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-servlet</artifactId>
-            <version>9.4.7.v20170914</version>
+            <version>9.4.15.v20190215</version>
         </dependency>
 
         <dependency>
@@ -85,13 +104,11 @@
         <dependency>
             <groupId>org.junit.platform</groupId>
             <artifactId>junit-platform-launcher</artifactId>
-            <version>1.0.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.junit.platform</groupId>
             <artifactId>junit-platform-runner</artifactId>
-            <version>1.0.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
