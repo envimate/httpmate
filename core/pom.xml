@@ -43,6 +43,7 @@
     </properties>
 
     <dependencies>
+
         <dependency>
             <groupId>com.envimate.message-mate</groupId>
             <artifactId>core</artifactId>
