@@ -60,7 +60,9 @@ public final class WebSocketModuleBuilder implements EventStage {
     public CategorizerStage acceptingWebSocketsToThePath(final String template) {
         return new CategorizerStage() {
             @Override
-            public <T> WebSocketModuleBuilder initializingMetaDataForIncomingMessagesWith(MetaDataKey<T> key, Function<MetaData, T> valueProvider) {
+            public <T> WebSocketModuleBuilder initializingMetaDataForIncomingMessagesWith(
+                    final MetaDataKey<T> key,
+                    final Function<MetaData, T> valueProvider) {
                 final MetaDataEntryProvider provider = storing(key, valueProvider);
                 final List<MetaDataEntryProvider> providers = asList(
                         MetaDataEntryProvider.saving(PATH_PARAMETERS),

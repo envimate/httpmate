@@ -26,7 +26,7 @@ import com.envimate.httpmate.websockets.convenience.WebSocketTag;
 
 import java.util.function.Predicate;
 
-import static com.envimate.httpmate.websockets.WEBSOCKET_CHAIN_KEYS.WEBSOCKET_TAG;
+import static com.envimate.httpmate.websockets.WebsocketChainKeys.WEBSOCKET_TAG;
 import static com.envimate.httpmate.websockets.convenience.WebSocketTag.webSocketTag;
 
 public interface When<T> {

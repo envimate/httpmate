@@ -1,3 +1,24 @@
+/*
+ * Copyright (c) 2018 envimate GmbH - https://envimate.com/.
+ *
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 package com.envimate.httpmate.servletwithwebsockets;
 
 import com.envimate.httpmate.HttpMate;
@@ -18,14 +39,16 @@ import static com.envimate.httpmate.chains.HttpMateChains.PRE_PROCESS;
 import static com.envimate.httpmate.servlet.ServletHandling.extractMetaDataFromHttpServletRequest;
 import static com.envimate.httpmate.servlet.ServletHandling.handle;
 import static com.envimate.httpmate.servletwithwebsockets.JettyStyleWebSocket.jettyStyleSocket;
-import static com.envimate.httpmate.websockets.WEBSOCKET_CHAIN_KEYS.*;
+import static com.envimate.httpmate.websockets.WebsocketChainKeys.*;
 import static com.envimate.httpmate.websockets.registry.WebSocketId.randomWebSocketId;
 
 @ToString
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class DoubleServlet extends WebSocketServlet {
-    private final HttpMate httpMate;
+    private static final long serialVersionUID = 1;
+
+    private final transient HttpMate httpMate;
 
     public static DoubleServlet doubleServletFor(final HttpMate httpMate) {
         return new DoubleServlet(httpMate);

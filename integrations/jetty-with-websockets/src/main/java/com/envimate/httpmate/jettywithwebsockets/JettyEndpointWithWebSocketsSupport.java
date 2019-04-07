@@ -37,12 +37,12 @@ public final class JettyEndpointWithWebSocketsSupport implements AutoCloseable {
 
     public static PortStage jettyEndpointWithWebSocketsSupportFor(final HttpMate httpMate) {
         return port -> {
-            final Servlet servlet = DoubleServlet.doubleServletFor(httpMate);
             final Server server;
             try {
                 server = new Server(port);
                 final ServletHandler servletHandler = new ServletHandler();
                 server.setHandler(servletHandler);
+                final Servlet servlet = DoubleServlet.doubleServletFor(httpMate);
                 final ServletHolder servletHolder = new ServletHolder(servlet);
                 servletHandler.addServletWithMapping(servletHolder, "/*");
                 server.start();

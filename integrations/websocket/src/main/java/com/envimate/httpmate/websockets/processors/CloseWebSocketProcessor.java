@@ -32,7 +32,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
 import static com.envimate.httpmate.util.Validators.validateNotNull;
-import static com.envimate.httpmate.websockets.WEBSOCKET_CHAIN_KEYS.WEBSOCKET_ID;
+import static com.envimate.httpmate.websockets.WebsocketChainKeys.WEBSOCKET_ID;
 
 @ToString
 @EqualsAndHashCode

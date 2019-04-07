@@ -25,10 +25,9 @@ import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
 import com.envimate.httpmate.HttpMate;
+import com.envimate.httpmate.Logger;
 import com.envimate.httpmate.chains.MetaData;
 import com.envimate.httpmate.chains.MetaDataKey;
-import com.envimate.httpmate.Logger;
-import com.envimate.httpmate.response.HttpResponse;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 
@@ -78,15 +77,13 @@ public final class AwsLambdaEndpoint {
         metaData.set(CONTEXT_KEY, context);
         metaData.set(IS_HTTP_REQUEST, true);
 
-
         httpMate.handleRequest(metaData, response -> {
             throw new UnsupportedOperationException();
         });
 
-        final HttpResponse webServiceResponse = null;
-        final int statusCode = webServiceResponse.status();
-        final Map<String, String> responseHeaders = webServiceResponse.headers();
-        final InputStream responseStream = webServiceResponse.body();
+        final int statusCode = metaData.get(RESPONSE_STATUS);
+        final Map<String, String> responseHeaders = metaData.get(RESPONSE_HEADERS);
+        final InputStream responseStream = metaData.get(STREAM_RESPONSE);
         final String responseBody = inputStreamToString(responseStream);
         return new APIGatewayProxyResponseEvent().withStatusCode(statusCode).withHeaders(responseHeaders).withBody(responseBody);
     }

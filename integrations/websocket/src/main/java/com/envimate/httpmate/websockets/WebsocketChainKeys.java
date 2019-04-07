@@ -27,7 +27,7 @@ import com.envimate.httpmate.websockets.registry.WebSocketId;
 
 import static com.envimate.httpmate.chains.MetaDataKey.metaDataKey;
 
-public final class WEBSOCKET_CHAIN_KEYS {
+public final class WebsocketChainKeys {
     public static final MetaDataKey<Boolean> IS_WEBSOCKET_MESSAGE = metaDataKey("IS_WEBSOCKET_MESSAGE");
     public static final MetaDataKey<WebSocketId> WEBSOCKET_ID = metaDataKey("WEBSOCKET_ID");
     public static final MetaDataKey<WebSocketMapping> WEBSOCKET_MAPPING = metaDataKey("WEBSOCKET_MAPPING");
@@ -36,4 +36,7 @@ public final class WEBSOCKET_CHAIN_KEYS {
 
     public static final MetaDataKey<WebSocketTag> WEBSOCKET_TAG = metaDataKey("WEBSOCKET_TAG");
     public static final MetaDataKey<Boolean> IS_WEBSOCKET = metaDataKey("IS_WEBSOCKET");
+
+    private WebsocketChainKeys() {
+    }
 }

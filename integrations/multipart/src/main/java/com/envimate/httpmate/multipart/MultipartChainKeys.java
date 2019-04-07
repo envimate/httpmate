@@ -19,17 +19,15 @@
  * under the License.
  */
 
-package com.envimate.httpmate.websockets;
+package com.envimate.httpmate.multipart;
 
-public final class WEBSOCKET_CHAINS {
+import com.envimate.httpmate.chains.MetaDataKey;
 
-    public static final String DETERMINE_WEBSOCKET_TYPE = "DETERMINE_WEBSOCKET_TYPE";
+import static com.envimate.httpmate.chains.MetaDataKey.metaDataKey;
 
-    public static final String WEBSOCKET_ESTABLISHMENT = "WEBSOCKET_ESTABLISHMENT";
-    public static final String WEBSOCKET_OPEN = "WEBSOCKET_OPEN";
-    public static final String WEBSOCKET_MESSAGE = "WEBSOCKET_MESSAGE";
-    public static final String WEBSOCKET_CLOSE = "WEBSOCKET_CLOSE";
-    public static final String WEBSOCKET_CLOSED = "WEBSOCKET_CLOSED";
+public final class MultipartChainKeys {
+    public static final MetaDataKey<MultipartIteratorBody> MULTIPART_ITERATOR_BODY = metaDataKey("MULTIPART_ITERATOR_BODY");
 
-    public static final String SEND_TO_WEBSOCKETS = "SEND_TO_WEBSOCKETS";
+    private MultipartChainKeys() {
+    }
 }

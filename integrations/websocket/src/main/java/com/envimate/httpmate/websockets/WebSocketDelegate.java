@@ -23,7 +23,7 @@ package com.envimate.httpmate.websockets;
 
 public interface WebSocketDelegate {
 
-    void sendText(final String text);
+    void sendText(String text);
 
     void close();
 }

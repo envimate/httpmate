@@ -19,26 +19,20 @@
  * under the License.
  */
 
-package com.envimate.httpmate.websockets.builder;
+package com.envimate.httpmate.websockets;
 
-import com.envimate.httpmate.websockets.WebSocketForEventFilter;
-import com.envimate.httpmate.websockets.convenience.WebSocketTag;
+public final class WebsocketChains {
 
-import java.util.Objects;
+    public static final String DETERMINE_WEBSOCKET_TYPE = "DETERMINE_WEBSOCKET_TYPE";
 
-import static com.envimate.httpmate.websockets.convenience.WebSocketTag.webSocketTag;
+    public static final String WEBSOCKET_ESTABLISHMENT = "WEBSOCKET_ESTABLISHMENT";
+    public static final String WEBSOCKET_OPEN = "WEBSOCKET_OPEN";
+    public static final String WEBSOCKET_MESSAGE = "WEBSOCKET_MESSAGE";
+    public static final String WEBSOCKET_CLOSE = "WEBSOCKET_CLOSE";
+    public static final String WEBSOCKET_CLOSED = "WEBSOCKET_CLOSED";
 
-public interface To<T, E> {
+    public static final String SEND_TO_WEBSOCKETS = "SEND_TO_WEBSOCKETS";
 
-    @SuppressWarnings("EqualsBetweenInconvertibleTypes")
-    default T toWebSocketsTaggedWith(final String tag) {
-        final WebSocketTag expectedTag = webSocketTag(tag);
-        return toWebSocketsThat((category, event) -> Objects.equals(expectedTag, category));
+    private WebsocketChains() {
     }
-
-    default T toAllWebSockets() {
-        return toWebSocketsThat((category, event) -> true);
-    }
-
-    T toWebSocketsThat(WebSocketForEventFilter<E> filter);
 }

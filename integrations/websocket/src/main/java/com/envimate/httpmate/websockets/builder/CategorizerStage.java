@@ -28,7 +28,7 @@ import com.envimate.httpmate.websockets.convenience.WebSocketTag;
 
 import java.util.function.Function;
 
-import static com.envimate.httpmate.websockets.WEBSOCKET_CHAIN_KEYS.WEBSOCKET_TAG;
+import static com.envimate.httpmate.websockets.WebsocketChainKeys.WEBSOCKET_TAG;
 import static com.envimate.httpmate.websockets.convenience.WebSocketTag.webSocketTag;
 
 public interface CategorizerStage {
@@ -42,5 +42,6 @@ public interface CategorizerStage {
         return initializingMetaDataForIncomingMessagesWith(WEBSOCKET_TAG, metaData -> webSocketTag);
     }
 
-    <T> WebSocketModuleBuilder initializingMetaDataForIncomingMessagesWith(MetaDataKey<T> key, Function<MetaData, T> valueProvider);
+    <T> WebSocketModuleBuilder initializingMetaDataForIncomingMessagesWith(
+            MetaDataKey<T> key, Function<MetaData, T> valueProvider);
 }

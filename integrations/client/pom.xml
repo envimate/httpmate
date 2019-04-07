@@ -37,6 +37,9 @@
     <name>HttpMate - Integrations - Client</name>
 
     <properties>
+        <checkstyle.suppressions.location>
+            ${project.basedir}/src/test/checkstyle/checkstyle-suppressions.xml
+        </checkstyle.suppressions.location>
         <spotbugs.excludeFilterFile>
             ${project.basedir}/src/test/spotbugs/spotbugs-exclude.xml
         </spotbugs.excludeFilterFile>

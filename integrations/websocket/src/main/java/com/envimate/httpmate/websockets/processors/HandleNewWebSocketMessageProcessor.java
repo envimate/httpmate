@@ -35,7 +35,7 @@ import lombok.ToString;
 import java.util.List;
 
 import static com.envimate.httpmate.util.Validators.validateNotNull;
-import static com.envimate.httpmate.websockets.WEBSOCKET_CHAIN_KEYS.*;
+import static com.envimate.httpmate.websockets.WebsocketChainKeys.*;
 
 @ToString
 @EqualsAndHashCode

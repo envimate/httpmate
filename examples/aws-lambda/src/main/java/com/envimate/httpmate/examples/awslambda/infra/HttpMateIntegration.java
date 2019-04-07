@@ -25,24 +25,11 @@ import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
-import com.envimate.httpmate.HttpMate;
-import com.envimate.httpmate.awslambda.AwsLambdaEndpoint;
-import com.envimate.httpmate.examples.awslambda.usecases.HelloUseCase;
-import com.envimate.httpmate.request.HttpRequestMethod;
-import com.google.gson.Gson;
-
-import static com.envimate.httpmate.awslambda.AwsLambdaEndpoint.awsLambdaEndpointFor;
 
 public class HttpMateIntegration implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
-    private static final AwsLambdaEndpoint ENDPOINT;
-
-    static {
-        final Gson gson = new Gson();
-        ENDPOINT = null;
-    }
 
     @Override
     public APIGatewayProxyResponseEvent handleRequest(final APIGatewayProxyRequestEvent event, final Context context) {
-        return ENDPOINT.delegate(event, context);
+        throw new UnsupportedOperationException();
     }
 }

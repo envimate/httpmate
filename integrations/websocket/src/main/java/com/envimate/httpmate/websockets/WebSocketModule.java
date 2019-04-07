@@ -42,9 +42,9 @@ import static com.envimate.httpmate.chains.rules.Consume.consume;
 import static com.envimate.httpmate.chains.rules.Jump.jumpTo;
 import static com.envimate.httpmate.chains.rules.Rule.jumpRule;
 import static com.envimate.httpmate.util.Validators.validateNotNull;
-import static com.envimate.httpmate.websockets.WEBSOCKET_CHAINS.*;
-import static com.envimate.httpmate.websockets.WEBSOCKET_CHAIN_KEYS.IS_WEBSOCKET;
-import static com.envimate.httpmate.websockets.WEBSOCKET_CHAIN_KEYS.WEBSOCKET_ID;
+import static com.envimate.httpmate.websockets.WebsocketChains.*;
+import static com.envimate.httpmate.websockets.WebsocketChainKeys.IS_WEBSOCKET;
+import static com.envimate.httpmate.websockets.WebsocketChainKeys.WEBSOCKET_ID;
 import static com.envimate.httpmate.websockets.WebSocketModuleBuilder.webSocketModuleBuilder;
 import static com.envimate.httpmate.websockets.processors.ActivateWebSocketProcessor.activateWebSocketProcessor;
 import static com.envimate.httpmate.websockets.processors.CloseWebSocketProcessor.closeWebSocketProcessor;
@@ -102,22 +102,28 @@ public final class WebSocketModule implements Module {
 
     private static void createSkeleton(final ChainRegistry chainRegistry) {
         final Chain exceptionChain = chainRegistry.getChainFor(EXCEPTION_OCCURRED);
-        final Chain websocketEstablishmentChain = chainRegistry.createChain(WEBSOCKET_ESTABLISHMENT, consume(), jumpTo(exceptionChain));
+        final Chain websocketEstablishmentChain = chainRegistry.createChain(
+                WEBSOCKET_ESTABLISHMENT, consume(), jumpTo(exceptionChain));
         final Chain authorizationChain = chainRegistry.getChainFor(AUTHORIZATION);
-        authorizationChain.addRoutingRule(jumpRule(websocketEstablishmentChain, metaData -> metaData.getOptional(WEBSOCKET_ID).isPresent()));
+        authorizationChain.addRoutingRule(jumpRule(
+                websocketEstablishmentChain, metaData -> metaData.getOptional(WEBSOCKET_ID).isPresent()));
         final Chain authenticationChain = chainRegistry.getChainFor(AUTHENTICATION);
-        final Chain determineWebSocketTypeChain = chainRegistry.createChain(DETERMINE_WEBSOCKET_TYPE, jumpTo(authenticationChain), jumpTo(exceptionChain));
+        final Chain determineWebSocketTypeChain = chainRegistry.createChain(
+                DETERMINE_WEBSOCKET_TYPE, jumpTo(authenticationChain), jumpTo(exceptionChain));
         final Chain processHeadersChain = chainRegistry.getChainFor(PROCESS_HEADERS);
-        processHeadersChain.addRoutingRule(jumpRule(determineWebSocketTypeChain, metaData -> metaData.getOptional(WEBSOCKET_ID).isPresent()));
+        processHeadersChain.addRoutingRule(
+                jumpRule(determineWebSocketTypeChain, metaData -> metaData.getOptional(WEBSOCKET_ID).isPresent()));
         chainRegistry.createChain(WEBSOCKET_OPEN, consume(), jumpTo(exceptionChain));
         final Chain determineEventChain = chainRegistry.getChainFor(DETERMINE_EVENT);
         final Chain preMapToEventChain = chainRegistry.getChainFor(PRE_MAP_TO_EVENT);
         determineEventChain.addRoutingRule(jumpRule(preMapToEventChain, metaData -> metaData.contains(WEBSOCKET_ID)));
         final Chain preDetermineEventChain = chainRegistry.getChainFor(PRE_DETERMINE_EVENT);
         chainRegistry.createChain(WEBSOCKET_MESSAGE, jumpTo(preDetermineEventChain), jumpTo(exceptionChain));
-        final Chain sendToWebSocketsChain = chainRegistry.createChain(SEND_TO_WEBSOCKETS, consume(), jumpTo(exceptionChain));
+        final Chain sendToWebSocketsChain = chainRegistry.createChain(
+                SEND_TO_WEBSOCKETS, consume(), jumpTo(exceptionChain));
         final Chain serializationChain = chainRegistry.getChainFor(SERIALIZATION);
-        serializationChain.addRoutingRule(jumpRule(sendToWebSocketsChain, metaData -> metaData.getOptional(IS_WEBSOCKET).orElse(false)));
+        serializationChain.addRoutingRule(
+                jumpRule(sendToWebSocketsChain, metaData -> metaData.getOptional(IS_WEBSOCKET).orElse(false)));
         chainRegistry.createChain(WEBSOCKET_CLOSED, consume(), jumpTo(exceptionChain));
         chainRegistry.createChain(WEBSOCKET_CLOSE, consume(), jumpTo(exceptionChain));
     }

@@ -22,7 +22,6 @@
 package com.envimate.httpmate.tests.usecases.mapmate;
 
 import com.envimate.httpmate.tests.usecases.mapmate.mapmatedefinitions.DataTransferObject;
-import com.envimate.httpmate.tests.usecases.mapmate.mapmatedefinitions.MapMateRequest;
 
 public class MapMateUseCase {
 
