@@ -44,7 +44,7 @@
         <dependency>
             <groupId>com.envimate.mapmate</groupId>
             <artifactId>core</artifactId>
-            <version>1.6.9</version>
+            <version>1.6.10</version>
         </dependency>
     </dependencies>
 </project>
