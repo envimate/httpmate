@@ -31,4 +31,5 @@
     <suppress checks="ParameterNumber" files="Core" />
     <suppress checks="IllegalCatch" files="Chain" />
     <suppress checks="EmptyBlock" files="Chain" />
+    <suppress checks="ClassFanOutComplexity" files="HttpMateConfigurator" />
 </suppressions>
