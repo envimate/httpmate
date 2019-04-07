@@ -28,7 +28,7 @@
     <parent>
         <groupId>com.envimate</groupId>
         <artifactId>httpmate-parent</artifactId>
-        <version>1.0.12</version>
+        <version>1.0.14</version>
     </parent>
 
     <groupId>com.envimate.httpmate</groupId>
@@ -50,7 +50,7 @@
         <dependency>
             <groupId>com.envimate.message-mate</groupId>
             <artifactId>core</artifactId>
-            <version>1.0.2-SNAPSHOT</version>
+            <version>1.0.3</version>
         </dependency>
     </dependencies>
 
