@@ -135,10 +135,10 @@ public final class HttpMateTestConfigurations {
                 .servingTheUseCase(TwoParametersUseCase.class).forRequestPath("/twoparameters").andRequestMethod(GET)
                 .servingTheUseCase(VoidUseCase.class).forRequestPath("/void").andRequestMethod(GET)
                 .servingTheUseCase(MultipartAndMapmateUseCase.class).forRequestPath("/multipart_and_mapmate").andRequestMethod(PUT)
-                .mappingEventsToUseCaseParametersOfType(Parameter.class).using((targetType, map) -> new Parameter())
-                .mappingEventsToUseCaseParametersOfType(WildcardParameter.class).using((targetType, map) -> new WildcardParameter((String) map.get("parameter")))
-                .mappingEventsToUseCaseParametersOfType(QueryParametersParameter.class).using((targetType, map) -> new QueryParametersParameter((Map<String, String>) (Object) map))
-                .mappingEventsToUseCaseParametersOfType(HeadersParameter.class).using((targetType, map) -> new HeadersParameter((Map<String, String>) (Object) map))
+                .mappingUseCaseParametersOfType(Parameter.class).using((targetType, map) -> new Parameter())
+                .mappingUseCaseParametersOfType(WildcardParameter.class).using((targetType, map) -> new WildcardParameter((String) map.get("parameter")))
+                .mappingUseCaseParametersOfType(QueryParametersParameter.class).using((targetType, map) -> new QueryParametersParameter((Map<String, String>) (Object) map))
+                .mappingUseCaseParametersOfType(HeadersParameter.class).using((targetType, map) -> new HeadersParameter((Map<String, String>) (Object) map))
                 /*
                 .mappingRequestsToUseCaseParametersOfType(EchoContentTypeValue.class).using((targetType, metaData) -> {
                     final ContentType contentType = metaData.get(HTTP_MATE_CHAIN_KEYS.CONTENT_TYPE);
@@ -148,20 +148,20 @@ public final class HttpMateTestConfigurations {
                 .mappingRequestsToUseCaseParametersOfType(EchoMultipartValue.class).using((targetType, metaData) -> echoMultipartValue(metaData.get(MULTIPART_ITERATOR_BODY)))
                 .mappingRequestsToUseCaseParametersOfType(MultipartPart.class).using((targetType, metaData) -> metaData.get(MULTIPART_ITERATOR_BODY).next())
                 */
-                .mappingEventsToUseCaseParametersOfType(EchoPathAndQueryParametersValue.class).using((targetType, map) -> new EchoPathAndQueryParametersValue((Map<String, String>) (Object) map))
-                .mappingEventsToUseCaseParametersOfType(EchoAuthenticationInformationValue.class).using((targetType, map) -> {
+                .mappingUseCaseParametersOfType(EchoPathAndQueryParametersValue.class).using((targetType, map) -> new EchoPathAndQueryParametersValue((Map<String, String>) (Object) map))
+                .mappingUseCaseParametersOfType(EchoAuthenticationInformationValue.class).using((targetType, map) -> {
                     final String username = (String) map.getOrDefault("username", "guest");
                     return new EchoAuthenticationInformationValue(username);
                 })
-                .mappingEventsToUseCaseParametersOfType(Parameter1.class).using(((targetType, map) -> {
+                .mappingUseCaseParametersOfType(Parameter1.class).using(((targetType, map) -> {
                     final Object param1 = map.get("param1");
                     return new Parameter1((String) param1);
                 }))
-                .mappingEventsToUseCaseParametersOfType(Parameter2.class).using(((targetType, map) -> {
+                .mappingUseCaseParametersOfType(Parameter2.class).using(((targetType, map) -> {
                     final Object param2 = map.get("param2");
                     return new Parameter2((String) param2);
                 }))
-                .mappingEventsToUseCaseParametersByDefaultUsing(theMapMateDeserializerOnTheRequestBody(DESERIALIZER)/*.andInjectingRequestValuesIntoTheJsonBodyUsing((metaData, json) -> {
+                .mappingUseCaseParametersByDefaultUsing(theMapMateDeserializerOnTheRequestBody(DESERIALIZER)/*.andInjectingRequestValuesIntoTheJsonBodyUsing((metaData, json) -> {
                     final Map<String, String> dtoMap;
                     if(json.containsKey("dataTransferObject")) {
                         dtoMap = (Map<String, String>) json.get("dataTransferObject");
@@ -173,8 +173,7 @@ public final class HttpMateTestConfigurations {
                     metaData.get(PATH_PARAMETERS).asStringMap().forEach(dtoMap::put);
                     metaData.get(QUERY_PARAMETERS).asStringMap().forEach(dtoMap::put);
                 })*/)
-                .mappingRequestsToEventByDirectlyMappingAllData()
-
+                .preparingRequestsForParameterMappingThatByDirectlyMappingAllData()
                 //.serializingResponseObjectsOfType(Download.class).using(theDownloadSerializer())
                 .serializingResponseObjectsOfType(HeadersInResponseReturnValue.class).using(value -> of(value.key, value.value))
                 .serializingResponseObjectsOfType(SetContentTypeInResponseValue.class).using(value -> of("contentType", value.value))
@@ -182,7 +181,7 @@ public final class HttpMateTestConfigurations {
                 .serializingResponseObjectsThat(Objects::isNull).using(object -> null)
                 //.serializingResponseObjectsByDefaultUsing(obje)
                 .serializingResponseObjectsByDefaultUsing(object -> of("response", object.toString()))
-                .mappingEventsToResponsesUsing((event, metaData) -> {
+                .mappingResponsesUsing((event, metaData) -> {
                     metaData.get(EVENT_RETURN_VALUE).ifPresent(responseMap -> {
                         if (responseMap.containsKey("response")) {
                             metaData.set(STRING_RESPONSE, (String) responseMap.get("response"));

@@ -75,13 +75,13 @@
 		<dependency>
 			<groupId>com.envimate.httpmate</groupId>
 			<artifactId>core</artifactId>
-			<version>1.0.9</version>
+			<version>1.0.12</version>
 		</dependency>
 		<!-- As we want to run our endpoint on aws-lambda we need the httpmate awslambda integration dependency to take care of translating requests from ApiGateway-->
 		<dependency>
 			<groupId>com.envimate.httpmate.integrations</groupId>
 			<artifactId>httpmate-awslambda</artifactId>
-			<version>1.0.9</version>
+			<version>1.0.12</version>
 		</dependency>
 
 		<dependency>
@@ -106,7 +106,7 @@
 		<dependency>
 			<groupId>com.envimate.httpmate.integrations</groupId>
 			<artifactId>httpmate-client</artifactId>
-			<version>1.0.9</version>
+			<version>1.0.12</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>

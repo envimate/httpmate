@@ -25,7 +25,7 @@ Show me the code
 <dependency>
     <groupId>com.envimate.httpmate.integrations</groupId>
     <artifactId>httpmate-spark</artifactId>
-    <version>1.0.9</version>
+    <version>1.0.12</version>
 </dependency>
 ```
 ---

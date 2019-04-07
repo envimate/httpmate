@@ -105,9 +105,9 @@ public final class Application {
                             VERY_STUPID.set(user);
                         }))
                         */
-                .mappingRequestsToEventByDirectlyMappingAllData()
-                //.mappingEventsToResponsesUsing(theMapMateSerializer(serializer)::map)
-                .mappingEventsToResponsesUsing((event, metaData) -> {
+                .preparingRequestsForParameterMappingThatByDirectlyMappingAllData()
+                //.mappingResponsesUsing(theMapMateSerializer(serializer)::map)
+                .mappingResponsesUsing((event, metaData) -> {
                 })
                 //.serializingResponseObjectsByDefaultUsing(theMapMateSerializer(serializer))
                 .configuredBy(configurator -> {

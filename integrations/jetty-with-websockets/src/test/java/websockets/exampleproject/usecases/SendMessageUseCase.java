@@ -1,6 +1,5 @@
 package websockets.exampleproject.usecases;
 
-import com.envimate.messageMate.messageBus.EventType;
 import websockets.exampleproject.domain.*;
 
 import java.util.List;

@@ -25,6 +25,7 @@ import com.envimate.httpmate.chains.Chain;
 import com.envimate.httpmate.chains.ChainRegistry;
 import com.envimate.httpmate.chains.MetaData;
 import com.envimate.httpmate.chains.rules.Jump;
+import com.envimate.httpmate.chains.rules.Processor;
 import com.envimate.httpmate.convenience.preprocessors.Authenticator;
 import com.envimate.httpmate.convenience.preprocessors.Authorizer;
 import com.envimate.httpmate.event.EventTypeGenerators;
@@ -64,13 +65,15 @@ final class Core {
                                        final EventTypeGenerators useCaseGenerators,
                                        final FilterMap<MetaData, RequestToEventMapper> requestToEventMappers,
                                        final List<Authenticator> authenticators,
-                                       final List<Authorizer> authorizers) {
+                                       final List<Authorizer> authorizers,
+                                       final List<Processor> requestFilters) {
         final ChainRegistry chainRegistry = createSkeleton();
         chainRegistry.addProcessorToChain(PRE_PROCESS, translateToValueObjectsProcessor());
         chainRegistry.addProcessorToChain(PROCESS_BODY_STRING, streamToStringProcessor());
         chainRegistry.addProcessorToChain(DETERMINE_EVENT, determineEventProcessor(useCaseGenerators));
         authenticators.forEach(processor -> chainRegistry.addProcessorToChain(AUTHENTICATION, processor));
         authorizers.forEach(processor -> chainRegistry.addProcessorToChain(AUTHORIZATION, processor));
+        requestFilters.forEach(processor -> chainRegistry.addProcessorToChain(PRE_MAP_TO_EVENT, processor));
         chainRegistry.addProcessorToChain(MAP_TO_EVENT, mapToEventProcessor(requestToEventMappers));
         chainRegistry.addProcessorToChain(SUBMIT, dispatchEventProcessor(messageBus));
         chainRegistry.addProcessorToChain(PRE_SERIALIZATION, createHttpResponseBuilderProcessor(responseTemplate));

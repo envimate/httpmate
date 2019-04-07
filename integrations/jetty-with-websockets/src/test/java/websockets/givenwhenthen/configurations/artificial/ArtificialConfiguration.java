@@ -113,8 +113,8 @@ public final class ArtificialConfiguration {
         final HttpMate httpMate = aHttpMateDispatchingEventsUsing(MESSAGE_BUS)
                 .choosingTheEvent(eventTypeFromString("NormalUseCase")).forRequestPath("/normal").andRequestMethod(HttpRequestMethod.GET)
                 .choosingTheEvent(eventTypeFromString("BothUseCase")).forRequestPath("/both").andRequestMethod(HttpRequestMethod.GET)
-                .mappingRequestsToEventByDirectlyMappingAllData()
-                .mappingEventsToResponsesUsing((event, metaData) -> metaData.set(STRING_RESPONSE, event.toString()))
+                .preparingRequestsForParameterMappingThatByDirectlyMappingAllData()
+                .mappingResponsesUsing((event, metaData) -> metaData.set(STRING_RESPONSE, event.toString()))
                 .configuredBy(configurator -> {
                     configurator.configureSecurity().addAuthenticator(metaData -> metaData.get(QUERY_PARAMETERS).getQueryParameter("username"));
                     configurator.configureSecurity().addAuthenticator(metaData -> metaData.get(HEADERS).getHeader("username"));

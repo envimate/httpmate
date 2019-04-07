@@ -40,19 +40,19 @@ public interface DeserializationStage<T> {
      *               on the respective http request
      * @return the next step in the fluent builder
      */
-    <X> Using<DeserializationStage<T>, RequestMapper<X>> mappingEventsToUseCaseParametersThat(
+    <X> Using<DeserializationStage<T>, RequestMapper<X>> mappingUseCaseParametersThat(
             BiPredicate<Class<?>, Map<String, Object>> filter);
 
     /**
      * Configures the default {@link RequestMapper} that will be used to deserialize a
      * to a use case parameter if no {@link RequestMapper} configured under
-     * {@link DeserializationStage#mappingEventsToUseCaseParametersThat(BiPredicate)},
-     * {@link DeserializationStage#mappingEventsToUseCaseParametersOfType(Class)}, etc. matches the request.
+     * {@link DeserializationStage#mappingUseCaseParametersThat(BiPredicate)},
+     * {@link DeserializationStage#mappingUseCaseParametersOfType(Class)}, etc. matches the request.
      *
      * @param mapper a {@link RequestMapper}
      * @return the next step in the fluent builder
      */
-    T mappingEventsToUseCaseParametersByDefaultUsing(RequestMapper<Object> mapper);
+    T mappingUseCaseParametersByDefaultUsing(RequestMapper<Object> mapper);
 
     /**
      * Enters a fluent builder that configures a {@link RequestMapper} that will be used to deserialize a
@@ -61,18 +61,18 @@ public interface DeserializationStage<T> {
      * @param type the type of use case parameters that will be deserialized by the {@link RequestMapper}
      * @return the next step in the fluent builder
      */
-    default <X> Using<DeserializationStage<T>, RequestMapper<X>> mappingEventsToUseCaseParametersOfType(final Class<X> type) {
-        return mappingEventsToUseCaseParametersThat(areOfType(type));
+    default <X> Using<DeserializationStage<T>, RequestMapper<X>> mappingUseCaseParametersOfType(final Class<X> type) {
+        return mappingUseCaseParametersThat(areOfType(type));
     }
 
     /**
      * Configures {@link HttpMate} to throw an exception if no {@link RequestMapper} configured under
-     * {@link DeserializationStage#mappingEventsToUseCaseParametersThat(BiPredicate)},
-     * {@link DeserializationStage#mappingEventsToUseCaseParametersOfType(Class)} (Class)}, etc. matches the request.
+     * {@link DeserializationStage#mappingUseCaseParametersThat(BiPredicate)},
+     * {@link DeserializationStage#mappingUseCaseParametersOfType(Class)} (Class)}, etc. matches the request.
      *
      * @return the next step in the fluent builder
      */
     default T throwAnExceptionByDefault() {
-        return mappingEventsToUseCaseParametersByDefaultUsing(failWithMessage("No request mapper found"));
+        return mappingUseCaseParametersByDefaultUsing(failWithMessage("No request mapper found"));
     }
 }

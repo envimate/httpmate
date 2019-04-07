@@ -54,7 +54,7 @@ public final class EventDrivenBuilder {
         }
 
         @Override
-        public Using<MapToEventStage<Stage2>, RequestToEventMapper> mappingRequestsToEventsThat(
+        public Using<MapToEventStage<Stage2>, RequestToEventMapper> preparingRequestsForParameterMappingThat(
                 final Predicate<MetaData> filter) {
             return requestToEventMapper -> {
                 builder.addRequestToEventMapper(filter, requestToEventMapper);
@@ -63,7 +63,7 @@ public final class EventDrivenBuilder {
         }
 
         @Override
-        public Stage2 mappingRequestsToEventsUsing(final RequestToEventMapper mapper) {
+        public Stage2 preparingRequestsForParameterMapping(final RequestToEventMapper mapper) {
             builder.setDefaultRequestToEventMapper(mapper);
             return new Stage2();
         }
@@ -71,7 +71,7 @@ public final class EventDrivenBuilder {
 
     public final class Stage2 implements MapToResponseStage<Stage3> {
         @Override
-        public Stage3 mappingEventsToResponsesUsing(final EventToResponseMapper mapper) {
+        public Stage3 mappingResponsesUsing(final EventToResponseMapper mapper) {
             builder.setResponseMapper(mapper);
             return new Stage3();
         }

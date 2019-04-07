@@ -46,6 +46,7 @@ import static com.envimate.httpmate.util.Validators.validateNotNullNorEmpty;
 import static java.lang.String.join;
 import static java.util.stream.Collectors.joining;
 
+// "Access-Control-Allow-Credentials", "true"
 @ToString
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)

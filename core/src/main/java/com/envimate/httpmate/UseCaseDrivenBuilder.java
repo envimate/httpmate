@@ -63,7 +63,7 @@ public final class UseCaseDrivenBuilder {
         }
 
         @Override
-        public <X> Using<DeserializationStage<Stage2>, RequestMapper<X>> mappingEventsToUseCaseParametersThat(
+        public <X> Using<DeserializationStage<Stage2>, RequestMapper<X>> mappingUseCaseParametersThat(
                 final BiPredicate<Class<?>, Map<String, Object>> filter) {
             return mapper -> {
                 useCaseConfigurator.addRequestMapper(filter, mapper);
@@ -72,7 +72,7 @@ public final class UseCaseDrivenBuilder {
         }
 
         @Override
-        public Stage2 mappingEventsToUseCaseParametersByDefaultUsing(final RequestMapper<Object> mapper) {
+        public Stage2 mappingUseCaseParametersByDefaultUsing(final RequestMapper<Object> mapper) {
             useCaseConfigurator.setDefaultRequestMapper(mapper);
             return new Stage2();
         }
@@ -81,7 +81,7 @@ public final class UseCaseDrivenBuilder {
     public final class Stage2 implements MapToEventStage<Stage5> {
 
         @Override
-        public Using<MapToEventStage<Stage5>, RequestToEventMapper> mappingRequestsToEventsThat(
+        public Using<MapToEventStage<Stage5>, RequestToEventMapper> preparingRequestsForParameterMappingThat(
                 final Predicate<MetaData> filter) {
             return mapper -> {
                 builder.addRequestToEventMapper(filter, mapper);
@@ -90,7 +90,7 @@ public final class UseCaseDrivenBuilder {
         }
 
         @Override
-        public Stage5 mappingRequestsToEventsUsing(final RequestToEventMapper mapper) {
+        public Stage5 preparingRequestsForParameterMapping(final RequestToEventMapper mapper) {
             builder.setDefaultRequestToEventMapper(mapper);
             return new Stage5();
         }
@@ -117,7 +117,7 @@ public final class UseCaseDrivenBuilder {
     public final class Stage6 implements MapToResponseStage<Stage7> {
 
         @Override
-        public Stage7 mappingEventsToResponsesUsing(final EventToResponseMapper mapper) {
+        public Stage7 mappingResponsesUsing(final EventToResponseMapper mapper) {
             builder.setResponseMapper(mapper);
             return new Stage7();
         }

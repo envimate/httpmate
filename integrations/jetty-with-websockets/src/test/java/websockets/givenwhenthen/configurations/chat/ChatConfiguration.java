@@ -81,8 +81,8 @@ public final class ChatConfiguration {
 
         final HttpMate httpMate = aHttpMateDispatchingEventsUsing(MESSAGE_BUS)
                 .choosingTheEvent(eventTypeFromString("ChatMessage")).forRequestPath("/send").andRequestMethod(GET)
-                .mappingRequestsToEventByDirectlyMappingAllData()
-                .mappingEventsToResponsesUsing((event, metaData) -> {
+                .preparingRequestsForParameterMappingThatByDirectlyMappingAllData()
+                .mappingResponsesUsing((event, metaData) -> {
                     final Map<String, Object> map = (Map<String, Object>) event;
                     final String content = (String) map.get("content");
                     metaData.set(STRING_RESPONSE, content);

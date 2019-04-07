@@ -33,10 +33,10 @@ import static com.envimate.httpmate.chains.HttpMateChainKeys.AUTHENTICATION_INFO
 
 public interface MapToEventStage<T> {
 
-    Using<MapToEventStage<T>, RequestToEventMapper> mappingRequestsToEventsThat(Predicate<MetaData> filter);
+    Using<MapToEventStage<T>, RequestToEventMapper> preparingRequestsForParameterMappingThat(Predicate<MetaData> filter);
 
-    default T mappingRequestsToEventByDirectlyMappingAllData() {
-        return mappingRequestsToEventsUsing(metaData -> {
+    default T preparingRequestsForParameterMappingThatByDirectlyMappingAllData() {
+        return preparingRequestsForParameterMapping(metaData -> {
             final Map<String, Object> eventMap = new HashMap<>();
             eventMap.putAll(metaData.get(QUERY_PARAMETERS).asStringMap());
             eventMap.putAll(metaData.get(PATH_PARAMETERS).asStringMap());
@@ -47,13 +47,13 @@ public interface MapToEventStage<T> {
         });
     }
 
-    default T mappingOnlyTheBodyToTheEvent() {
-        return mappingRequestsToEventsUsing(metaData -> {
+    default T preparingRequestsForParameterMappingUsingOnlyTheBody() {
+        return preparingRequestsForParameterMapping(metaData -> {
             final Map<String, Object> eventMap = new HashMap<>();
             metaData.getOptional(BODY_MAP).ifPresent(eventMap::putAll);
             return eventMap;
         });
     }
 
-    T mappingRequestsToEventsUsing(RequestToEventMapper mapper);
+    T preparingRequestsForParameterMapping(RequestToEventMapper mapper);
 }

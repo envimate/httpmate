@@ -25,5 +25,5 @@ import com.envimate.httpmate.mapper.EventToResponseMapper;
 
 public interface MapToResponseStage<T> {
 
-    T mappingEventsToResponsesUsing(EventToResponseMapper mapper);
+    T mappingResponsesUsing(EventToResponseMapper mapper);
 }

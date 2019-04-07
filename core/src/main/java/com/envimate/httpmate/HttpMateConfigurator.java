@@ -28,6 +28,7 @@ import com.envimate.httpmate.builder.configurators.ResponseTemplateConfigurator;
 import com.envimate.httpmate.builder.configurators.SecurityConfigurator;
 import com.envimate.httpmate.chains.ChainRegistry;
 import com.envimate.httpmate.chains.MetaData;
+import com.envimate.httpmate.chains.rules.Processor;
 import com.envimate.httpmate.convenience.preprocessors.Authenticator;
 import com.envimate.httpmate.convenience.preprocessors.Authorizer;
 import com.envimate.httpmate.event.EventTypeGenerationCondition;
@@ -68,6 +69,7 @@ public final class HttpMateConfigurator {
     private final FilterMapBuilder<Throwable, ResponseMapper<Throwable>> exceptionMappers = filterMapBuilder();
     private Logger logger;
     private final List<Module> modules = new LinkedList<>();
+    private final List<Processor> requestFilters = new LinkedList<>();
 
     static HttpMateConfigurator httpMateConfigurator() {
         final HttpMateConfigurator httpMateBuilder = new HttpMateConfigurator();
@@ -87,7 +89,8 @@ public final class HttpMateConfigurator {
                 eventTypeGenerators,
                 requestToEventMappers.build(),
                 authenticators,
-                authorizers);
+                authorizers,
+                requestFilters);
         modules.forEach(module -> module.register(chainRegistry, messageBus));
         return httpMate(chainRegistry, messageBus, logger);
     }
@@ -99,6 +102,11 @@ public final class HttpMateConfigurator {
 
     public MessageBus getMessageBus() {
         return messageBus;
+    }
+
+    public void filterRequests(final Processor filter) {
+        validateNotNull(filter, "filter");
+        requestFilters.add(filter);
     }
 
     public void addRequestToEventMapper(final Predicate<MetaData> filter,
