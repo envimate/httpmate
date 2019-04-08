@@ -17,4 +17,8 @@ public final class ChainName {
         validateNotNullNorEmpty(name, "name");
         return new ChainName(name);
     }
+
+    public String name() {
+        return name;
+    }
 }

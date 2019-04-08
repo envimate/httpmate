@@ -21,25 +21,27 @@
 
 package com.envimate.httpmate.chains;
 
+import static com.envimate.httpmate.chains.ChainName.chainName;
+
 public final class HttpMateChains {
 
     private HttpMateChains() {
     }
 
-    public static final String PRE_PROCESS = "PRE_PROCESS";
-    public static final String PROCESS_HEADERS = "PROCESS_HEADERS";
-    public static final String PROCESS_BODY = "PROCESS_BODY";
-    public static final String PROCESS_SINGLE_PART = "PROCESS_SINGLE_PART";
-    public static final String PROCESS_BODY_STRING = "PROCESS_BODY_STRING";
-    public static final String PRE_DETERMINE_EVENT = "PRE_DETERMINE_EVENT";
-    public static final String DETERMINE_EVENT = "DETERMINE_EVENT";
-    public static final String AUTHENTICATION = "AUTHENTICATION";
-    public static final String AUTHORIZATION = "AUTHORIZATION";
-    public static final String PRE_MAP_TO_EVENT = "PRE_MAP_TO_EVENT";
-    public static final String MAP_TO_EVENT = "MAP_TO_EVENT";
-    public static final String SUBMIT = "SUBMIT";
-    public static final String PRE_SERIALIZATION = "PRE_SERIALIZATION";
-    public static final String SERIALIZATION = "SERIALIZATION";
-    public static final String POST_SERIALIZATION = "POST_SERIALIZATION";
-    public static final String EXCEPTION_OCCURRED = "EXCEPTION_OCCURRED";
+    public static final ChainName PRE_PROCESS = chainName("PRE_PROCESS");
+    public static final ChainName PROCESS_HEADERS = chainName("PROCESS_HEADERS");
+    public static final ChainName PROCESS_BODY = chainName("PROCESS_BODY");
+    public static final ChainName PROCESS_SINGLE_PART = chainName("PROCESS_SINGLE_PART");
+    public static final ChainName PROCESS_BODY_STRING = chainName("PROCESS_BODY_STRING");
+    public static final ChainName PRE_DETERMINE_EVENT = chainName("PRE_DETERMINE_EVENT");
+    public static final ChainName DETERMINE_EVENT = chainName("DETERMINE_EVENT");
+    public static final ChainName AUTHENTICATION = chainName("AUTHENTICATION");
+    public static final ChainName AUTHORIZATION = chainName("AUTHORIZATION");
+    public static final ChainName PRE_MAP_TO_EVENT = chainName("PRE_MAP_TO_EVENT");
+    public static final ChainName MAP_TO_EVENT = chainName("MAP_TO_EVENT");
+    public static final ChainName SUBMIT = chainName("SUBMIT");
+    public static final ChainName PRE_SERIALIZATION = chainName("PRE_SERIALIZATION");
+    public static final ChainName SERIALIZATION = chainName("SERIALIZATION");
+    public static final ChainName POST_SERIALIZATION = chainName("POST_SERIALIZATION");
+    public static final ChainName EXCEPTION_OCCURRED = chainName("EXCEPTION_OCCURRED");
 }

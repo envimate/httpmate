@@ -35,7 +35,7 @@ final class GraphCreator {
     private GraphCreator() {
     }
 
-    static String createGraph(final Map<String, Chain> chains) {
+    static String createGraph(final Map<ChainName, Chain> chains) {
         final StringBuilder builder = new StringBuilder();
         builder.append("digraph G {\n");
         builder.append("CONSUMER [shape=point, width=0.5];\n");
@@ -59,12 +59,12 @@ final class GraphCreator {
         return builder.toString();
     }
 
-    private static String relation(final String from, final Action action, final String color, final Map<String, Chain> chains) {
+    private static String relation(final ChainName from, final Action action, final String color, final Map<ChainName, Chain> chains) {
         if (action instanceof Jump) {
             final Jump jump = (Jump) action;
             final Chain chain = jump.target().orElseThrow();
-            final String targetName = nameForChain(chain, chains);
-            return fromTo(from, targetName, color);
+            final ChainName targetName = nameForChain(chain);
+            return fromTo(from, targetName.name(), color);
         }
         if (action instanceof Consume) {
             return fromTo(from, "CONSUMER", color);
@@ -75,15 +75,18 @@ final class GraphCreator {
         return "";
     }
 
-    private static String fromTo(final String from, final String to, final String color) {
-        return format("%s -> %s [color=\"%s\" ] ", from, to, color) + "\n";
+    private static String fromTo(final ChainName from, final String to, final String color) {
+        return format("%s -> %s [color=\"%s\" ] ", from.name(), to, color) + "\n";
     }
 
-    private static String nameForChain(final Chain chain, final Map<String, Chain> chains) {
+    private static ChainName nameForChain(final Chain chain) {
+        return chain.getName();
+        /*
         return chains.entrySet().stream()
                 .filter(entry -> entry.getValue().equals(chain))
                 .findFirst()
                 .map(Map.Entry::getKey)
                 .orElseThrow(RuntimeException::new);
+         */
     }
 }

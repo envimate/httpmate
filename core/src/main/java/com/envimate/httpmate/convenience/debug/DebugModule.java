@@ -23,6 +23,7 @@ package com.envimate.httpmate.convenience.debug;
 
 import com.envimate.httpmate.Module;
 import com.envimate.httpmate.chains.Chain;
+import com.envimate.httpmate.chains.ChainName;
 import com.envimate.httpmate.chains.ChainRegistry;
 import com.envimate.httpmate.chains.HttpMateChains;
 import com.envimate.httpmate.chains.rules.Rule;
@@ -33,6 +34,7 @@ import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
+import static com.envimate.httpmate.chains.ChainName.chainName;
 import static com.envimate.httpmate.chains.HttpMateChains.POST_SERIALIZATION;
 import static com.envimate.httpmate.chains.HttpMateChainKeys.PATH;
 import static com.envimate.httpmate.chains.HttpMateChainKeys.STRING_RESPONSE;
@@ -53,7 +55,7 @@ public final class DebugModule implements Module {
     public void register(final ChainRegistry chainRegistry,
                          final MessageBus messageBus) {
         final Chain nextChain = chainRegistry.getChainFor(POST_SERIALIZATION);
-        final Chain debugChain = chainRegistry.createChain("DEBUG", jumpTo(nextChain), drop());
+        final Chain debugChain = chainRegistry.createChain(chainName("DEBUG"), jumpTo(nextChain), drop());
         debugChain.addProcessor(metaData -> {
             final String dump = chainRegistry.dump();
             metaData.set(STRING_RESPONSE, dump);

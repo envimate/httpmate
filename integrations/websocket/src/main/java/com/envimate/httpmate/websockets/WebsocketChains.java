@@ -21,17 +21,21 @@
 
 package com.envimate.httpmate.websockets;
 
+import com.envimate.httpmate.chains.ChainName;
+
+import static com.envimate.httpmate.chains.ChainName.chainName;
+
 public final class WebsocketChains {
 
-    public static final String DETERMINE_WEBSOCKET_TYPE = "DETERMINE_WEBSOCKET_TYPE";
+    public static final ChainName DETERMINE_WEBSOCKET_TYPE = chainName("DETERMINE_WEBSOCKET_TYPE");
 
-    public static final String WEBSOCKET_ESTABLISHMENT = "WEBSOCKET_ESTABLISHMENT";
-    public static final String WEBSOCKET_OPEN = "WEBSOCKET_OPEN";
-    public static final String WEBSOCKET_MESSAGE = "WEBSOCKET_MESSAGE";
-    public static final String WEBSOCKET_CLOSE = "WEBSOCKET_CLOSE";
-    public static final String WEBSOCKET_CLOSED = "WEBSOCKET_CLOSED";
+    public static final ChainName WEBSOCKET_ESTABLISHMENT = chainName("WEBSOCKET_ESTABLISHMENT");
+    public static final ChainName WEBSOCKET_OPEN = chainName("WEBSOCKET_OPEN");
+    public static final ChainName WEBSOCKET_MESSAGE = chainName("WEBSOCKET_MESSAGE");
+    public static final ChainName WEBSOCKET_CLOSE = chainName("WEBSOCKET_CLOSE");
+    public static final ChainName WEBSOCKET_CLOSED = chainName("WEBSOCKET_CLOSED");
 
-    public static final String SEND_TO_WEBSOCKETS = "SEND_TO_WEBSOCKETS";
+    public static final ChainName SEND_TO_WEBSOCKETS = chainName("SEND_TO_WEBSOCKETS");
 
     private WebsocketChains() {
     }

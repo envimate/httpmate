@@ -23,6 +23,7 @@ package com.envimate.httpmate.convenience.cors;
 
 import com.envimate.httpmate.Module;
 import com.envimate.httpmate.chains.Chain;
+import com.envimate.httpmate.chains.ChainName;
 import com.envimate.httpmate.chains.ChainRegistry;
 import com.envimate.httpmate.request.Headers;
 import com.envimate.httpmate.request.HttpRequestMethod;
@@ -36,6 +37,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.envimate.httpmate.chains.ChainName.chainName;
 import static com.envimate.httpmate.chains.HttpMateChainKeys.*;
 import static com.envimate.httpmate.chains.HttpMateChains.*;
 import static com.envimate.httpmate.chains.rules.Jump.jumpTo;
@@ -75,7 +77,7 @@ public final class CorsModule implements Module {
                          final MessageBus messageBus) {
         final Chain exceptionChain = chainRegistry.getChainFor(EXCEPTION_OCCURRED);
         final Chain entryChain = chainRegistry.getChainFor(POST_SERIALIZATION);
-        final Chain corsChain = chainRegistry.createChain("CORS", jumpTo(entryChain), jumpTo(exceptionChain));
+        final Chain corsChain = chainRegistry.createChain(chainName("CORS"), jumpTo(entryChain), jumpTo(exceptionChain));
 
         corsChain.addProcessor(metaData -> {
             final Headers headers = metaData.get(HEADERS);

@@ -23,7 +23,7 @@ package com.envimate.httpmate.chains;
 
 public final class NoChainForNameException extends RuntimeException {
 
-    NoChainForNameException(final String name) {
-        super("No chain registered for name " + name + ".");
+    NoChainForNameException(final ChainName name) {
+        super("No chain registered for name " + name.name() + ".");
     }
 }
