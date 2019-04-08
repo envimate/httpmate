@@ -46,32 +46,11 @@
     </properties>
 
     <dependencies>
-
         <dependency>
             <groupId>com.envimate.message-mate</groupId>
             <artifactId>core</artifactId>
             <version>1.0.3</version>
         </dependency>
     </dependencies>
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.8.0</version>
-                <configuration>
-                    <compilerArgs>
-                        <arg>-Xlint:all</arg>
-                        <arg>-Xlint:-processing</arg>
-                        <arg>-Xlint:-serial</arg>
-                        <arg>-parameters</arg>
-                    </compilerArgs>
-                    <source>10</source>
-                    <target>10</target>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
 
 </project>
