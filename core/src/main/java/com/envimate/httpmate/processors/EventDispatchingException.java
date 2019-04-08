@@ -25,7 +25,7 @@ import lombok.EqualsAndHashCode;
 
 import static com.envimate.httpmate.util.Validators.validateNotNull;
 
-@EqualsAndHashCode
+@EqualsAndHashCode(callSuper = true)
 public final class EventDispatchingException extends RuntimeException {
 
     private EventDispatchingException(final Throwable cause) {
