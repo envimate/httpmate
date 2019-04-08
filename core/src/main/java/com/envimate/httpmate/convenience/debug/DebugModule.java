@@ -23,7 +23,6 @@ package com.envimate.httpmate.convenience.debug;
 
 import com.envimate.httpmate.Module;
 import com.envimate.httpmate.chains.Chain;
-import com.envimate.httpmate.chains.ChainName;
 import com.envimate.httpmate.chains.ChainRegistry;
 import com.envimate.httpmate.chains.HttpMateChains;
 import com.envimate.httpmate.chains.rules.Rule;
@@ -35,9 +34,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
 import static com.envimate.httpmate.chains.ChainName.chainName;
-import static com.envimate.httpmate.chains.HttpMateChains.POST_SERIALIZATION;
 import static com.envimate.httpmate.chains.HttpMateChainKeys.PATH;
 import static com.envimate.httpmate.chains.HttpMateChainKeys.STRING_RESPONSE;
+import static com.envimate.httpmate.chains.HttpMateChains.POST_SERIALIZATION;
 import static com.envimate.httpmate.chains.rules.Drop.drop;
 import static com.envimate.httpmate.chains.rules.Jump.jumpTo;
 

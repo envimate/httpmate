@@ -23,7 +23,6 @@ package com.envimate.httpmate.convenience.cors;
 
 import com.envimate.httpmate.Module;
 import com.envimate.httpmate.chains.Chain;
-import com.envimate.httpmate.chains.ChainName;
 import com.envimate.httpmate.chains.ChainRegistry;
 import com.envimate.httpmate.request.Headers;
 import com.envimate.httpmate.request.HttpRequestMethod;
@@ -48,7 +47,6 @@ import static com.envimate.httpmate.util.Validators.validateNotNullNorEmpty;
 import static java.lang.String.join;
 import static java.util.stream.Collectors.joining;
 
-// "Access-Control-Allow-Credentials", "true"
 @ToString
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)

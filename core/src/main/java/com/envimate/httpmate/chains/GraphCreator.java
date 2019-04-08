@@ -44,22 +44,24 @@ final class GraphCreator {
 
         chains.forEach((name, chain) -> {
             final Action defaultAction = chain.getDefaultAction();
-            builder.append(relation(name, defaultAction, "black", chains));
+            builder.append(relation(name, defaultAction, "black"));
 
             chain.getRules().forEach(rule -> {
                 final Action action = rule.action();
-                builder.append(relation(name, action, "black", chains));
+                builder.append(relation(name, action, "black"));
             });
 
             final Action exceptionAction = chain.getExceptionAction();
-            builder.append(relation(name, exceptionAction, "red", chains));
+            builder.append(relation(name, exceptionAction, "red"));
         });
 
         builder.append("}\n");
         return builder.toString();
     }
 
-    private static String relation(final ChainName from, final Action action, final String color, final Map<ChainName, Chain> chains) {
+    private static String relation(final ChainName from,
+                                   final Action action,
+                                   final String color) {
         if (action instanceof Jump) {
             final Jump jump = (Jump) action;
             final Chain chain = jump.target().orElseThrow();
@@ -81,12 +83,5 @@ final class GraphCreator {
 
     private static ChainName nameForChain(final Chain chain) {
         return chain.getName();
-        /*
-        return chains.entrySet().stream()
-                .filter(entry -> entry.getValue().equals(chain))
-                .findFirst()
-                .map(Map.Entry::getKey)
-                .orElseThrow(RuntimeException::new);
-         */
     }
 }

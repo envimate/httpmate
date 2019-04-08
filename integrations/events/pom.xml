@@ -36,12 +36,6 @@
 
     <name>HttpMate - Integrations - Events</name>
 
-    <properties>
-        <checkstyle.suppressions.location>
-            ${project.basedir}/src/test/checkstyle/checkstyle-suppressions.xml
-        </checkstyle.suppressions.location>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>com.envimate.httpmate</groupId>
