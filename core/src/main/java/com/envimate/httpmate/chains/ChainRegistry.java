@@ -37,13 +37,13 @@ import static lombok.AccessLevel.PRIVATE;
 
 @RequiredArgsConstructor(access = PRIVATE)
 public class ChainRegistry {
-    private final Map<String, Chain> namedChains = new HashMap<>();
+    private final Map<ChainName, Chain> namedChains = new HashMap<>();
 
     public static ChainRegistry emptyChainRegistry() {
         return new ChainRegistry();
     }
 
-    public Chain createChain(final String name,
+    public Chain createChain(final ChainName name,
                              final Action defaultAction,
                              final Action exceptionAction) {
         final Chain chain = chain(defaultAction, exceptionAction, name);
@@ -51,7 +51,7 @@ public class ChainRegistry {
         return chain;
     }
 
-    public Chain getChainFor(final String chainName) {
+    public Chain getChainFor(final ChainName chainName) {
         validateNotNull(chainName, "chainName");
         if (namedChains.containsKey(chainName)) {
             return namedChains.get(chainName);
@@ -60,7 +60,7 @@ public class ChainRegistry {
         }
     }
 
-    public void addProcessorToChain(final String chainName,
+    public void addProcessorToChain(final ChainName chainName,
                                     final Processor processor) {
         validateNotNull(chainName, "chainName");
         validateNotNull(processor, "processor");
@@ -68,7 +68,7 @@ public class ChainRegistry {
         chain.addProcessor(processor);
     }
 
-    public void putIntoChain(final String chainName,
+    public void putIntoChain(final ChainName chainName,
                              final MetaData initialMetaData,
                              final Consumer<MetaData> consumer) {
         final Chain chain = getChainFor(chainName);

@@ -23,6 +23,7 @@ package com.envimate.httpmate;
 
 import com.envimate.httpmate.builder.EventStage1;
 import com.envimate.httpmate.builder.UseCaseStage1;
+import com.envimate.httpmate.chains.ChainName;
 import com.envimate.httpmate.chains.ChainRegistry;
 import com.envimate.httpmate.chains.HttpMateChains;
 import com.envimate.httpmate.chains.MetaData;
@@ -62,10 +63,10 @@ public final class HttpMate {
         metaData.set(LOGGER, logger);
     }
 
-    public void handle(final String chainIdentifier,
+    public void handle(final ChainName chainName,
                        final MetaData metaData) {
         initMetaData(metaData);
-        chainRegistry.putIntoChain(chainIdentifier, metaData, metaData1 -> {
+        chainRegistry.putIntoChain(chainName, metaData, metaData1 -> {
         });
     }
 

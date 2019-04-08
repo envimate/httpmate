@@ -26,29 +26,27 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>com.envimate</groupId>
-        <artifactId>httpmate-parent</artifactId>
-        <version>1.0.14</version>
+        <groupId>com.envimate.httpmate</groupId>
+        <artifactId>integrations-parent</artifactId>
+        <version>1.0.12</version>
     </parent>
 
-    <packaging>pom</packaging>
+    <groupId>com.envimate.httpmate.integrations</groupId>
+    <artifactId>httpmate-events</artifactId>
 
-    <groupId>com.envimate.httpmate</groupId>
-    <artifactId>integrations-parent</artifactId>
+    <name>HttpMate - Integrations - Events</name>
 
-    <name>HttpMate - integrations</name>
+    <properties>
+        <checkstyle.suppressions.location>
+            ${project.basedir}/src/test/checkstyle/checkstyle-suppressions.xml
+        </checkstyle.suppressions.location>
+    </properties>
 
-    <modules>
-        <module>spark</module>
-        <module>aws-lambda</module>
-        <module>multipart</module>
-        <module>mapmate</module>
-        <module>jetty</module>
-        <module>jetty-with-websockets</module>
-        <module>servlet</module>
-        <module>servlet-with-websockets</module>
-        <module>client</module>
-        <module>websocket</module>
-        <module>events</module>
-    </modules>
+    <dependencies>
+        <dependency>
+            <groupId>com.envimate.httpmate</groupId>
+            <artifactId>core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
 </project>

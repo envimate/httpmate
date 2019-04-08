@@ -45,11 +45,11 @@ public class Chain {
     private final List<Rule> rules;
     @Getter
     private final Channel<ProcessingContext> processChannel;
-    private final String name;
+    private final ChainName name;
 
     static Chain chain(final Action defaultAction,
                        final Action exceptionAction,
-                       final String name) {
+                       final ChainName name) {
         final Channel<ProcessingContext> processChannel = aChannel(ProcessingContext.class)
                 .withDefaultAction(subscription()).build();
         return new Chain(defaultAction, exceptionAction, new LinkedList<>(), processChannel, name);
@@ -100,7 +100,7 @@ public class Chain {
         }
     }
 
-    public String getName() {
+    public ChainName getName() {
         return name;
     }
 }

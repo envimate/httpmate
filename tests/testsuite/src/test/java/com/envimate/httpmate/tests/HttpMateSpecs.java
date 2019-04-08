@@ -23,7 +23,6 @@ package com.envimate.httpmate.tests;
 
 import com.envimate.httpmate.tests.givenwhenthen.DeployerAndClient;
 import org.junit.AfterClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;

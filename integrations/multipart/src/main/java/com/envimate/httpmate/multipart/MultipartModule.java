@@ -32,9 +32,10 @@ import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
+import static com.envimate.httpmate.chains.ChainName.chainName;
+import static com.envimate.httpmate.chains.HttpMateChainKeys.CONTENT_TYPE;
 import static com.envimate.httpmate.chains.HttpMateChains.DETERMINE_EVENT;
 import static com.envimate.httpmate.chains.HttpMateChains.EXCEPTION_OCCURRED;
-import static com.envimate.httpmate.chains.HttpMateChainKeys.CONTENT_TYPE;
 import static com.envimate.httpmate.chains.rules.Jump.jumpTo;
 import static com.envimate.httpmate.chains.rules.Rule.jumpRule;
 import static com.envimate.httpmate.multipart.MultipartProcessor.multipartProcessor;
@@ -55,7 +56,7 @@ public final class MultipartModule implements Module {
         final Chain exceptionOccuredChain = chainRegistry.getChainFor(EXCEPTION_OCCURRED);
 
         final Chain processMultipartChain = chainRegistry
-                .createChain("PROCESS_MULTIPART", jumpTo(determineEventChain), jumpTo(exceptionOccuredChain));
+                .createChain(chainName("PROCESS_MULTIPART"), jumpTo(determineEventChain), jumpTo(exceptionOccuredChain));
         processMultipartChain.addProcessor(multipartProcessor());
 
         final Chain processBodyChain = chainRegistry.getChainFor(HttpMateChains.PROCESS_BODY);
