@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 envimate GmbH - https://envimate.com/.
+ * Copyright (c) 2019 envimate GmbH - https://envimate.com/.
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -21,7 +21,7 @@
 
 package com.envimate.httpmate.chains.rules;
 
-import com.envimate.httpmate.chains.Chain;
+import com.envimate.httpmate.chains.ChainName;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
@@ -40,7 +40,7 @@ public final class Drop implements Action {
     }
 
     @Override
-    public Optional<Chain> target() {
+    public Optional<ChainName> target() {
         return empty();
     }
 }

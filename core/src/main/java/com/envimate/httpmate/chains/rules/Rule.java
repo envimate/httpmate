@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 envimate GmbH - https://envimate.com/.
+ * Copyright (c) 2019 envimate GmbH - https://envimate.com/.
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -21,34 +21,50 @@
 
 package com.envimate.httpmate.chains.rules;
 
-import com.envimate.httpmate.chains.Chain;
 import com.envimate.httpmate.chains.MetaData;
+import com.envimate.httpmate.chains.ModuleIdentifier;
+import lombok.AccessLevel;
+import lombok.EqualsAndHashCode;
+import lombok.RequiredArgsConstructor;
+import lombok.ToString;
 
 import java.util.function.Predicate;
 
-import static com.envimate.httpmate.chains.rules.Jump.jumpTo;
+import static com.envimate.httpmate.util.Validators.validateNotNull;
 
-/**
- * Routing rules are different from Processors. There shall only be one rule resolved for one request, with
- * the exception, of a chains default rule, which will be used, in case no specific Rule matches the request.
- */
-public interface Rule {
+@ToString
+@EqualsAndHashCode
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
+public final class Rule {
+    private final ModuleIdentifier moduleIdentifier;
+    private final Predicate<MetaData> matcher;
+    private final Action action;
+    private final RuleDescription ruleDescription;
 
-    static Rule jumpRule(final Chain targetChain, final Predicate<MetaData> matcher) {
-        return new Rule() {
-            @Override
-            public boolean matches(final MetaData metaData) {
-                return matcher.test(metaData);
-            }
-
-            @Override
-            public Action action() {
-                return jumpTo(targetChain);
-            }
-        };
+    public static Rule rule(final ModuleIdentifier moduleIdentifier,
+                            final Predicate<MetaData> matcher,
+                            final Action action,
+                            final RuleDescription ruleDescription) {
+        validateNotNull(moduleIdentifier, "moduleIdentifier");
+        validateNotNull(matcher, "matcher");
+        validateNotNull(action, "action");
+        validateNotNull(ruleDescription, "ruleDescription");
+        return new Rule(moduleIdentifier, matcher, action, ruleDescription);
     }
 
-    boolean matches(MetaData metaData);
+    public boolean matches(final MetaData metaData) {
+        return matcher.test(metaData);
+    }
 
-    Action action();
+    public Action action() {
+        return action;
+    }
+
+    public ModuleIdentifier moduleIdentifier() {
+        return moduleIdentifier;
+    }
+
+    public RuleDescription description() {
+        return ruleDescription;
+    }
 }

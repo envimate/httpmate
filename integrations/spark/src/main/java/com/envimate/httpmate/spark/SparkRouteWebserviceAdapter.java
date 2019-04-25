@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 envimate GmbH - https://envimate.com/.
+ * Copyright (c) 2019 envimate GmbH - https://envimate.com/.
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -36,7 +36,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import static com.envimate.httpmate.chains.HttpMateChainKeys.*;
+import static com.envimate.httpmate.HttpMateChainKeys.*;
 import static com.envimate.httpmate.chains.MetaData.emptyMetaData;
 import static com.envimate.httpmate.util.Streams.streamInputStreamToOutputStream;
 import static com.envimate.httpmate.util.Streams.stringToInputStream;
@@ -54,7 +54,7 @@ final class SparkRouteWebserviceAdapter implements Route {
         final String httpRequestMethod = request.requestMethod();
         metaData.set(RAW_METHOD, httpRequestMethod);
         final String path = request.pathInfo();
-        metaData.set(PATH, path);
+        metaData.set(RAW_PATH, path);
         final Map<String, String> headers = request.headers().stream()
                 .collect(toMap(key -> key, request::headers));
         metaData.set(RAW_HEADERS, headers);

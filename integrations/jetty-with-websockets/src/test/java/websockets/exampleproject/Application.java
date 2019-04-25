@@ -1,12 +1,27 @@
+/*
+ * Copyright (c) 2019 envimate GmbH - https://envimate.com/.
+ *
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 package websockets.exampleproject;
 
-import com.envimate.httpmate.HttpMate;
-import com.envimate.httpmate.request.HttpRequestMethod;
-import com.envimate.httpmate.websockets.WebSocketModule;
-import com.envimate.mapmate.deserialization.Deserializer;
 import com.envimate.mapmate.deserialization.methods.DeserializationCPMethod;
-import com.envimate.mapmate.serialization.Serializer;
-import com.envimate.messageMate.messageBus.EventType;
 import com.envimate.messageMate.messageBus.MessageBus;
 import com.envimate.messageMate.messageBus.MessageBusType;
 import com.envimate.messageMate.useCaseAdapter.UseCaseAdapter;
@@ -18,51 +33,53 @@ import websockets.exampleproject.usecases.SendMessageResponse;
 import websockets.exampleproject.usecases.SendMessageUseCase;
 import websockets.exampleproject.usecases.events.NewMessageEvent;
 
-import java.util.Map;
-
-import static com.envimate.httpmate.HttpMate.aHttpMateDispatchingEventsUsing;
-import static com.envimate.httpmate.chains.HttpMateChainKeys.AUTHENTICATION_INFORMATION;
-import static com.envimate.httpmate.chains.HttpMateChainKeys.HEADERS;
-import static com.envimate.httpmate.multipart.MultipartModule.multipartModule;
-import static com.envimate.httpmate.request.ContentType.json;
-import static com.envimate.httpmate.unpacking.BodyMapParsingModule.aBodyMapParsingModule;
-import static com.envimate.httpmate.websockets.WebSocketModule.webSocketModule;
+import static com.envimate.httpmate.HttpMate.aHttpMateConfiguredAs;
+import static com.envimate.httpmate.HttpMateChainKeys.AUTHENTICATION_INFORMATION;
+import static com.envimate.httpmate.events.EventDrivenBuilder.EVENT_DRIVEN;
+import static com.envimate.httpmate.http.HttpRequestMethod.DELETE;
+import static com.envimate.httpmate.websockets.WebSocketsConfigurator.toUseWebSockets;
+import static com.envimate.httpmate.websockets.WebsocketChainKeys.IS_WEBSOCKET_MESSAGE;
+import static com.envimate.httpmate.websocketsevents.Conditions.forwardingItToAllWebSocketsThat;
 import static com.envimate.mapmate.deserialization.Deserializer.aDeserializer;
+import static com.envimate.mapmate.serialization.Serializer.aSerializer;
 import static com.envimate.messageMate.internal.pipe.configuration.AsynchronousConfiguration.constantPoolSizeAsynchronousPipeConfiguration;
 import static com.envimate.messageMate.messageBus.MessageBusBuilder.aMessageBus;
 import static com.envimate.messageMate.useCaseAdapter.UseCaseAdapterBuilder.anUseCaseAdapter;
-import static websockets.exampleproject.CookieParsing.getCookie;
 
 public final class Application {
 
+    private static final int POOL_SIZE = 4;
     public static final MessageBus MESSAGE_BUS = aMessageBus()
             .forType(MessageBusType.ASYNCHRONOUS)
-            .withAsynchronousConfiguration(constantPoolSizeAsynchronousPipeConfiguration(4))
+            .withAsynchronousConfiguration(constantPoolSizeAsynchronousPipeConfiguration(POOL_SIZE))
             .build();
+
+    private Application() {
+    }
 
     public static void startApplication() {
 
         final Gson gson = new Gson();
 
-        final Deserializer deserializer = aDeserializer()
-                .withUnmarshaller(gson::fromJson)
+        aDeserializer()
+                .withJsonUnmarshaller(gson::fromJson)
                 .withCustomPrimitive(MessageContent.class).deserializedUsingTheStaticMethodWithSingleStringArgument()
                 .withCustomPrimitive(Username.class).deserializedUsingTheStaticMethodWithSingleStringArgument()
                 .withDataTransferObject(SendMessageRequest.class).deserializedUsingTheSingleFactoryMethod()
                 .withCustomPrimitive(User.class).deserializedUsing(new DeserializationCPMethod() {
                     @Override
-                    public void verifyCompatibility(Class targetType) {
+                    public void verifyCompatibility(final Class<?> targetType) {
                     }
 
                     @Override
-                    public Object deserialize(String input, Class targetType) throws Exception {
+                    public Object deserialize(final String input, final Class<?> targetType) {
                         return VERY_STUPID.get();
                     }
                 })
                 .build();
 
-        final Serializer serializer = Serializer.aSerializer()
-                .withMarshaller(gson::toJson)
+        aSerializer()
+                .withJsonMarshaller(gson::toJson)
                 .withDataTransferObject(SendMessageResponse.class).serializedByItsPublicFields()
                 .withDataTransferObject(Message.class).serializedByItsPublicFields()
                 .withDataTransferObject(NewMessageEvent.class).serializedByItsPublicFields()
@@ -70,8 +87,6 @@ public final class Application {
                 .withCustomPrimitive(MessageId.class).serializedUsingTheMethod(MessageId::stringValue)
                 .withCustomPrimitive(Username.class).serializedUsingTheMethod(Username::stringValue)
                 .build();
-
-        final UserRepository userRepository = UserRepository.userRepository();
 
         final UseCaseAdapter useCaseAdapter = anUseCaseAdapter()
                 .invokingUseCase(SendMessageUseCase.class).forType("SendMessageRequest").callingTheSingleUseCaseMethod()
@@ -81,51 +96,36 @@ public final class Application {
                 .puttingExceptionObjectNamedAsExceptionIntoResponseMapByDefault();
         useCaseAdapter.attachTo(MESSAGE_BUS);
 
-        final WebSocketModule webSocketModule = webSocketModule()
-                .acceptingWebSocketsToThePath("/connect").saving(AUTHENTICATION_INFORMATION)
-                .choosingTheEvent("SendMessageRequest").when(metaData -> true)
-                .forwardingTheEvent("NewMessageEvent").toWebSocketsThat((metaData, event) -> {
+        aHttpMateConfiguredAs(EVENT_DRIVEN).attachedTo(MESSAGE_BUS)
+                .triggeringTheEvent("SendMessageRequest").forRequestPath("/qwrefewiflrwefjierwipower").andRequestMethod(DELETE)
+                .triggeringTheEvent("SendMessageRequest").when(metaData -> metaData.getOptional(IS_WEBSOCKET_MESSAGE).orElse(false))
+                .handlingTheEvent("NewMessageEvent").by(forwardingItToAllWebSocketsThat((metaData, event) -> {
                     //return event.message.recipients.contains(metaData.get(AUTHENTICATION_INFORMATION));
                     throw new UnsupportedOperationException();
-                })
-                .closingOn("BanUserEvent").allWebSocketsThat((category, event) -> {
+                }))
+                .handlingTheEvent("BanUserEvent").by(forwardingItToAllWebSocketsThat((metaData, event) -> {
                     //return category.equals(event.username());
                     throw new UnsupportedOperationException();
-                })
-                .build();
-
-        final HttpMate httpMate = aHttpMateDispatchingEventsUsing(MESSAGE_BUS)
-                .choosingTheEvent(EventType.eventTypeFromString("SendMessageRequest")).forRequestPath("/qwrefewiflrwefjierwipower").andRequestMethod(HttpRequestMethod.DELETE)
-                //.choosingTheEvent("UPLOAD_USER_AVATAR").forRequestPath("/user/<id>/upload").andRequestMethod(HttpRequestMethod.GET)
-                /*
-                .mappingRequestsToUseCaseParametersByDefaultUsing(theMapMateDeserializerOnTheRequestBody(deserializer)
-                        .andInjectingRequestValuesIntoTheJsonBodyUsing((metaData, json) -> {
-                            final User user = (User) metaData.get(AUTHENTICATION_INFORMATION);
-                            json.put("sender", "dummy");
-                            VERY_STUPID.set(user);
-                        }))
-                        */
-                .preparingRequestsForParameterMappingThatByDirectlyMappingAllData()
-                //.mappingResponsesUsing(theMapMateSerializer(serializer)::map)
+                }))
                 .mappingResponsesUsing((event, metaData) -> {
                 })
-                //.serializingResponseObjectsByDefaultUsing(theMapMateSerializer(serializer))
-                .configuredBy(configurator -> {
+                .configured(toUseWebSockets().acceptingWebSocketsToThePath("/connect").saving(AUTHENTICATION_INFORMATION))
+                .configured(configurator -> {
+                    /*
                     configurator.configureSecurity().addAuthenticator(metaData -> metaData.get(HEADERS).getHeader("cookie").flatMap(
                             cookieHeader -> getCookie("username", cookieHeader).flatMap(
                                     username -> getCookie("password", cookieHeader).flatMap(
                                             password -> userRepository.getIfCorrectAuthenticationInformation(username, password)))));
                     configurator.configureSecurity().addAuthorizer(metaData -> metaData.getOptional(AUTHENTICATION_INFORMATION).isPresent());
                     configurator.configureLogger().loggingToStderr();
-                    configurator.registerModule(webSocketModule);
-                    configurator.registerModule(multipartModule());
-                    configurator.registerModule(aBodyMapParsingModule()
-                            .parsingContentType(json()).with(body -> new Gson().fromJson(body, Map.class))
-                            .usingTheDefaultContentType(json()));
-                });
-
-        final String chains = httpMate.dumpChains();
-        System.out.println("chains = " + chains);
+                     */
+                    //configurator.registerModule(webSocketModule);
+                    //configurator.registerModule(multipartModule());
+                    //configurator.registerModule(aBodyMapParsingModule()
+                    //        .parsingContentType(json()).with(body -> new Gson().fromJson(body, Map.class))
+                    //        .usingTheDefaultContentType(json()));
+                })
+                .build();
 
         //final JettyEndpoint jettyEndpoint = jettyEndpointFor(doubleServletFor(httpMate)).listeningOnThePort(8976);
 
@@ -134,7 +134,7 @@ public final class Application {
 
     private static final ThreadLocal<User> VERY_STUPID = new ThreadLocal<>();
 
-    public static void main(String[] args) {
+    public static void main(final String[] args) {
         startApplication();
     }
 }

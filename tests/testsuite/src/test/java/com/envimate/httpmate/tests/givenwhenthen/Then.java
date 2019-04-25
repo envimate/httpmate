@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 envimate GmbH - https://envimate.com/.
+ * Copyright (c) 2019 envimate GmbH - https://envimate.com/.
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -22,6 +22,7 @@
 package com.envimate.httpmate.tests.givenwhenthen;
 
 import com.envimate.httpmate.tests.givenwhenthen.client.HttpClientResponse;
+import com.envimate.httpmate.tests.lowlevel.LowLevelHttpMateConfiguration;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -33,15 +34,13 @@ import static org.junit.Assert.assertThat;
 public final class Then {
 
     private final HttpClientResponse response;
-    private final StringBuilder log;
 
-    private Then(final HttpClientResponse response, final StringBuilder log) {
+    private Then(final HttpClientResponse response) {
         this.response = response;
-        this.log = log;
     }
 
-    static Then then(final HttpClientResponse response, final StringBuilder log) {
-        return new Then(response, log);
+    static Then then(final HttpClientResponse response) {
+        return new Then(response);
     }
 
     public Then theStatusCodeWas(final int expectedStatusCode) {
@@ -78,7 +77,7 @@ public final class Then {
     }
 
     public Then theLogOutputStartedWith(final String expectedPrefix) {
-        final String logContent = log.toString();
+        final String logContent = LowLevelHttpMateConfiguration.logger.toString();
         assertThat(logContent, startsWith(expectedPrefix));
         return this;
     }

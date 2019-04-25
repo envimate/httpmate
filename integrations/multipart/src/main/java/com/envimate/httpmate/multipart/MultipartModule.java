@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 envimate GmbH - https://envimate.com/.
+ * Copyright (c) 2019 envimate GmbH - https://envimate.com/.
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -21,48 +21,45 @@
 
 package com.envimate.httpmate.multipart;
 
-import com.envimate.httpmate.Module;
-import com.envimate.httpmate.chains.Chain;
-import com.envimate.httpmate.chains.ChainRegistry;
-import com.envimate.httpmate.chains.HttpMateChains;
-import com.envimate.httpmate.request.ContentType;
-import com.envimate.messageMate.messageBus.MessageBus;
+import com.envimate.httpmate.chains.ChainExtender;
+import com.envimate.httpmate.chains.ChainModule;
+import com.envimate.httpmate.chains.ChainName;
+import com.envimate.httpmate.chains.Configurator;
+import com.envimate.httpmate.http.ContentType;
+import com.envimate.httpmate.http.Http;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
+import static com.envimate.httpmate.HttpMateChainKeys.CONTENT_TYPE;
+import static com.envimate.httpmate.HttpMateChains.*;
 import static com.envimate.httpmate.chains.ChainName.chainName;
-import static com.envimate.httpmate.chains.HttpMateChainKeys.CONTENT_TYPE;
-import static com.envimate.httpmate.chains.HttpMateChains.DETERMINE_EVENT;
-import static com.envimate.httpmate.chains.HttpMateChains.EXCEPTION_OCCURRED;
+import static com.envimate.httpmate.chains.Configurator.toUseModules;
 import static com.envimate.httpmate.chains.rules.Jump.jumpTo;
-import static com.envimate.httpmate.chains.rules.Rule.jumpRule;
+import static com.envimate.httpmate.http.ContentType.fromString;
 import static com.envimate.httpmate.multipart.MultipartProcessor.multipartProcessor;
+import static java.lang.String.format;
 
 @ToString
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-public final class MultipartModule implements Module {
-    private static final String CONTENT_TYPE_PREFIX = "multipart/form-data";
+public final class MultipartModule implements ChainModule {
+    private static final ChainName PROCESS_BODY_MULTIPART = chainName("PROCESS_BODY_MULTIPART");
+    private static final ContentType CONTENT_TYPE_PREFIX = fromString("multipart/form-data");
+    private static final String RULE_DESCRIPTION = format("%s=%s", Http.Headers.CONTENT_TYPE,
+            CONTENT_TYPE_PREFIX.internalValueForMapping());
 
-    public static Module multipartModule() {
-        return new MultipartModule();
+    public static Configurator toExposeMultipartBodiesUsingMultipartIteratorBody() {
+        return toUseModules(new MultipartModule());
     }
 
     @Override
-    public void register(final ChainRegistry chainRegistry, final MessageBus messageBus) {
-        final Chain determineEventChain = chainRegistry.getChainFor(DETERMINE_EVENT);
-        final Chain exceptionOccuredChain = chainRegistry.getChainFor(EXCEPTION_OCCURRED);
+    public void register(final ChainExtender extender) {
+        extender.createChain(PROCESS_BODY_MULTIPART, jumpTo(DETERMINE_HANDLER), jumpTo(EXCEPTION_OCCURRED));
+        extender.addProcessor(PROCESS_BODY_MULTIPART, multipartProcessor());
 
-        final Chain processMultipartChain = chainRegistry
-                .createChain(chainName("PROCESS_MULTIPART"), jumpTo(determineEventChain), jumpTo(exceptionOccuredChain));
-        processMultipartChain.addProcessor(multipartProcessor());
-
-        final Chain processBodyChain = chainRegistry.getChainFor(HttpMateChains.PROCESS_BODY);
-        processBodyChain.addRoutingRule(jumpRule(processMultipartChain, metaData -> {
-            final ContentType contentType = metaData.get(CONTENT_TYPE);
-            return contentType.startsWith(ContentType.fromString(CONTENT_TYPE_PREFIX));
-        }));
+        extender.routeIf(PROCESS_BODY, jumpTo(PROCESS_BODY_MULTIPART), CONTENT_TYPE,
+                contentType -> contentType.startsWith(CONTENT_TYPE_PREFIX), RULE_DESCRIPTION);
     }
 }

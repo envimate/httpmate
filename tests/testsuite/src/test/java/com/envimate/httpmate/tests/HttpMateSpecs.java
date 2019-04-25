@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 envimate GmbH - https://envimate.com/.
+ * Copyright (c) 2019 envimate GmbH - https://envimate.com/.
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -35,13 +35,13 @@ import static com.envimate.httpmate.tests.givenwhenthen.deploy.DeployerManager.*
 @RunWith(Parameterized.class)
 public final class HttpMateSpecs {
 
+    public HttpMateSpecs(final DeployerAndClient deployerAndClient) {
+        setCurrentDeployerAndClient(deployerAndClient);
+    }
+
     @Parameterized.Parameters(name = "{0}")
     public static Collection<DeployerAndClient> deployers() {
         return activeDeployers();
-    }
-
-    public HttpMateSpecs(final DeployerAndClient deployerAndClient) {
-        setCurrentDeployerAndClient(deployerAndClient);
     }
 
     @AfterClass
@@ -50,46 +50,46 @@ public final class HttpMateSpecs {
     }
 
     @Test
-    public void testGETRequest() {
+    public void testGetRequest() {
         givenTheTestHttpMateInstance()
-                .when().aRequestToThePath("/test").viaTheGETMethod().withAnEmptyBody().isIssued()
+                .when().aRequestToThePath("/test").viaTheGetMethod().withAnEmptyBody().isIssued()
                 .theStatusCodeWas(200)
                 .theResponseContentTypeWas("application/json")
-                .theResponseBodyWas("foo");
+                .theResponseBodyWas("{\"response\":\"foo\"}");
     }
 
     @Test
-    public void testPOSTRequest() {
+    public void testPostRequest() {
         givenTheTestHttpMateInstance()
-                .when().aRequestToThePath("/test").viaThePOSTMethod().withAnEmptyBody().isIssued()
+                .when().aRequestToThePath("/test").viaThePostMethod().withAnEmptyBody().isIssued()
                 .theStatusCodeWas(200)
                 .theResponseContentTypeWas("application/json")
-                .theResponseBodyWas("foo");
+                .theResponseBodyWas("{\"response\":\"foo\"}");
     }
 
     @Test
-    public void testPUTRequest() {
+    public void testPutRequest() {
         givenTheTestHttpMateInstance()
-                .when().aRequestToThePath("/test").viaThePUTMethod().withAnEmptyBody().isIssued()
+                .when().aRequestToThePath("/test").viaThePutMethod().withAnEmptyBody().isIssued()
                 .theStatusCodeWas(200)
                 .theResponseContentTypeWas("application/json")
-                .theResponseBodyWas("foo");
+                .theResponseBodyWas("{\"response\":\"foo\"}");
     }
 
     @Test
-    public void testDELETERequest() {
+    public void testDeleteRequest() {
         givenTheTestHttpMateInstance()
-                .when().aRequestToThePath("/test").viaTheDELETEMethod().withAnEmptyBody().isIssued()
+                .when().aRequestToThePath("/test").viaTheDeleteMethod().withAnEmptyBody().isIssued()
                 .theStatusCodeWas(200)
                 .theResponseContentTypeWas("application/json")
-                .theResponseBodyWas("foo");
+                .theResponseBodyWas("{\"response\":\"foo\"}");
     }
 
     @Test
     public void testCorsOptionsRequest() {
         givenTheTestHttpMateInstance()
                 .when().aRequestToThePath("/the/path/does/not/matter/for/options/requests")
-                .viaTheOPTIONSMethod().withAnEmptyBody()
+                .viaTheOptionsMethod().withAnEmptyBody()
                 .withTheHeader("Access-Control-Request-Headers", "X-Custom-Header, Upgrade-Insecure-Requests")
                 .withTheHeader("Access-Control-Request-Method", "POST, GET, OPTIONS").isIssued()
                 .theStatusCodeWas(200)
@@ -101,10 +101,10 @@ public final class HttpMateSpecs {
     @Test
     public void testCorsHeadersArePresent() {
         givenTheTestHttpMateInstance()
-                .when().aRequestToThePath("/test").viaTheGETMethod().withAnEmptyBody().isIssued()
+                .when().aRequestToThePath("/test").viaTheGetMethod().withAnEmptyBody().isIssued()
                 .theStatusCodeWas(200)
                 .theResponseContentTypeWas("application/json")
-                .theResponseBodyWas("foo")
+                .theResponseBodyWas("{\"response\":\"foo\"}")
                 .theReponseContainsTheHeader("Access-Control-Allow-Origin", "*")
                 .theReponseContainsTheHeader("Access-Control-Request-Method", "GET, POST, PUT, DELETE")
                 .theReponseContainsTheHeader("Access-Control-Allow-Headers", "X-Custom-Header, Upgrade-Insecure-Requests");
@@ -113,161 +113,139 @@ public final class HttpMateSpecs {
     @Test
     public void testUseCaseWithParameters() {
         givenTheTestHttpMateInstance()
-                .when().aRequestToThePath("/parameterized").viaTheGETMethod().withAnEmptyBody().isIssued()
+                .when().aRequestToThePath("/parameterized").viaTheGetMethod().withAnEmptyBody().isIssued()
                 .theStatusCodeWas(200)
                 .theResponseContentTypeWas("application/json")
-                .theResponseBodyWas("parameter");
+                .theResponseBodyWas("{\"response\":\"parameter\"}");
     }
 
     @Test
     public void testHeadersInRequest() {
         givenTheTestHttpMateInstance()
-                .when().aRequestToThePath("/headers").viaTheGETMethod().withAnEmptyBody().withTheHeader("testheader", "foo").isIssued()
+                .when().aRequestToThePath("/headers").viaTheGetMethod().withAnEmptyBody().withTheHeader("testheader", "foo").isIssued()
                 .theStatusCodeWas(200)
                 .theResponseContentTypeWas("application/json")
-                .theResponseBodyWas("foo");
-    }
-
-    @Test
-    public void testHeadersInResponse() {
-        givenTheTestHttpMateInstance()
-                .when().aRequestToThePath("/headers_response").viaTheGETMethod().withAnEmptyBody().isIssued()
-                .theStatusCodeWas(200)
-                .theResponseContentTypeWas("application/json")
-                .theReponseContainsTheHeader("foo", "bar");
-    }
-
-    @Test
-    public void testContentTypeInResponse() {
-        givenTheTestHttpMateInstance()
-                .when().aRequestToThePath("/set_contenttype_in_response").viaTheGETMethod().withAnEmptyBody().isIssued()
-                .theStatusCodeWas(200)
-                .theResponseContentTypeWas("foobar");
+                .theResponseBodyWas("{\"response\":\"foo\"}");
     }
 
     @Test
     public void testWildcardRoute() {
         givenTheTestHttpMateInstance()
-                .when().aRequestToThePath("/wild/foo/card").viaTheGETMethod().withAnEmptyBody().isIssued()
+                .when().aRequestToThePath("/wild/foo/card").viaTheGetMethod().withAnEmptyBody().isIssued()
                 .theStatusCodeWas(200)
                 .theResponseContentTypeWas("application/json")
-                .theResponseBodyWas("foo");
+                .theResponseBodyWas("{\"response\":\"foo\"}");
     }
 
     @Test
     public void testWildcardRouteWithEmptyMiddleWildcard() {
         givenTheTestHttpMateInstance()
-                .when().aRequestToThePath("/wild/card").viaTheGETMethod().withAnEmptyBody().isIssued()
+                .when().aRequestToThePath("/wild/card").viaTheGetMethod().withAnEmptyBody().isIssued()
                 .theStatusCodeWas(405)
-                .theResponseContentTypeWas("application/json")
                 .theResponseBodyWas("No use case found.");
     }
 
     @Test
     public void testQueryParameters() {
         givenTheTestHttpMateInstance()
-                .when().aRequestToThePath("/queryparameters?param1=derp&param2=").viaTheGETMethod().withAnEmptyBody().isIssued()
+                .when().aRequestToThePath("/queryparameters?param1=derp&param2=").viaTheGetMethod().withAnEmptyBody().isIssued()
                 .theStatusCodeWas(200)
                 .theResponseContentTypeWas("application/json")
-                .theResponseBodyContains("param1=derp")
-                .theResponseBodyContains("param2=");
+                .theResponseBodyContains("param1\\u003dderp")
+                .theResponseBodyContains("param2\\u003d");
     }
 
     @Test
     public void testQueryParametersAndPathParameters() {
         givenTheTestHttpMateInstance()
-                .when().aRequestToThePath("/echo_path_and_query_parameters/foo?test=bar").viaTheGETMethod().withAnEmptyBody().isIssued()
+                .when().aRequestToThePath("/echo_path_and_query_parameters/foo?test=bar").viaTheGetMethod().withAnEmptyBody().isIssued()
                 .theStatusCodeWas(200)
                 .theResponseContentTypeWas("application/json")
-                .theResponseBodyContains("test=bar")
-                .theResponseBodyContains("wildcard=foo");
+                .theResponseBodyContains("test\\u003dbar")
+                .theResponseBodyContains("wildcard\\u003dfoo");
     }
 
     @Test
     public void testUseCaseNotFoundExceptionHandler() {
         givenTheTestHttpMateInstance()
-                .when().aRequestToThePath("/this_has_no_usecase").viaTheGETMethod().withAnEmptyBody().isIssued()
+                .when().aRequestToThePath("/this_has_no_usecase").viaTheGetMethod().withAnEmptyBody().isIssued()
                 .theStatusCodeWas(405)
-                .theResponseContentTypeWas("application/json")
                 .theResponseBodyWas("No use case found.");
     }
 
     @Test
     public void testMappedExceptionHandler() {
         givenTheTestHttpMateInstance()
-                .when().aRequestToThePath("/mapped_exception").viaTheGETMethod().withAnEmptyBody().isIssued()
+                .when().aRequestToThePath("/mapped_exception").viaTheGetMethod().withAnEmptyBody().isIssued()
                 .theStatusCodeWas(201)
-                .theResponseContentTypeWas("application/json")
                 .theResponseBodyWas("");
     }
 
     @Test
     public void testDefaultExceptionHandlerDoesNotDiscloseTheExceptionInTheResponse() {
         givenTheTestHttpMateInstance()
-                .when().aRequestToThePath("/unmapped_exception").viaTheGETMethod().withAnEmptyBody().isIssued()
+                .when().aRequestToThePath("/unmapped_exception").viaTheGetMethod().withAnEmptyBody().isIssued()
                 .theStatusCodeWas(500)
-                .theResponseContentTypeWas("application/json")
                 .theResponseBodyWas("");
     }
 
     @Test
     public void testAuthenticationByHeader() {
         givenTheTestHttpMateInstance()
-                .when().aRequestToThePath("/authentication_echo").viaTheGETMethod().withAnEmptyBody().withTheHeader("username", "bob1").isIssued()
+                .when().aRequestToThePath("/authentication_echo").viaTheGetMethod().withAnEmptyBody().withTheHeader("username", "bob1").isIssued()
                 .theStatusCodeWas(200)
                 .theResponseContentTypeWas("application/json")
-                .theResponseBodyWas("Authenticated as: bob1");
+                .theResponseBodyWas("{\"response\":\"Authenticated as: bob1\"}");
     }
 
     @Test
     public void testAuthenticationByBody() {
         givenTheTestHttpMateInstance()
-                .when().aRequestToThePath("/authentication_echo").viaThePOSTMethod().withTheBody("{ \"username\": \"bob2\" }").withContentType("application/json").isIssued()
+                .when().aRequestToThePath("/authentication_echo").viaThePostMethod().withTheBody("{ \"username\": \"bob2\" }").withContentType("application/json").isIssued()
                 .theStatusCodeWas(200)
                 .theResponseContentTypeWas("application/json")
-                .theResponseBodyWas("Authenticated as: bob2");
+                .theResponseBodyWas("{\"response\":\"Authenticated as: bob2\"}");
     }
 
     @Test
     public void testAuthenticationByQueryParameter() {
         givenTheTestHttpMateInstance()
-                .when().aRequestToThePath("/authentication_echo?username=bob3").viaTheGETMethod().withAnEmptyBody().isIssued()
+                .when().aRequestToThePath("/authentication_echo?username=bob3").viaTheGetMethod().withAnEmptyBody().isIssued()
                 .theStatusCodeWas(200)
                 .theResponseContentTypeWas("application/json")
-                .theResponseBodyWas("Authenticated as: bob3");
+                .theResponseBodyWas("{\"response\":\"Authenticated as: bob3\"}");
     }
 
     @Test
     public void testNoAuthentication() {
         givenTheTestHttpMateInstance()
-                .when().aRequestToThePath("/authentication_echo").viaTheGETMethod().withAnEmptyBody().isIssued()
+                .when().aRequestToThePath("/authentication_echo").viaTheGetMethod().withAnEmptyBody().isIssued()
                 .theStatusCodeWas(200)
                 .theResponseContentTypeWas("application/json")
-                .theResponseBodyWas("Authenticated as: guest");
+                .theResponseBodyWas("{\"response\":\"Authenticated as: guest\"}");
     }
 
     @Test
     public void testAuthorization() {
         givenTheTestHttpMateInstance()
-                .when().aRequestToThePath("/authorized").viaThePOSTMethod().withAnEmptyBody().withTheHeader("username", "admin").isIssued()
+                .when().aRequestToThePath("/authorized").viaThePostMethod().withAnEmptyBody().withTheHeader("username", "admin").isIssued()
                 .theStatusCodeWas(200)
                 .theResponseContentTypeWas("application/json")
-                .theResponseBodyWas("Welcome to the admin section!");
+                .theResponseBodyWas("{\"response\":\"Welcome to the admin section!\"}");
     }
 
     @Test
     public void testUnauthorized() {
         givenTheTestHttpMateInstance()
-                .when().aRequestToThePath("/authorized").viaThePOSTMethod().withAnEmptyBody().withTheHeader("username", "mallory").isIssued()
+                .when().aRequestToThePath("/authorized").viaThePostMethod().withAnEmptyBody().withTheHeader("username", "mallory").isIssued()
                 .theStatusCodeWas(403)
-                .theResponseContentTypeWas("application/json")
                 .theResponseBodyWas("Go away.");
     }
 
     @Test
     public void testMapMate() {
         givenTheTestHttpMateInstance()
-                .when().aRequestToThePath("/mapmate/derp").viaThePOSTMethod().withTheBody("{value1=derp,value2=merp,value3=herp,value4=qerp}").withContentType("application/json").isIssued()
+                .when().aRequestToThePath("/mapmate/derp").viaThePostMethod().withTheBody("{value1=derp,value2=merp,value3=herp,value4=qerp}").withContentType("application/json").isIssued()
                 .theStatusCodeWas(200)
                 .theResponseContentTypeWas("application/json")
                 .theJsonResponseEquals("" +
@@ -283,7 +261,7 @@ public final class HttpMateSpecs {
     @Test
     public void testMapMateWithInjection() {
         givenTheTestHttpMateInstance()
-                .when().aRequestToThePath("/mapmate/derp?value2=merp").viaThePOSTMethod().withTheBody("{value4=qerp}").withTheHeader("value3", "herp").withContentType("application/json").isIssued()
+                .when().aRequestToThePath("/mapmate/derp?value2=merp").viaThePostMethod().withTheBody("{value4=qerp}").withTheHeader("value3", "herp").withContentType("application/json").isIssued()
                 .theStatusCodeWas(200)
                 .theResponseContentTypeWas("application/json")
                 .theJsonResponseEquals("" +
@@ -299,7 +277,7 @@ public final class HttpMateSpecs {
     @Test
     public void testMapMateOnlyWithInjectionAndWithoutBody() {
         givenTheTestHttpMateInstance()
-                .when().aRequestToThePath("/mapmate/derp").viaTheGETMethod().withAnEmptyBody()
+                .when().aRequestToThePath("/mapmate/derp").viaTheGetMethod().withAnEmptyBody()
                 .withTheHeader("value2", "merp").withTheHeader("value3", "herp").withTheHeader("value4", "qerp").isIssued()
                 .theStatusCodeWas(200)
                 .theResponseContentTypeWas("application/json")
@@ -316,17 +294,16 @@ public final class HttpMateSpecs {
     @Test
     public void testTwoUseCaseParameters() {
         givenTheTestHttpMateInstance()
-                .when().aRequestToThePath("/twoparameters").viaTheGETMethod().withAnEmptyBody().withTheHeader("param1", "Hello").withTheHeader("param2", "World").isIssued()
+                .when().aRequestToThePath("/twoparameters").viaTheGetMethod().withAnEmptyBody().withTheHeader("param1", "Hello").withTheHeader("param2", "World").isIssued()
                 .theStatusCodeWas(200)
                 .theResponseContentTypeWas("application/json")
-                .theResponseBodyWas("Hello World");
+                .theResponseBodyWas("{\"response\":\"Hello World\"}");
     }
-
 
     @Test
     public void testVoidUseCase() {
         givenTheTestHttpMateInstance()
-                .when().aRequestToThePath("/void").viaTheGETMethod().withAnEmptyBody().isIssued()
+                .when().aRequestToThePath("/void").viaTheGetMethod().withAnEmptyBody().isIssued()
                 .theStatusCodeWas(200)
                 .theResponseContentTypeWas("application/json")
                 .theResponseBodyWas("");

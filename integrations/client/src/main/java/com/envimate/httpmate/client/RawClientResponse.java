@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 envimate GmbH - https://envimate.com/.
+ * Copyright (c) 2019 envimate GmbH - https://envimate.com/.
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -30,7 +30,7 @@ import java.io.InputStream;
 import java.util.Map;
 import java.util.Optional;
 
-import static com.envimate.httpmate.convenience.Http.Headers.CONTENT_TYPE;
+import static com.envimate.httpmate.http.Http.Headers.CONTENT_TYPE;
 import static com.envimate.httpmate.util.Validators.validateNotNull;
 import static java.util.Optional.ofNullable;
 

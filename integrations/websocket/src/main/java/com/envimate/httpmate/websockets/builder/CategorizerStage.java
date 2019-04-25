@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 envimate GmbH - https://envimate.com/.
+ * Copyright (c) 2019 envimate GmbH - https://envimate.com/.
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -23,25 +23,25 @@ package com.envimate.httpmate.websockets.builder;
 
 import com.envimate.httpmate.chains.MetaData;
 import com.envimate.httpmate.chains.MetaDataKey;
-import com.envimate.httpmate.websockets.WebSocketModuleBuilder;
-import com.envimate.httpmate.websockets.convenience.WebSocketTag;
+import com.envimate.httpmate.websockets.WebSocketTag;
+import com.envimate.httpmate.websockets.WebSocketsConfigurator;
 
 import java.util.function.Function;
 
+import static com.envimate.httpmate.websockets.WebSocketTag.webSocketTag;
 import static com.envimate.httpmate.websockets.WebsocketChainKeys.WEBSOCKET_TAG;
-import static com.envimate.httpmate.websockets.convenience.WebSocketTag.webSocketTag;
 
 public interface CategorizerStage {
 
-    default WebSocketModuleBuilder saving(final MetaDataKey key) {
+    default <T> WebSocketsConfigurator saving(final MetaDataKey<T> key) {
         return initializingMetaDataForIncomingMessagesWith(key, metaData -> metaData.get(key));
     }
 
-    default WebSocketModuleBuilder taggedBy(final String tag) {
+    default WebSocketsConfigurator taggedBy(final String tag) {
         final WebSocketTag webSocketTag = webSocketTag(tag);
         return initializingMetaDataForIncomingMessagesWith(WEBSOCKET_TAG, metaData -> webSocketTag);
     }
 
-    <T> WebSocketModuleBuilder initializingMetaDataForIncomingMessagesWith(
+    <T> WebSocketsConfigurator initializingMetaDataForIncomingMessagesWith(
             MetaDataKey<T> key, Function<MetaData, T> valueProvider);
 }

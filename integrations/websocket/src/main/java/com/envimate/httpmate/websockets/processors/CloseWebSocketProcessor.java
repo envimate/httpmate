@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 envimate GmbH - https://envimate.com/.
+ * Copyright (c) 2019 envimate GmbH - https://envimate.com/.
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -22,17 +22,18 @@
 package com.envimate.httpmate.websockets.processors;
 
 import com.envimate.httpmate.chains.MetaData;
-import com.envimate.httpmate.chains.rules.Processor;
+import com.envimate.httpmate.chains.Processor;
 import com.envimate.httpmate.websockets.WebSocket;
-import com.envimate.httpmate.websockets.registry.WebSocketId;
 import com.envimate.httpmate.websockets.registry.WebSocketRegistry;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
+import java.util.List;
+
 import static com.envimate.httpmate.util.Validators.validateNotNull;
-import static com.envimate.httpmate.websockets.WebsocketChainKeys.WEBSOCKET_ID;
+import static com.envimate.httpmate.websockets.WebsocketChainKeys.WEBSOCKETS_TO_CLOSE;
 
 @ToString
 @EqualsAndHashCode
@@ -47,10 +48,16 @@ public final class CloseWebSocketProcessor implements Processor {
 
     @Override
     public void apply(final MetaData metaData) {
-        validateNotNull(metaData, "metaData");
+        final List<WebSocket> webSockets = metaData.get(WEBSOCKETS_TO_CLOSE);
+        webSockets.forEach(webSocket -> {
+            registry.unregister(webSocket.id());
+            webSocket.close();
+        });
+        /*
         final WebSocketId id = metaData.get(WEBSOCKET_ID);
         final WebSocket webSocket = registry.byId(id);
         registry.unregister(id);
         webSocket.close();
+         */
     }
 }

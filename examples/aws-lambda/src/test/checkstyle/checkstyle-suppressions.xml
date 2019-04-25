@@ -1,6 +1,6 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright (c) 2018 envimate GmbH - https://envimate.com/.
+  ~ Copyright (c) 2019 envimate GmbH - https://envimate.com/.
   ~
   ~ Licensed to the Apache Software Foundation (ASF) under one
   ~ or more contributor license agreements.  See the NOTICE file
@@ -21,8 +21,8 @@
   -->
 
 <!DOCTYPE suppressions PUBLIC
-		"-//Puppy Crawl//DTD Suppressions 1.1//EN"
-		"http://www.puppycrawl.com/dtds/suppressions_1_1.dtd">
+        "-//Puppy Crawl//DTD Suppressions 1.1//EN"
+        "http://www.puppycrawl.com/dtds/suppressions_1_1.dtd">
 <suppressions>
-	<suppress checks="VisibilityModifier" files="com.envimate.httpmate.examples.awslambda.usecases.*"/>
+    <suppress checks="VisibilityModifier" files="com.envimate.httpmate.examples.awslambda.usecases.*"/>
 </suppressions>

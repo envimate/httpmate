@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 envimate GmbH - https://envimate.com/.
+ * Copyright (c) 2019 envimate GmbH - https://envimate.com/.
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -22,8 +22,10 @@
 package com.envimate.httpmate.websockets;
 
 import com.envimate.httpmate.chains.MetaDataKey;
-import com.envimate.httpmate.websockets.convenience.WebSocketTag;
 import com.envimate.httpmate.websockets.registry.WebSocketId;
+import com.envimate.httpmate.websockets.registry.WebSocketRegistry;
+
+import java.util.List;
 
 import static com.envimate.httpmate.chains.MetaDataKey.metaDataKey;
 
@@ -33,6 +35,10 @@ public final class WebsocketChainKeys {
     public static final MetaDataKey<WebSocketMapping> WEBSOCKET_MAPPING = metaDataKey("WEBSOCKET_MAPPING");
     public static final MetaDataKey<WebSocketDelegate> WEBSOCKET_DELEGATE = metaDataKey("WEBSOCKET_DELEGATE");
     public static final MetaDataKey<Boolean> WEBSOCKET_ACCEPTED = metaDataKey("WEBSOCKET_ACCEPTED");
+
+    public static final MetaDataKey<WebSocketRegistry> WEBSOCKET_REGISTRY = metaDataKey("WEBSOCKET_REGISTRY");
+    public static final MetaDataKey<List<WebSocket>> RECIPIENT_WEBSOCKETS = metaDataKey("RECIPIENT_WEBSOCKETS");
+    public static final MetaDataKey<List<WebSocket>> WEBSOCKETS_TO_CLOSE = metaDataKey("WEBSOCKETS_TO_CLOSE");
 
     public static final MetaDataKey<WebSocketTag> WEBSOCKET_TAG = metaDataKey("WEBSOCKET_TAG");
     public static final MetaDataKey<Boolean> IS_WEBSOCKET = metaDataKey("IS_WEBSOCKET");

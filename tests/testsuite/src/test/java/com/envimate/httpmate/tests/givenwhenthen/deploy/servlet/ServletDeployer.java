@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 envimate GmbH - https://envimate.com/.
+ * Copyright (c) 2019 envimate GmbH - https://envimate.com/.
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -25,13 +25,13 @@ import com.envimate.httpmate.HttpMate;
 import com.envimate.httpmate.tests.givenwhenthen.client.ClientFactory;
 import com.envimate.httpmate.tests.givenwhenthen.deploy.Deployer;
 import com.envimate.httpmate.tests.givenwhenthen.deploy.Deployment;
-import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
+import org.eclipse.jetty.servlet.ServletHolder;
 
 import java.util.List;
 
+import static com.envimate.httpmate.servlet.ServletEndpoint.servletEndpointFor;
 import static com.envimate.httpmate.tests.givenwhenthen.client.real.RealHttpMateClientFactory.theRealHttpMateClient;
 import static com.envimate.httpmate.tests.givenwhenthen.client.real.RealHttpMateClientWithConnectionReuseFactory.theRealHttpMateClientWithConnectionReuse;
 import static com.envimate.httpmate.tests.givenwhenthen.client.shitty.ShittyClientFactory.theShittyTestClient;
@@ -39,34 +39,31 @@ import static com.envimate.httpmate.tests.givenwhenthen.deploy.Deployment.httpDe
 import static com.envimate.httpmate.tests.givenwhenthen.deploy.FreePortPool.freePort;
 import static java.util.Arrays.asList;
 
-@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class ServletDeployer implements Deployer {
-
     private Server current;
+
+    private ServletDeployer() {
+    }
 
     public static Deployer servletDeployer() {
         return new ServletDeployer();
     }
 
     @Override
-    public Deployment ensureTheTestHttpMateInstanceIsDeployed() {
+    public Deployment deploy(final HttpMate httpMate) {
         cleanUp();
         final int port = freePort();
         current = new Server(port);
-        final ServletHandler handler = new ServletHandler();
-        current.setHandler(handler);
-        handler.addServletWithMapping(Servlet.class, "/*");
+        final ServletHandler servletHandler = new ServletHandler();
+        current.setHandler(servletHandler);
+        final ServletHolder servletHolder = new ServletHolder(servletEndpointFor(httpMate));
+        servletHandler.addServletWithMapping(servletHolder, "/*");
         try {
             current.start();
         } catch (final Exception e) {
             throw new RuntimeException(e);
         }
         return httpDeployment("localhost", port);
-    }
-
-    @Override
-    public Deployment deploy(final HttpMate httpMate) {
-        throw new UnsupportedOperationException();
     }
 
     @Override

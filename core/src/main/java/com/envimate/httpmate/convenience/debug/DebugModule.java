@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 envimate GmbH - https://envimate.com/.
+ * Copyright (c) 2019 envimate GmbH - https://envimate.com/.
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -21,49 +21,46 @@
 
 package com.envimate.httpmate.convenience.debug;
 
-import com.envimate.httpmate.Module;
-import com.envimate.httpmate.chains.Chain;
+import com.envimate.httpmate.chains.ChainExtender;
+import com.envimate.httpmate.chains.ChainModule;
+import com.envimate.httpmate.chains.ChainName;
 import com.envimate.httpmate.chains.ChainRegistry;
-import com.envimate.httpmate.chains.HttpMateChains;
-import com.envimate.httpmate.chains.rules.Rule;
 import com.envimate.httpmate.path.PathTemplate;
-import com.envimate.messageMate.messageBus.MessageBus;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
+import static com.envimate.httpmate.HttpMateChainKeys.PATH;
+import static com.envimate.httpmate.HttpMateChainKeys.STRING_RESPONSE;
+import static com.envimate.httpmate.HttpMateChains.POST_PROCESS;
+import static com.envimate.httpmate.HttpMateChains.PRE_PROCESS;
 import static com.envimate.httpmate.chains.ChainName.chainName;
-import static com.envimate.httpmate.chains.HttpMateChainKeys.PATH;
-import static com.envimate.httpmate.chains.HttpMateChainKeys.STRING_RESPONSE;
-import static com.envimate.httpmate.chains.HttpMateChains.POST_SERIALIZATION;
+import static com.envimate.httpmate.chains.ChainRegistry.CHAIN_REGISTRY;
 import static com.envimate.httpmate.chains.rules.Drop.drop;
 import static com.envimate.httpmate.chains.rules.Jump.jumpTo;
+import static com.envimate.httpmate.path.PathTemplate.pathTemplate;
 
 @ToString
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-public final class DebugModule implements Module {
-    private final PathTemplate pathTemplate = PathTemplate.pathTemplate("/internals");
+public final class DebugModule implements ChainModule {
+    private static final ChainName DEBUG_CHAIN = chainName("DEBUG");
+    private static final PathTemplate PATH_TEMPLATE = pathTemplate("/internals");
 
-    public static Module debugModule() {
+    public static ChainModule debugModule() {
         return new DebugModule();
     }
 
     @Override
-    public void register(final ChainRegistry chainRegistry,
-                         final MessageBus messageBus) {
-        final Chain nextChain = chainRegistry.getChainFor(POST_SERIALIZATION);
-        final Chain debugChain = chainRegistry.createChain(chainName("DEBUG"), jumpTo(nextChain), drop());
-        debugChain.addProcessor(metaData -> {
-            final String dump = chainRegistry.dump();
+    public void register(final ChainExtender extender) {
+        final ChainRegistry registry = extender.getMetaDatum(CHAIN_REGISTRY);
+        extender.createChain(DEBUG_CHAIN, jumpTo(POST_PROCESS), drop());
+        extender.addProcessor(DEBUG_CHAIN, metaData -> {
+            final String dump = registry.dump();
             metaData.set(STRING_RESPONSE, dump);
         });
 
-        final Chain attachChain = chainRegistry.getChainFor(HttpMateChains.PRE_PROCESS);
-        attachChain.addRoutingRule(Rule.jumpRule(debugChain, metaData -> {
-            final String path = metaData.get(PATH);
-            return pathTemplate.matches(path);
-        }));
+        extender.routeIf(PRE_PROCESS, jumpTo(DEBUG_CHAIN), PATH, PATH_TEMPLATE::matches, PATH_TEMPLATE.toString());
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 envimate GmbH - https://envimate.com/.
+ * Copyright (c) 2019 envimate GmbH - https://envimate.com/.
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -22,12 +22,12 @@
 package com.envimate.httpmate.websockets.builder;
 
 import com.envimate.httpmate.chains.MetaData;
-import com.envimate.httpmate.websockets.convenience.WebSocketTag;
+import com.envimate.httpmate.websockets.WebSocketTag;
 
 import java.util.function.Predicate;
 
 import static com.envimate.httpmate.websockets.WebsocketChainKeys.WEBSOCKET_TAG;
-import static com.envimate.httpmate.websockets.convenience.WebSocketTag.webSocketTag;
+import static com.envimate.httpmate.websockets.WebSocketTag.webSocketTag;
 
 public interface When<T> {
 

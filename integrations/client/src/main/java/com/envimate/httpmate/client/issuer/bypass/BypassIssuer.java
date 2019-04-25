@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 envimate GmbH - https://envimate.com/.
+ * Copyright (c) 2019 envimate GmbH - https://envimate.com/.
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -34,7 +34,7 @@ import java.io.InputStream;
 import java.util.Map;
 import java.util.function.Function;
 
-import static com.envimate.httpmate.chains.HttpMateChainKeys.*;
+import static com.envimate.httpmate.HttpMateChainKeys.*;
 import static com.envimate.httpmate.chains.MetaData.emptyMetaData;
 import static com.envimate.httpmate.client.RawClientResponse.rawClientResponse;
 import static com.envimate.httpmate.util.Validators.validateNotNull;
@@ -58,7 +58,7 @@ public final class BypassIssuer implements Issuer {
         metaData.set(RAW_HEADERS, request.headers());
         metaData.set(RAW_QUERY_PARAMETERS, request.queryParameters());
         metaData.set(RAW_METHOD, request.method());
-        metaData.set(PATH, fixedPath);
+        metaData.set(RAW_PATH, fixedPath);
         metaData.set(BODY_STREAM, request.body());
         metaData.set(IS_HTTP_REQUEST, true);
 

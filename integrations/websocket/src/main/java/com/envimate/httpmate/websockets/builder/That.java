@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 envimate GmbH - https://envimate.com/.
+ * Copyright (c) 2019 envimate GmbH - https://envimate.com/.
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -23,11 +23,11 @@ package com.envimate.httpmate.websockets.builder;
 
 import com.envimate.httpmate.websockets.WebSocketForEventFilter;
 
-public interface That<T, E> {
+public interface That<T> {
 
     default T allWebSockets() {
         return allWebSocketsThat((category, event) -> true);
     }
 
-    T allWebSocketsThat(WebSocketForEventFilter<E> filter);
+    T allWebSocketsThat(WebSocketForEventFilter filter);
 }

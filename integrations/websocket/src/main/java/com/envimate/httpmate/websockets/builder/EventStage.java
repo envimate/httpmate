@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 envimate GmbH - https://envimate.com/.
+ * Copyright (c) 2019 envimate GmbH - https://envimate.com/.
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -21,15 +21,13 @@
 
 package com.envimate.httpmate.websockets.builder;
 
-import com.envimate.httpmate.websockets.WebSocketModule;
+import com.envimate.httpmate.chains.Configurator;
 
 public interface EventStage {
 
-    When<EventStage> choosingTheEvent(String eventType);
+    //To<EventStage> forwardingTheEvent(String eventType);
 
-    <E> To<EventStage, E> forwardingTheEvent(String eventType);
+    //That<EventStage> closingOn(String eventType);
 
-    <E> That<EventStage, E> closingOn(String eventType);
-
-    WebSocketModule build();
+    Configurator build();
 }

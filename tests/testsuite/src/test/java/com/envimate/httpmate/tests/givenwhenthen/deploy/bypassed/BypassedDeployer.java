@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 envimate GmbH - https://envimate.com/.
+ * Copyright (c) 2019 envimate GmbH - https://envimate.com/.
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -30,7 +30,6 @@ import lombok.RequiredArgsConstructor;
 
 import java.util.List;
 
-import static com.envimate.httpmate.tests.HttpMateTestConfigurations.theHttpMateInstanceUsedForTesting;
 import static com.envimate.httpmate.tests.givenwhenthen.client.real.BypassingHttpMateClientFactory.theBypassingHttpMateClient;
 import static com.envimate.httpmate.tests.givenwhenthen.deploy.Deployment.bypassedDeployment;
 import static java.util.Collections.singletonList;
@@ -43,12 +42,7 @@ public final class BypassedDeployer implements Deployer {
     }
 
     @Override
-    public Deployment ensureTheTestHttpMateInstanceIsDeployed() {
-        return bypassedDeployment(theHttpMateInstanceUsedForTesting());
-    }
-
-    @Override
-    public Deployment deploy(HttpMate httpMate) {
+    public Deployment deploy(final HttpMate httpMate) {
         return bypassedDeployment(httpMate);
     }
 

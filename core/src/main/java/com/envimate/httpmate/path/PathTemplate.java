@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 envimate GmbH - https://envimate.com/.
+ * Copyright (c) 2019 envimate GmbH - https://envimate.com/.
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -28,9 +28,9 @@ import lombok.RequiredArgsConstructor;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import static java.util.Arrays.stream;
+import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
 @EqualsAndHashCode
@@ -47,8 +47,9 @@ public final class PathTemplate {
         return new PathTemplate(elements);
     }
 
-    public boolean matches(final String path) {
-        final String[] elementsAsStrings = splitIntoElements(path);
+    public boolean matches(final Path path) {
+        final String raw = path.raw();
+        final String[] elementsAsStrings = splitIntoElements(raw);
         final int numberOfElements = elementsAsStrings.length;
         if(this.templateElements.size() != numberOfElements) {
             return false;
@@ -67,14 +68,14 @@ public final class PathTemplate {
         return this.templateElements
                 .stream()
                 .map(PathTemplateElement::toString)
-                .collect(Collectors.joining("/", "/", ""));
+                .collect(joining("/", "/", ""));
     }
 
-    public Map<String, String> extractPathParameters(final String path) {
+    public Map<String, String> extractPathParameters(final Path path) {
         if(!matches(path)) {
             throw new RuntimeException("Can only extract path parameters from matching paths.");
         }
-        final String[] elements = splitIntoElements(path);
+        final String[] elements = splitIntoElements(path.raw());
         final Map<String, String> pathParameters = new HashMap<>();
         final int length = elements.length;
         for(int i = 0; i < length; i++) {

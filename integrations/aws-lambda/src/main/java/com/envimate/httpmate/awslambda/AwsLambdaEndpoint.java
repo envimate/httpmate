@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 envimate GmbH - https://envimate.com/.
+ * Copyright (c) 2019 envimate GmbH - https://envimate.com/.
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -25,9 +25,9 @@ import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
 import com.envimate.httpmate.HttpMate;
-import com.envimate.httpmate.Logger;
 import com.envimate.httpmate.chains.MetaData;
 import com.envimate.httpmate.chains.MetaDataKey;
+import com.envimate.httpmate.logger.Logger;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 
@@ -35,8 +35,8 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.envimate.httpmate.HttpMateChainKeys.*;
 import static com.envimate.httpmate.awslambda.AwsLambdaLogger.awsLambdaLogger;
-import static com.envimate.httpmate.chains.HttpMateChainKeys.*;
 import static com.envimate.httpmate.chains.MetaData.emptyMetaData;
 import static com.envimate.httpmate.chains.MetaDataKey.metaDataKey;
 import static com.envimate.httpmate.util.Streams.inputStreamToString;
@@ -72,7 +72,7 @@ public final class AwsLambdaEndpoint {
         metaData.set(RAW_HEADERS, headers);
         metaData.set(RAW_QUERY_PARAMETERS, queryParameters);
         metaData.set(RAW_METHOD, httpRequestMethod);
-        metaData.set(PATH, path);
+        metaData.set(RAW_PATH, path);
         metaData.set(BODY_STREAM, bodyStream);
         metaData.set(CONTEXT_KEY, context);
         metaData.set(IS_HTTP_REQUEST, true);

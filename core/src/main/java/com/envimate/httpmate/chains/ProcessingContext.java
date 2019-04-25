@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 envimate GmbH - https://envimate.com/.
+ * Copyright (c) 2019 envimate GmbH - https://envimate.com/.
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -21,29 +21,41 @@
 
 package com.envimate.httpmate.chains;
 
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.EqualsAndHashCode;
+import lombok.RequiredArgsConstructor;
+import lombok.ToString;
 
 import java.util.function.Consumer;
 
+import static com.envimate.httpmate.chains.RunId.randomRunId;
 import static com.envimate.httpmate.util.Validators.validateNotNull;
 
 @ToString
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 final class ProcessingContext {
-    @Getter
-    private final ChainRegistry chainRegistry;
-    @Getter
+    private final RunId runId;
     private final MetaData metaData;
-    @Getter
     private final Consumer<MetaData> consumer;
 
-    static ProcessingContext processingContext(final ChainRegistry chainRegistry,
-                                               final MetaData metaData,
+    static ProcessingContext processingContext(final MetaData metaData,
                                                final Consumer<MetaData> consumer) {
-        validateNotNull(chainRegistry, "chainRegistry");
         validateNotNull(metaData, "metaData");
         validateNotNull(consumer, "consumer");
-        return new ProcessingContext(chainRegistry, metaData, consumer);
+        final RunId runId = randomRunId();
+        return new ProcessingContext(runId, metaData, consumer);
+    }
+
+    MetaData metaData() {
+        return metaData;
+    }
+
+    void consume() {
+        consumer.accept(metaData);
+    }
+
+    RunId runId() {
+        return runId;
     }
 }

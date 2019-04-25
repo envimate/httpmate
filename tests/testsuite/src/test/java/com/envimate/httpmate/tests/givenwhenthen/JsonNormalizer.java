@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 envimate GmbH - https://envimate.com/.
+ * Copyright (c) 2019 envimate GmbH - https://envimate.com/.
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -23,17 +23,18 @@ package com.envimate.httpmate.tests.givenwhenthen;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import lombok.NoArgsConstructor;
 
 import java.util.TreeMap;
 
-@NoArgsConstructor
 final class JsonNormalizer {
+
+    private JsonNormalizer() {
+    }
 
     @SuppressWarnings("unchecked")
     static String normalizeJson(final String json) {
         final Gson gson = new GsonBuilder().setPrettyPrinting().create();
         final TreeMap<String, Object> map = gson.fromJson(json, TreeMap.class);
-        return  gson.toJson(map);
+        return gson.toJson(map);
     }
 }

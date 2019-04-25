@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 envimate GmbH - https://envimate.com/.
+ * Copyright (c) 2019 envimate GmbH - https://envimate.com/.
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -21,147 +21,83 @@
 
 package com.envimate.httpmate.websockets;
 
-import com.envimate.httpmate.Module;
-import com.envimate.httpmate.chains.Chain;
-import com.envimate.httpmate.chains.ChainRegistry;
-import com.envimate.httpmate.chains.MetaData;
+import com.envimate.httpmate.MetricsProvider;
+import com.envimate.httpmate.chains.ChainExtender;
+import com.envimate.httpmate.chains.ChainModule;
+import com.envimate.httpmate.chains.DependencyRegistry;
 import com.envimate.httpmate.websockets.registry.WebSocketRegistry;
-import com.envimate.messageMate.messageBus.EventType;
-import com.envimate.messageMate.messageBus.MessageBus;
 import lombok.AccessLevel;
+import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
+import lombok.ToString;
 
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-import java.util.function.BiConsumer;
 
-import static com.envimate.httpmate.chains.HttpMateChainKeys.EVENT_RETURN_VALUE;
-import static com.envimate.httpmate.chains.HttpMateChains.*;
-import static com.envimate.httpmate.chains.MetaData.emptyMetaData;
+import static com.envimate.httpmate.HttpMateChains.*;
 import static com.envimate.httpmate.chains.rules.Consume.consume;
 import static com.envimate.httpmate.chains.rules.Jump.jumpTo;
-import static com.envimate.httpmate.chains.rules.Rule.jumpRule;
 import static com.envimate.httpmate.util.Validators.validateNotNull;
+import static com.envimate.httpmate.websockets.WebSocketMetrics.NUMBER_OF_ACTIVE_WEB_SOCKETS;
+import static com.envimate.httpmate.websockets.WebsocketChainKeys.*;
 import static com.envimate.httpmate.websockets.WebsocketChains.*;
-import static com.envimate.httpmate.websockets.WebsocketChainKeys.IS_WEBSOCKET;
-import static com.envimate.httpmate.websockets.WebsocketChainKeys.WEBSOCKET_ID;
-import static com.envimate.httpmate.websockets.WebSocketModuleBuilder.webSocketModuleBuilder;
 import static com.envimate.httpmate.websockets.processors.ActivateWebSocketProcessor.activateWebSocketProcessor;
 import static com.envimate.httpmate.websockets.processors.CloseWebSocketProcessor.closeWebSocketProcessor;
 import static com.envimate.httpmate.websockets.processors.CreateWebSocketProcessor.createWebSocketProcessor;
-import static com.envimate.httpmate.websockets.processors.DetermineEventForWebSockets.determineEventForWebSockets;
 import static com.envimate.httpmate.websockets.processors.DetermineWebSocketTypeProcessor.determineWebSocketTypeProcessor;
 import static com.envimate.httpmate.websockets.processors.HandleNewWebSocketMessageProcessor.handleNewWebSocketMessageProcessor;
 import static com.envimate.httpmate.websockets.processors.RemoveWebSocketFromRegistryProcessor.removeWebSocketFromRegistryProcessor;
 import static com.envimate.httpmate.websockets.processors.SendToWebSocketsProcessor.sendToWebSocketsProcessor;
+import static com.envimate.httpmate.websockets.processors.WebSocketInitializationProcessor.webSocketInitializationProcessor;
 import static com.envimate.httpmate.websockets.registry.WebSocketRegistry.webSocketRegistry;
-import static java.util.Optional.of;
 
+@ToString
+@EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-public final class WebSocketModule implements Module {
-    private final List<WebSocketMapping> webSocketMappings;
-    private final List<EventMapping> outgoingEventMappings;
-    private final List<IncomingEventMapping> incomingEventMappings;
-    private final List<IncomingEventMapping> closeEventMappings;
-    private final WebSocketRegistry registry;
+public final class WebSocketModule implements ChainModule {
+    private final List<WebSocketMapping> webSocketMappings = new LinkedList<>();
 
-    static WebSocketModule webSocketModule(final List<WebSocketMapping> webSocketMappings,
-                                           final List<EventMapping> outgoingEventMappings,
-                                           final List<IncomingEventMapping> incomingEventMappings,
-                                           final List<IncomingEventMapping> closeEventMappings) {
-        validateNotNull(webSocketMappings, "webSocketMappings");
-        validateNotNull(outgoingEventMappings, "outgoingEventMappings");
-        validateNotNull(incomingEventMappings, "incomingEventMappings");
-        validateNotNull(closeEventMappings, "closeEventMappings");
-        final WebSocketRegistry registry = webSocketRegistry();
-        return new WebSocketModule(webSocketMappings, outgoingEventMappings, incomingEventMappings, closeEventMappings, registry);
+    public static WebSocketModule webSocketModule() {
+        return new WebSocketModule();
     }
 
-    public static WebSocketModuleBuilder webSocketModule() {
-        return webSocketModuleBuilder();
-    }
-
-    public WebSocketsMetrics metrics() {
-        return registry.metrics();
+    public void addWebSocketMapping(final WebSocketMapping webSocketMapping) {
+        validateNotNull(webSocketMapping, "webSocketMapping");
+        webSocketMappings.add(webSocketMapping);
     }
 
     @Override
-    public void register(final ChainRegistry chainRegistry, final MessageBus messageBus) {
-        createSkeleton(chainRegistry);
-        chainRegistry.addProcessorToChain(WEBSOCKET_ESTABLISHMENT, createWebSocketProcessor(registry));
-        chainRegistry.addProcessorToChain(DETERMINE_WEBSOCKET_TYPE, determineWebSocketTypeProcessor(webSocketMappings));
-        chainRegistry.addProcessorToChain(WEBSOCKET_OPEN, activateWebSocketProcessor(registry));
-        chainRegistry.addProcessorToChain(DETERMINE_EVENT, determineEventForWebSockets(outgoingEventMappings));
-        chainRegistry.addProcessorToChain(WEBSOCKET_MESSAGE, handleNewWebSocketMessageProcessor(registry, outgoingEventMappings));
-        chainRegistry.addProcessorToChain(SEND_TO_WEBSOCKETS, sendToWebSocketsProcessor(registry));
-        chainRegistry.addProcessorToChain(WEBSOCKET_CLOSED, removeWebSocketFromRegistryProcessor(registry));
-        chainRegistry.addProcessorToChain(WEBSOCKET_CLOSE, closeWebSocketProcessor(registry));
-        registerIncomingEvents(messageBus, chainRegistry);
-        registerCloseEvents(messageBus, chainRegistry);
+    public void configure(final DependencyRegistry dependencyRegistry) {
+        final MetricsProvider<Integer> metricsProvider =
+                dependencyRegistry.createMetricsProvider(NUMBER_OF_ACTIVE_WEB_SOCKETS, 0);
+        dependencyRegistry.setMetaDatum(WEBSOCKET_REGISTRY, webSocketRegistry(metricsProvider));
     }
 
-    private static void createSkeleton(final ChainRegistry chainRegistry) {
-        final Chain exceptionChain = chainRegistry.getChainFor(EXCEPTION_OCCURRED);
-        final Chain websocketEstablishmentChain = chainRegistry.createChain(
-                WEBSOCKET_ESTABLISHMENT, consume(), jumpTo(exceptionChain));
-        final Chain authorizationChain = chainRegistry.getChainFor(AUTHORIZATION);
-        authorizationChain.addRoutingRule(jumpRule(
-                websocketEstablishmentChain, metaData -> metaData.getOptional(WEBSOCKET_ID).isPresent()));
-        final Chain authenticationChain = chainRegistry.getChainFor(AUTHENTICATION);
-        final Chain determineWebSocketTypeChain = chainRegistry.createChain(
-                DETERMINE_WEBSOCKET_TYPE, jumpTo(authenticationChain), jumpTo(exceptionChain));
-        final Chain processHeadersChain = chainRegistry.getChainFor(PROCESS_HEADERS);
-        processHeadersChain.addRoutingRule(
-                jumpRule(determineWebSocketTypeChain, metaData -> metaData.getOptional(WEBSOCKET_ID).isPresent()));
-        chainRegistry.createChain(WEBSOCKET_OPEN, consume(), jumpTo(exceptionChain));
-        final Chain determineEventChain = chainRegistry.getChainFor(DETERMINE_EVENT);
-        final Chain preMapToEventChain = chainRegistry.getChainFor(PRE_MAP_TO_EVENT);
-        determineEventChain.addRoutingRule(jumpRule(preMapToEventChain, metaData -> metaData.contains(WEBSOCKET_ID)));
-        final Chain preDetermineEventChain = chainRegistry.getChainFor(PRE_DETERMINE_EVENT);
-        chainRegistry.createChain(WEBSOCKET_MESSAGE, jumpTo(preDetermineEventChain), jumpTo(exceptionChain));
-        final Chain sendToWebSocketsChain = chainRegistry.createChain(
-                SEND_TO_WEBSOCKETS, consume(), jumpTo(exceptionChain));
-        final Chain serializationChain = chainRegistry.getChainFor(SERIALIZATION);
-        serializationChain.addRoutingRule(
-                jumpRule(sendToWebSocketsChain, metaData -> metaData.getOptional(IS_WEBSOCKET).orElse(false)));
-        chainRegistry.createChain(WEBSOCKET_CLOSED, consume(), jumpTo(exceptionChain));
-        chainRegistry.createChain(WEBSOCKET_CLOSE, consume(), jumpTo(exceptionChain));
+    @Override
+    public void register(final ChainExtender extender) {
+        final WebSocketRegistry registry = extender.getMetaDatum(WEBSOCKET_REGISTRY);
+        createSkeleton(extender);
+        extender.addProcessor(INIT, webSocketInitializationProcessor(registry));
+        extender.addProcessor(WEBSOCKET_ESTABLISHMENT, createWebSocketProcessor(registry));
+        extender.addProcessor(DETERMINE_WEBSOCKET_TYPE, determineWebSocketTypeProcessor(webSocketMappings));
+        extender.addProcessor(WEBSOCKET_OPEN, activateWebSocketProcessor(registry));
+        extender.addProcessor(SEND_TO_WEBSOCKETS, sendToWebSocketsProcessor());
+        extender.addProcessor(WEBSOCKET_CLOSED, removeWebSocketFromRegistryProcessor(registry));
+        extender.addProcessor(WEBSOCKET_CLOSE, closeWebSocketProcessor(registry));
+        extender.addProcessor(WEBSOCKET_MESSAGE, handleNewWebSocketMessageProcessor(registry));
     }
 
-    private void registerIncomingEvents(final MessageBus messageBus,
-                                        final ChainRegistry chainRegistry) {
-        registerEventHandlers(incomingEventMappings, messageBus, (event, webSocket) -> {
-            final MetaData metaData = emptyMetaData();
-            metaData.set(IS_WEBSOCKET, true);
-            metaData.set(WEBSOCKET_ID, webSocket.id());
-            metaData.set(EVENT_RETURN_VALUE, of((Map) event));
-            chainRegistry.putIntoChain(PRE_SERIALIZATION, metaData, metaData1 -> {
-            });
-        });
-    }
+    private static void createSkeleton(final ChainExtender extender) {
+        extender.createChain(WEBSOCKET_ESTABLISHMENT, consume(), jumpTo(EXCEPTION_OCCURRED));
+        extender.createChain(DETERMINE_WEBSOCKET_TYPE, jumpTo(WEBSOCKET_ESTABLISHMENT), jumpTo(EXCEPTION_OCCURRED));
+        extender.routeIfSet(PROCESS_HEADERS, jumpTo(DETERMINE_WEBSOCKET_TYPE), WEBSOCKET_ID);
+        extender.createChain(WEBSOCKET_OPEN, consume(), jumpTo(EXCEPTION_OCCURRED));
+        extender.createChain(WEBSOCKET_MESSAGE, jumpTo(PROCESS_BODY), jumpTo(EXCEPTION_OCCURRED));
+        extender.createChain(SEND_TO_WEBSOCKETS, consume(), jumpTo(EXCEPTION_OCCURRED));
+        extender.createChain(WEBSOCKET_CLOSED, consume(), jumpTo(EXCEPTION_OCCURRED));
+        extender.createChain(WEBSOCKET_CLOSE, consume(), jumpTo(EXCEPTION_OCCURRED));
 
-    private void registerCloseEvents(final MessageBus messageBus,
-                                     final ChainRegistry chainRegistry) {
-        registerEventHandlers(closeEventMappings, messageBus, (event, webSocket) -> {
-            final MetaData metaData = emptyMetaData();
-            metaData.set(WEBSOCKET_ID, webSocket.id());
-            chainRegistry.putIntoChain(WEBSOCKET_CLOSE, metaData, metaData1 -> {
-            });
-        });
-    }
-
-    private void registerEventHandlers(final List<IncomingEventMapping> eventMappings,
-                                       final MessageBus messageBus,
-                                       final BiConsumer<Object, WebSocket> action) {
-        eventMappings.forEach(eventMapping -> {
-            final EventType eventType = eventMapping.eventType();
-            messageBus.subscribe(eventType, event -> registry.allActiveWebSockets().forEach(websocket -> {
-                final MetaData metaData = emptyMetaData();
-                websocket.savedMetaDataEntries().restoreTo(metaData);
-                if (eventMapping.filter().test(metaData, event)) {
-                    action.accept(event, websocket);
-                }
-            }));
-        });
+        extender.routeIfFlagIsSet(INIT, jumpTo(WEBSOCKET_MESSAGE), IS_WEBSOCKET_MESSAGE);
+        extender.routeIfFlagIsSet(POST_PROCESS, jumpTo(SEND_TO_WEBSOCKETS), IS_WEBSOCKET_MESSAGE);
     }
 }

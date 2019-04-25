@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 envimate GmbH - https://envimate.com/.
+ * Copyright (c) 2019 envimate GmbH - https://envimate.com/.
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -23,7 +23,6 @@ package com.envimate.httpmate.tests.givenwhenthen.deploy.awslambda;
 
 import com.envimate.httpmate.HttpMate;
 import com.envimate.httpmate.tests.givenwhenthen.client.ClientFactory;
-import com.envimate.httpmate.tests.givenwhenthen.client.real.RealHttpMateClientWithConnectionReuseFactory;
 import com.envimate.httpmate.tests.givenwhenthen.deploy.Deployer;
 import com.envimate.httpmate.tests.givenwhenthen.deploy.Deployment;
 
@@ -42,7 +41,6 @@ import static com.envimate.httpmate.tests.givenwhenthen.deploy.awslambda.S3Handl
 import static com.envimate.httpmate.tests.givenwhenthen.deploy.awslambda.lambdastatus.LambdaStatus.isReady;
 import static java.lang.String.format;
 import static java.util.Arrays.stream;
-import static java.util.Collections.singletonList;
 
 public final class AwsDeployer implements Deployer {
 
@@ -60,14 +58,14 @@ public final class AwsDeployer implements Deployer {
     }
 
     @Override
-    public Deployment ensureTheTestHttpMateInstanceIsDeployed() {
+    public Deployment deploy(final HttpMate httpMate) {
         if (uuid == null) {
             System.out.println("ensureTheTestHttpMateInstanceIsDeployed initializing");
             uuid = uuid();
             System.out.println("ensureTheTestHttpMateInstanceIsDeployed got uuid");
             final File lambdaFile = lambdaFile();
             System.out.println("ensureTheTestHttpMateInstanceIsDeployed got lamda file" + lambdaFile);
-            String s3Key = s3Key();
+            final String s3Key = s3Key();
             uploadToS3Bucket(BUCKET, s3Key, lambdaFile);
             waitFor(() -> isReady(uuid), 10, 60);
             sleep(10);
@@ -75,11 +73,6 @@ public final class AwsDeployer implements Deployer {
             System.out.println("skipping, ensureTheTestHttpMateInstanceIsDeployed already initialized...");
         }
         return httpsDeploymentWithBasePath(GATEWAY_ID + ".execute-api.eu-central-1.amazonaws.com", 443, "/" + uuid);
-    }
-
-    @Override
-    public Deployment deploy(final HttpMate httpMate) {
-        throw new UnsupportedOperationException();
     }
 
     @Override

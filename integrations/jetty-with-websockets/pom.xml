@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright (c) 2018 envimate GmbH - https://envimate.com/.
+  ~ Copyright (c) 2019 envimate GmbH - https://envimate.com/.
   ~
   ~ Licensed to the Apache Software Foundation (ASF) under one
   ~ or more contributor license agreements.  See the NOTICE file
@@ -42,7 +42,7 @@
     <parent>
         <groupId>com.envimate.httpmate</groupId>
         <artifactId>integrations-parent</artifactId>
-        <version>1.0.14</version>
+        <version>1.0.19</version>
     </parent>
 
     <groupId>com.envimate.httpmate.integrations</groupId>
@@ -73,14 +73,20 @@
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-server</artifactId>
-            <version>9.4.15.v20190215</version>
+            <version>9.4.17.v20190418</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-servlet</artifactId>
-            <version>9.4.15.v20190215</version>
+            <version>9.4.17.v20190418</version>
         </dependency>
 
+        <dependency>
+            <groupId>com.envimate.httpmate.integrations</groupId>
+            <artifactId>httpmate-websockets-events</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>org.glassfish.tyrus.bundles</groupId>
             <artifactId>tyrus-standalone-client</artifactId>
@@ -106,7 +112,7 @@
         <dependency>
             <groupId>com.envimate.httpmate.integrations</groupId>
             <artifactId>httpmate-client</artifactId>
-            <version>1.0.14</version>
+            <version>1.0.19</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -124,7 +130,7 @@
         <dependency>
             <groupId>com.envimate.httpmate.integrations</groupId>
             <artifactId>httpmate-multipart</artifactId>
-            <version>1.0.14</version>
+            <version>1.0.19</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

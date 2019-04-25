@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright (c) 2018 envimate GmbH - https://envimate.com/.
+  ~ Copyright (c) 2019 envimate GmbH - https://envimate.com/.
   ~
   ~ Licensed to the Apache Software Foundation (ASF) under one
   ~ or more contributor license agreements.  See the NOTICE file
@@ -27,7 +27,7 @@
     <parent>
         <groupId>com.envimate.httpmate.tests</groupId>
         <artifactId>parent</artifactId>
-        <version>1.0.14</version>
+        <version>1.0.19</version>
     </parent>
 
     <artifactId>aws-lambda-testfunction</artifactId>
@@ -51,7 +51,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
-                <version>2.3</version>
+                <version>3.2.1</version>
                 <configuration>
                     <createDependencyReducedPom>false</createDependencyReducedPom>
                 </configuration>

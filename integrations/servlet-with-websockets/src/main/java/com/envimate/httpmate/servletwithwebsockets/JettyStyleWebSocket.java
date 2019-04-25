@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 envimate GmbH - https://envimate.com/.
+ * Copyright (c) 2019 envimate GmbH - https://envimate.com/.
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -33,12 +33,14 @@ import org.eclipse.jetty.websocket.api.WebSocketListener;
 
 import java.io.IOException;
 
-import static com.envimate.httpmate.chains.HttpMateChainKeys.BODY_STRING;
+import static com.envimate.httpmate.HttpMateChainKeys.BODY_STREAM;
 import static com.envimate.httpmate.chains.MetaData.emptyMetaData;
+import static com.envimate.httpmate.util.Streams.stringToInputStream;
 import static com.envimate.httpmate.util.Validators.validateNotNull;
-import static com.envimate.httpmate.websockets.WebsocketChains.*;
 import static com.envimate.httpmate.websockets.WebsocketChainKeys.IS_WEBSOCKET_MESSAGE;
 import static com.envimate.httpmate.websockets.WebsocketChainKeys.WEBSOCKET_ID;
+import static com.envimate.httpmate.websockets.WebsocketChains.WEBSOCKET_CLOSED;
+import static com.envimate.httpmate.websockets.WebsocketChains.WEBSOCKET_OPEN;
 
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class JettyStyleWebSocket implements WebSocketListener, WebSocketDelegate {
@@ -77,9 +79,10 @@ public final class JettyStyleWebSocket implements WebSocketListener, WebSocketDe
     public void onWebSocketText(final String text) {
         final MetaData metaData = emptyMetaData();
         metaData.set(WEBSOCKET_ID, id);
-        metaData.set(BODY_STRING, text);
+        metaData.set(BODY_STREAM, stringToInputStream(text));
         metaData.set(IS_WEBSOCKET_MESSAGE, true);
-        httpMate.handle(WEBSOCKET_MESSAGE, metaData);
+        httpMate.handleRequest(metaData, m -> {
+        });
     }
 
     @Override

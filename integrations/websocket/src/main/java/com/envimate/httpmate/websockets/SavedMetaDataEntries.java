@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 envimate GmbH - https://envimate.com/.
+ * Copyright (c) 2019 envimate GmbH - https://envimate.com/.
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -36,14 +36,14 @@ import static com.envimate.httpmate.util.Validators.validateNotNull;
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class SavedMetaDataEntries {
-    private final Map<MetaDataKey, Object> entries;
+    private final Map<MetaDataKey<?>, Object> entries;
 
-    public static SavedMetaDataEntries savedMetaDataEntries(final Map<MetaDataKey, Object> entries) {
+    static SavedMetaDataEntries savedMetaDataEntries(final Map<MetaDataKey<?>, Object> entries) {
         validateNotNull(entries, "entries");
         return new SavedMetaDataEntries(entries);
     }
 
     public void restoreTo(final MetaData metaData) {
-        entries.forEach(metaData::set);
+        entries.forEach(metaData::setUnchecked);
     }
 }

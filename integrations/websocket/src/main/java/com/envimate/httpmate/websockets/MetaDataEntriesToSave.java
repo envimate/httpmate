@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 envimate GmbH - https://envimate.com/.
+ * Copyright (c) 2019 envimate GmbH - https://envimate.com/.
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -29,28 +29,40 @@ import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import static com.envimate.httpmate.HttpMateChainKeys.*;
 import static com.envimate.httpmate.util.Validators.validateNotNull;
+import static com.envimate.httpmate.websockets.MetaDataEntryProvider.saving;
 import static com.envimate.httpmate.websockets.SavedMetaDataEntries.savedMetaDataEntries;
+import static java.util.Collections.addAll;
 
 @ToString
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class MetaDataEntriesToSave {
-    private final List<MetaDataEntryProvider> entryProviders;
+    private final List<MetaDataEntryProvider<?>> entryProviders;
 
-    public static MetaDataEntriesToSave metaDataEntriesToSave(final List<MetaDataEntryProvider> entryProviders) {
+    public static MetaDataEntriesToSave metaDataEntriesToSave(final List<MetaDataEntryProvider<?>> entryProviders) {
         validateNotNull(entryProviders, "entryProviders");
-        return new MetaDataEntriesToSave(entryProviders);
+        final List<MetaDataEntryProvider<?>> realProviders = new LinkedList<>(entryProviders);
+        addAll(realProviders,
+                saving(PATH),
+                saving(PATH_PARAMETERS),
+                saving(QUERY_PARAMETERS),
+                saving(HEADERS),
+                saving(CONTENT_TYPE));
+        return new MetaDataEntriesToSave(realProviders);
     }
 
+    @SuppressWarnings("unchecked")
     public SavedMetaDataEntries save(final MetaData metaData) {
         validateNotNull(metaData, "metaData");
-        final Map<MetaDataKey, Object> savedMetaData = new HashMap<>();
+        final Map<MetaDataKey<?>, Object> savedMetaData = new HashMap<>();
         entryProviders.forEach(entryProvider -> {
-            final MetaDataEntry entry = entryProvider.provide(metaData);
+            final MetaDataEntry<?> entry = entryProvider.provide(metaData);
             savedMetaData.put(entry.key(), entry.value());
         });
         return savedMetaDataEntries(savedMetaData);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 envimate GmbH - https://envimate.com/.
+ * Copyright (c) 2019 envimate GmbH - https://envimate.com/.
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -21,8 +21,8 @@
 
 package com.envimate.httpmate.unpacking;
 
-import com.envimate.httpmate.Module;
-import com.envimate.httpmate.request.ContentType;
+import com.envimate.httpmate.chains.ChainModule;
+import com.envimate.httpmate.http.ContentType;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
@@ -54,7 +54,7 @@ public final class BodyMapParsingModuleBuilder {
         };
     }
 
-    public Module usingTheDefaultContentType(final ContentType contentType) {
+    public ChainModule usingTheDefaultContentType(final ContentType contentType) {
         validateNotNull(contentType, "contentType");
         return bodyMapParsingModule(contentType, bodyParsers);
     }

@@ -1,15 +1,32 @@
+/*
+ * Copyright (c) 2019 envimate GmbH - https://envimate.com/.
+ *
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 package websockets.givenwhenthen.configurations.chat;
 
 import com.envimate.httpmate.HttpMate;
-import com.envimate.httpmate.convenience.preprocessors.Authenticator;
-import com.envimate.httpmate.convenience.preprocessors.Authorizer;
-import com.envimate.httpmate.websockets.WebSocketModule;
+import com.envimate.httpmate.security.Authenticator;
+import com.envimate.httpmate.security.Authorizer;
 import com.envimate.messageMate.messageBus.MessageBus;
-import com.envimate.messageMate.messageBus.MessageBusType;
 import com.envimate.messageMate.useCaseAdapter.UseCaseAdapter;
 import com.google.gson.Gson;
-import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
 import websockets.givenwhenthen.configurations.TestConfiguration;
 import websockets.givenwhenthen.configurations.chat.domain.User;
 import websockets.givenwhenthen.configurations.chat.domain.UserRepository;
@@ -20,15 +37,21 @@ import websockets.givenwhenthen.configurations.chat.usecases.SendMessageUseCase;
 import java.util.Map;
 import java.util.Objects;
 
-import static com.envimate.httpmate.HttpMate.aHttpMateDispatchingEventsUsing;
-import static com.envimate.httpmate.chains.HttpMateChainKeys.*;
-import static com.envimate.httpmate.request.ContentType.json;
-import static com.envimate.httpmate.request.HttpRequestMethod.GET;
+import static com.envimate.httpmate.HttpMate.aHttpMateConfiguredAs;
+import static com.envimate.httpmate.HttpMateChainKeys.*;
+import static com.envimate.httpmate.convenience.configurators.Configurators.toLogUsing;
+import static com.envimate.httpmate.events.EventDrivenBuilder.EVENT_DRIVEN;
+import static com.envimate.httpmate.logger.Loggers.stderrLogger;
+import static com.envimate.httpmate.http.ContentType.json;
+import static com.envimate.httpmate.http.HttpRequestMethod.GET;
+import static com.envimate.httpmate.security.Configurators.toAuthenticateRequests;
+import static com.envimate.httpmate.security.Configurators.toAuthorizeRequests;
 import static com.envimate.httpmate.unpacking.BodyMapParsingModule.aBodyMapParsingModule;
-import static com.envimate.httpmate.websockets.WebSocketModule.webSocketModule;
+import static com.envimate.httpmate.websockets.WebSocketsConfigurator.toUseWebSockets;
+import static com.envimate.httpmate.websocketsevents.Conditions.forwardingItToAllWebSocketsThat;
 import static com.envimate.messageMate.internal.pipe.configuration.AsynchronousConfiguration.constantPoolSizeAsynchronousPipeConfiguration;
-import static com.envimate.messageMate.messageBus.EventType.eventTypeFromString;
 import static com.envimate.messageMate.messageBus.MessageBusBuilder.aMessageBus;
+import static com.envimate.messageMate.messageBus.MessageBusType.ASYNCHRONOUS;
 import static com.envimate.messageMate.useCaseAdapter.UseCaseAdapterBuilder.anUseCaseAdapter;
 import static websockets.givenwhenthen.configurations.TestConfiguration.testConfiguration;
 import static websockets.givenwhenthen.configurations.chat.domain.MessageContent.messageContent;
@@ -36,15 +59,19 @@ import static websockets.givenwhenthen.configurations.chat.domain.UserRepository
 import static websockets.givenwhenthen.configurations.chat.domain.Username.username;
 import static websockets.givenwhenthen.configurations.chat.usecases.ChatMessage.chatMessage;
 
-@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class ChatConfiguration {
 
-    public volatile static MessageBus MESSAGE_BUS;
+    private static final int POOL_SIZE = 4;
+    public static volatile MessageBus messageBus;
 
+    private ChatConfiguration() {
+    }
+
+    @SuppressWarnings("unchecked")
     public static TestConfiguration theExampleChatServerHttpMateInstance() {
-        MESSAGE_BUS = aMessageBus()
-                .forType(MessageBusType.ASYNCHRONOUS)
-                .withAsynchronousConfiguration(constantPoolSizeAsynchronousPipeConfiguration(4))
+        messageBus = aMessageBus()
+                .forType(ASYNCHRONOUS)
+                .withAsynchronousConfiguration(constantPoolSizeAsynchronousPipeConfiguration(POOL_SIZE))
                 .build();
 
         final UserRepository userRepository = userRepository();
@@ -68,35 +95,30 @@ public final class ChatConfiguration {
                 .throwingAnExceptionIfNoResponseMappingCanBeFound()
                 .puttingExceptionObjectNamedAsExceptionIntoResponseMapByDefault();
 
-        useCaseAdapter.attachTo(MESSAGE_BUS);
+        useCaseAdapter.attachTo(messageBus);
 
-        final WebSocketModule webSocketModule = webSocketModule()
-                .acceptingWebSocketsToThePath("/subscribe").saving(AUTHENTICATION_INFORMATION)
-                .forwardingTheEvent("NewMessageEvent").toWebSocketsThat((metaData, event) -> {
-                    final Map<String, Object> map = (Map<String, Object>) event;
-                    final String username = metaData.getAs(AUTHENTICATION_INFORMATION, User.class).name().internalValueForMapping();
-                    return Objects.equals(map.get("recipient"), username);
-                })
-                .build();
-
-        final HttpMate httpMate = aHttpMateDispatchingEventsUsing(MESSAGE_BUS)
-                .choosingTheEvent(eventTypeFromString("ChatMessage")).forRequestPath("/send").andRequestMethod(GET)
-                .preparingRequestsForParameterMappingThatByDirectlyMappingAllData()
+        final HttpMate httpMate = aHttpMateConfiguredAs(EVENT_DRIVEN).attachedTo(messageBus)
+                .triggeringTheEvent("ChatMessage").forRequestPath("/send").andRequestMethod(GET)
+                .handlingTheEvent("NewMessageEvent").by(forwardingItToAllWebSocketsThat((metaData, event) -> {
+                    final String username = metaData.getAs(AUTHENTICATION_INFORMATION, User.class)
+                            .name().internalValueForMapping();
+                    return Objects.equals(event.get("recipient"), username);
+                }))
                 .mappingResponsesUsing((event, metaData) -> {
                     final Map<String, Object> map = (Map<String, Object>) event;
                     final String content = (String) map.get("content");
                     metaData.set(STRING_RESPONSE, content);
                 })
-                .configuredBy(configurator -> {
-                    configurator.configureSecurity().addAuthenticator(authenticator);
-                    configurator.configureSecurity().addAuthorizer(authorizer);
-                    configurator.configureLogger().loggingToStderr();
-                    configurator.registerModule(webSocketModule);
-                    configurator.registerModule(aBodyMapParsingModule()
-                            .parsingContentType(json()).with(body -> new Gson().fromJson(body, Map.class))
-                            .usingTheDefaultContentType(json()));
-                });
+                .configured(toAuthenticateRequests().beforeBodyProcessing().using(authenticator))
+                .configured(toAuthorizeRequests().beforeBodyProcessing().using(authorizer))
+                .configured(toLogUsing(stderrLogger()))
+                .configured(toUseWebSockets()
+                        .acceptingWebSocketsToThePath("/subscribe").saving(AUTHENTICATION_INFORMATION))
+                .usingTheModule(aBodyMapParsingModule()
+                        .parsingContentType(json()).with(body -> new Gson().fromJson(body, Map.class))
+                        .usingTheDefaultContentType(json()))
+                .build();
 
-        return testConfiguration(httpMate, webSocketModule);
+        return testConfiguration(httpMate);
     }
 }

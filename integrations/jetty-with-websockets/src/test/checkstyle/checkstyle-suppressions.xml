@@ -1,6 +1,6 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright (c) 2018 envimate GmbH - https://envimate.com/.
+  ~ Copyright (c) 2019 envimate GmbH - https://envimate.com/.
   ~
   ~ Licensed to the Apache Software Foundation (ASF) under one
   ~ or more contributor license agreements.  See the NOTICE file
@@ -25,4 +25,11 @@
         "http://www.puppycrawl.com/dtds/suppressions_1_1.dtd">
 <suppressions>
     <suppress checks="IllegalCatch" files="JettyEndpointWithWebSocketsSupport" />
+    <suppress checks="MagicNumber" files="WebSocketsSpecs|When|WaitableObject" />
+    <suppress checks="ExplicitInitialization" files="SingleWebSocketReportBuilder" />
+    <suppress checks="IllegalCatch" files="When" />
+    <suppress checks="VisibilityModifier" files="Message|UseCaseA|UseCaseB|ChatConfiguration|Application|ArtificialConfiguration|LowLevelConfiguration" />
+    <suppress checks="LineLength" files="ArtificialConfiguration|WebSocketsSpecs|Application" />
+    <suppress checks="MethodLength" files="Application|ChatConfiguration|ArtificialConfiguration" />
+    <suppress checks="DeclarationOrder" files="ChatConfiguration|ArtificialConfiguration|Application" />
 </suppressions>

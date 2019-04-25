@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 envimate GmbH - https://envimate.com/.
+ * Copyright (c) 2019 envimate GmbH - https://envimate.com/.
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -30,38 +30,28 @@ import com.envimate.httpmate.tests.givenwhenthen.deploy.DeployerManager;
 import com.envimate.httpmate.tests.givenwhenthen.deploy.Deployment;
 import lombok.RequiredArgsConstructor;
 
-import java.util.function.Function;
-
+import static com.envimate.httpmate.tests.HttpMateTestConfigurations.theHttpMateInstanceUsedForTesting;
 import static com.envimate.httpmate.tests.givenwhenthen.deploy.DeployerManager.currentDeployer;
 
 @RequiredArgsConstructor
 public final class Given {
     private final Deployment deployment;
-    private final StringBuilder log;
 
     public static Given givenTheTestHttpMateInstance() {
         final Deployer deployer = currentDeployer();
-        final Deployment deployment = deployer.ensureTheTestHttpMateInstanceIsDeployed();
-        return new Given(deployment, null);
+        final Deployment deployment = deployer.deploy(theHttpMateInstanceUsedForTesting());
+        return new Given(deployment);
     }
 
     public static Given given(final HttpMate httpMate) {
         final Deployer deployer = currentDeployer();
         final Deployment deployment = deployer.deploy(httpMate);
-        return new Given(deployment, null);
-    }
-
-    public static Given givenTheHttpMateInstanceWithLogger(final Function<StringBuilder, HttpMate> httpMateFunction) {
-        final StringBuilder logger = new StringBuilder();
-        final HttpMate httpMate = httpMateFunction.apply(logger);
-        final Deployer deployer = currentDeployer();
-        final Deployment deployment = deployer.deploy(httpMate);
-        return new Given(deployment, logger);
+        return new Given(deployment);
     }
 
     public PathBuilder when() {
         final ClientFactory clientFactory = DeployerManager.currentClientFactory();
         final HttpClientWrapper clientWrapper = clientFactory.createClient(deployment);
-        return When.theWhen(clientWrapper, log);
+        return When.theWhen(clientWrapper);
     }
 }

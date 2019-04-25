@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 envimate GmbH - https://envimate.com/.
+ * Copyright (c) 2019 envimate GmbH - https://envimate.com/.
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -23,6 +23,8 @@ package com.envimate.httpmate.websockets;
 
 import com.envimate.httpmate.chains.MetaData;
 
-public interface WebSocketForEventFilter<E> {
-    boolean test(MetaData metaData, E event);
+import java.util.Map;
+
+public interface WebSocketForEventFilter {
+    boolean test(MetaData metaData, Map<String, Object> event);
 }

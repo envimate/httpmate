@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 envimate GmbH - https://envimate.com/.
+ * Copyright (c) 2019 envimate GmbH - https://envimate.com/.
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -22,7 +22,6 @@
 package com.envimate.httpmate.jettywithwebsockets;
 
 import com.envimate.httpmate.HttpMate;
-import com.envimate.httpmate.servletwithwebsockets.DoubleServlet;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import org.eclipse.jetty.server.Server;
@@ -30,6 +29,8 @@ import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 
 import javax.servlet.Servlet;
+
+import static com.envimate.httpmate.servletwithwebsockets.WebSocketAwareHttpMateServlet.webSocketAwareHttpMateServlet;
 
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class JettyEndpointWithWebSocketsSupport implements AutoCloseable {
@@ -42,7 +43,7 @@ public final class JettyEndpointWithWebSocketsSupport implements AutoCloseable {
                 server = new Server(port);
                 final ServletHandler servletHandler = new ServletHandler();
                 server.setHandler(servletHandler);
-                final Servlet servlet = DoubleServlet.doubleServletFor(httpMate);
+                final Servlet servlet = webSocketAwareHttpMateServlet(httpMate);
                 final ServletHolder servletHolder = new ServletHolder(servlet);
                 servletHandler.addServletWithMapping(servletHolder, "/*");
                 server.start();

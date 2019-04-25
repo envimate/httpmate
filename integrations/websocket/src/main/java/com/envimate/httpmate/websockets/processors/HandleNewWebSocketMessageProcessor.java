@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 envimate GmbH - https://envimate.com/.
+ * Copyright (c) 2019 envimate GmbH - https://envimate.com/.
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -22,8 +22,7 @@
 package com.envimate.httpmate.websockets.processors;
 
 import com.envimate.httpmate.chains.MetaData;
-import com.envimate.httpmate.chains.rules.Processor;
-import com.envimate.httpmate.websockets.EventMapping;
+import com.envimate.httpmate.chains.Processor;
 import com.envimate.httpmate.websockets.WebSocket;
 import com.envimate.httpmate.websockets.registry.WebSocketId;
 import com.envimate.httpmate.websockets.registry.WebSocketRegistry;
@@ -32,23 +31,19 @@ import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
-import java.util.List;
-
 import static com.envimate.httpmate.util.Validators.validateNotNull;
-import static com.envimate.httpmate.websockets.WebsocketChainKeys.*;
+import static com.envimate.httpmate.websockets.WebsocketChainKeys.IS_WEBSOCKET;
+import static com.envimate.httpmate.websockets.WebsocketChainKeys.WEBSOCKET_ID;
 
 @ToString
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class HandleNewWebSocketMessageProcessor implements Processor {
     private final WebSocketRegistry registry;
-    private final List<EventMapping> eventMappings;
 
-    public static Processor handleNewWebSocketMessageProcessor(final WebSocketRegistry registry,
-                                                               final List<EventMapping> eventMappings) {
+    public static Processor handleNewWebSocketMessageProcessor(final WebSocketRegistry registry) {
         validateNotNull(registry, "registry");
-        validateNotNull(eventMappings, "eventMappings");
-        return new HandleNewWebSocketMessageProcessor(registry, eventMappings);
+        return new HandleNewWebSocketMessageProcessor(registry);
     }
 
     @Override

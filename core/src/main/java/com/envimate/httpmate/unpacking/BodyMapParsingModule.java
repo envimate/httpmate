@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 envimate GmbH - https://envimate.com/.
+ * Copyright (c) 2019 envimate GmbH - https://envimate.com/.
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -21,10 +21,9 @@
 
 package com.envimate.httpmate.unpacking;
 
-import com.envimate.httpmate.Module;
-import com.envimate.httpmate.chains.ChainRegistry;
-import com.envimate.httpmate.request.ContentType;
-import com.envimate.messageMate.messageBus.MessageBus;
+import com.envimate.httpmate.chains.ChainExtender;
+import com.envimate.httpmate.chains.ChainModule;
+import com.envimate.httpmate.http.ContentType;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
@@ -34,8 +33,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
-import static com.envimate.httpmate.chains.HttpMateChainKeys.*;
-import static com.envimate.httpmate.chains.HttpMateChains.PRE_DETERMINE_EVENT;
+import static com.envimate.httpmate.HttpMateChainKeys.*;
+import static com.envimate.httpmate.HttpMateChains.PROCESS_BODY_STRING;
 import static com.envimate.httpmate.unpacking.BodyMapParsingModuleBuilder.bodyMapParsingModuleBuilder;
 import static com.envimate.httpmate.unpacking.UnsupportedContentTypeException.unsupportedContentTypeException;
 import static com.envimate.httpmate.util.Validators.validateNotNull;
@@ -46,7 +45,7 @@ import static java.util.Optional.ofNullable;
 @ToString
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-public final class BodyMapParsingModule implements Module {
+public final class BodyMapParsingModule implements ChainModule {
     private final ContentType defaultContentType;
     private final Map<ContentType, Function<String, Map<String, Object>>> bodyParsers;
 
@@ -54,8 +53,8 @@ public final class BodyMapParsingModule implements Module {
         return bodyMapParsingModuleBuilder();
     }
 
-    static Module bodyMapParsingModule(final ContentType defaultContentType,
-                                       final Map<ContentType, Function<String, Map<String, Object>>> bodyParsers) {
+    static ChainModule bodyMapParsingModule(final ContentType defaultContentType,
+                                        final Map<ContentType, Function<String, Map<String, Object>>> bodyParsers) {
         validateNotNull(defaultContentType, "defaultContentType");
         validateNotNull(bodyParsers, "bodyParsers");
         if (!bodyParsers.containsKey(defaultContentType)) {
@@ -67,9 +66,8 @@ public final class BodyMapParsingModule implements Module {
     }
 
     @Override
-    public void register(final ChainRegistry chainRegistry,
-                         final MessageBus messageBus) {
-        chainRegistry.addProcessorToChain(PRE_DETERMINE_EVENT, metaData ->
+    public void register(final ChainExtender extender) {
+        extender.addProcessor(PROCESS_BODY_STRING, metaData ->
                 metaData.getOptional(BODY_STRING).ifPresent(body -> {
                     final ContentType contentType = metaData.get(CONTENT_TYPE);
 

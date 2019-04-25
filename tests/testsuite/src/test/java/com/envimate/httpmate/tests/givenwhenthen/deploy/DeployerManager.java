@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 envimate GmbH - https://envimate.com/.
+ * Copyright (c) 2019 envimate GmbH - https://envimate.com/.
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -29,21 +29,21 @@ import java.util.LinkedList;
 import java.util.List;
 
 import static com.envimate.httpmate.tests.givenwhenthen.DeployerAndClient.deployerAndClient;
-import static com.envimate.httpmate.tests.givenwhenthen.deploy.awslambda.AwsDeployer.awsDeployer;
-import static com.envimate.httpmate.tests.givenwhenthen.deploy.bypassed.BypassedDeployer.bypassedDeployer;
-import static com.envimate.httpmate.tests.givenwhenthen.deploy.purejava.PureJavaDeployer.pureJavaDeployer;
 import static com.envimate.httpmate.tests.givenwhenthen.deploy.jetty.JettyDeployer.jettyDeployer;
+import static com.envimate.httpmate.tests.givenwhenthen.deploy.purejava.PureJavaDeployer.pureJavaDeployer;
 import static com.envimate.httpmate.tests.givenwhenthen.deploy.servlet.ServletDeployer.servletDeployer;
 import static com.envimate.httpmate.tests.givenwhenthen.deploy.spark.SparkDeployer.sparkDeployer;
 import static java.util.Arrays.asList;
 
 public final class DeployerManager {
+    //private static final Collection<Deployer> ACTIVE_DEPLOYERS =
+    // asList(bypassedDeployer(), jettyDeployer(), sparkDeployer(), pureJavaDeployer(), servletDeployer(), awsDeployer());
+    private static final Collection<Deployer> ACTIVE_DEPLOYERS =
+            asList(jettyDeployer(), sparkDeployer(), pureJavaDeployer(), servletDeployer());
+    private static DeployerAndClient currentDeployerAndClient;
+
     private DeployerManager() {
     }
-
-    //private static final Collection<Deployer> ACTIVE_DEPLOYERS = asList(bypassedDeployer(), jettyDeployer(), sparkDeployer(), pureJavaDeployer(), servletDeployer(), awsDeployer());
-    private static final Collection<Deployer> ACTIVE_DEPLOYERS = asList(jettyDeployer(), sparkDeployer(), pureJavaDeployer(), servletDeployer());
-    private static DeployerAndClient CURRENT_DEPLOYER_AND_CLIENT;
 
     public static Collection<DeployerAndClient> activeDeployers() {
         final List<DeployerAndClient> deployerAndClients = new LinkedList<>();
@@ -55,21 +55,21 @@ public final class DeployerManager {
     }
 
     public static void setCurrentDeployerAndClient(final DeployerAndClient currentDeployerAndClient) {
-        CURRENT_DEPLOYER_AND_CLIENT = currentDeployerAndClient;
+        DeployerManager.currentDeployerAndClient = currentDeployerAndClient;
     }
 
     public static Deployer currentDeployer() {
-        if (CURRENT_DEPLOYER_AND_CLIENT == null) {
+        if (currentDeployerAndClient == null) {
             throw new RuntimeException("Deployer has not been set.");
         }
-        return CURRENT_DEPLOYER_AND_CLIENT.deployer();
+        return currentDeployerAndClient.deployer();
     }
 
     public static ClientFactory currentClientFactory() {
-        if (CURRENT_DEPLOYER_AND_CLIENT == null) {
+        if (currentDeployerAndClient == null) {
             throw new RuntimeException("Deployer has not been set.");
         }
-        return CURRENT_DEPLOYER_AND_CLIENT.clientFactory();
+        return currentDeployerAndClient.clientFactory();
     }
 
     public static void cleanUpAllDeployers() {

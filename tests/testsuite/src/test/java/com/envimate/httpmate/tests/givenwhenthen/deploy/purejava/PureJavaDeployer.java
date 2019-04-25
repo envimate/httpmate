@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 envimate GmbH - https://envimate.com/.
+ * Copyright (c) 2019 envimate GmbH - https://envimate.com/.
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -30,7 +30,6 @@ import com.envimate.httpmate.tests.givenwhenthen.deploy.Deployment;
 import java.util.List;
 
 import static com.envimate.httpmate.convenience.endpoints.PureJavaEndpoint.pureJavaEndpointFor;
-import static com.envimate.httpmate.tests.HttpMateTestConfigurations.theHttpMateInstanceUsedForTesting;
 import static com.envimate.httpmate.tests.givenwhenthen.client.real.RealHttpMateClientFactory.theRealHttpMateClient;
 import static com.envimate.httpmate.tests.givenwhenthen.client.real.RealHttpMateClientWithConnectionReuseFactory.theRealHttpMateClientWithConnectionReuse;
 import static com.envimate.httpmate.tests.givenwhenthen.client.shitty.ShittyClientFactory.theShittyTestClient;
@@ -47,11 +46,6 @@ public final class PureJavaDeployer implements Deployer {
 
     public static Deployer pureJavaDeployer() {
         return new PureJavaDeployer();
-    }
-
-    @Override
-    public Deployment ensureTheTestHttpMateInstanceIsDeployed() {
-        return deploy(theHttpMateInstanceUsedForTesting());
     }
 
     @Override

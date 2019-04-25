@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 envimate GmbH - https://envimate.com/.
+ * Copyright (c) 2019 envimate GmbH - https://envimate.com/.
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -23,6 +23,7 @@ package com.envimate.httpmate.tests.givenwhenthen;
 
 import com.envimate.httpmate.tests.givenwhenthen.builders.MultipartElement;
 import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 import java.util.LinkedList;
@@ -30,7 +31,8 @@ import java.util.List;
 
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class MultipartBuilder {
-    final List<MultipartElement> elements;
+    @Getter
+    private final List<MultipartElement> elements;
 
     public static MultipartBuilder startingWith(final MultipartElement element) {
         final List<MultipartElement> elements = new LinkedList<>();

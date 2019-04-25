@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 envimate GmbH - https://envimate.com/.
+ * Copyright (c) 2019 envimate GmbH - https://envimate.com/.
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -23,7 +23,7 @@ package com.envimate.httpmate.tests.givenwhenthen.deploy.awslambda.lambdastatus;
 
 import lombok.RequiredArgsConstructor;
 
-@RequiredArgsConstructor()
+@RequiredArgsConstructor
 public final class StackIdentifier {
     private final String stackIdentifier;
 

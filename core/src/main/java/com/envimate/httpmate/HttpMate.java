@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 envimate GmbH - https://envimate.com/.
+ * Copyright (c) 2019 envimate GmbH - https://envimate.com/.
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -21,23 +21,15 @@
 
 package com.envimate.httpmate;
 
-import com.envimate.httpmate.builder.EventStage1;
-import com.envimate.httpmate.builder.UseCaseStage1;
-import com.envimate.httpmate.chains.ChainName;
-import com.envimate.httpmate.chains.ChainRegistry;
-import com.envimate.httpmate.chains.HttpMateChains;
-import com.envimate.httpmate.chains.MetaData;
+import com.envimate.httpmate.chains.*;
 import com.envimate.httpmate.convenience.endpoints.PureJavaEndpoint;
-import com.envimate.httpmate.mapper.ResponseHandler;
-import com.envimate.messageMate.messageBus.MessageBus;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 
 import java.io.IOException;
+import java.util.Optional;
 
-import static com.envimate.httpmate.EventDrivenBuilder.eventDrivenBuilder;
-import static com.envimate.httpmate.UseCaseDrivenBuilder.useCaseDrivenBuilder;
-import static com.envimate.httpmate.chains.HttpMateChainKeys.LOGGER;
+import static com.envimate.httpmate.LowLevelBuilder.LOW_LEVEL;
 import static com.envimate.httpmate.util.Validators.validateNotNull;
 
 /**
@@ -47,60 +39,49 @@ import static com.envimate.httpmate.util.Validators.validateNotNull;
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class HttpMate {
     private final ChainRegistry chainRegistry;
-    private final MessageBus messageBus;
-    private final Logger logger;
 
-    static HttpMate httpMate(final ChainRegistry chainRegistry,
-                             final MessageBus messageBus,
-                             final Logger logger) {
+    public static HttpMate httpMate(final ChainRegistry chainRegistry) {
         validateNotNull(chainRegistry, "chainRegistry");
-        validateNotNull(messageBus, "messageBus");
-        validateNotNull(logger, "logger");
-        return new HttpMate(chainRegistry, messageBus, logger);
-    }
-
-    private void initMetaData(final MetaData metaData) {
-        metaData.set(LOGGER, logger);
+        return new HttpMate(chainRegistry);
     }
 
     public void handle(final ChainName chainName,
                        final MetaData metaData) {
-        initMetaData(metaData);
         chainRegistry.putIntoChain(chainName, metaData, metaData1 -> {
         });
     }
 
     public void handleRequest(final MetaData metaData,
-                              final ResponseHandler responseHandler) {
-        initMetaData(metaData);
-        chainRegistry.putIntoChain(HttpMateChains.PRE_PROCESS, metaData, finalMetaData -> {
+                              final FinalConsumer responseHandler) {
+        chainRegistry.putIntoChain(HttpMateChains.INIT, metaData, finalMetaData -> {
             try {
-                responseHandler.handleResponse(metaData);
+                responseHandler.consume(metaData);
             } catch (final IOException e) {
                 throw new RuntimeException(e);
             }
         });
     }
 
-    public MessageBus getMessageBus() {
-        return messageBus;
+    public <T> T getMetaDatum(final MetaDataKey<T> key) {
+        validateNotNull(key, "key");
+        return chainRegistry.getMetaDatum(key);
+    }
+
+    public <T> Optional<T> getOptionalMetaDatum(final MetaDataKey<T> key) {
+        validateNotNull(key, "key");
+        return chainRegistry.getOptionalMetaDatum(key);
     }
 
     public String dumpChains() {
         return chainRegistry.dump();
     }
 
-    /**
-     * Enters a fluent builder to configure a {@link HttpMate} instance.
-     * This provides a wide range of configuration options.
-     *
-     * @return a fluent builder to configure a {@link HttpMate} instance
-     */
-    public static UseCaseStage1<UseCaseDrivenBuilder.Stage1> aHttpMateInstance() {
-        return useCaseDrivenBuilder();
+    public static LowLevelBuilder aLowLevelHttpMate() {
+        return aHttpMateConfiguredAs(LOW_LEVEL);
     }
 
-    public static EventStage1<EventDrivenBuilder.Stage1> aHttpMateDispatchingEventsUsing(final MessageBus messageBus) {
-        return eventDrivenBuilder(messageBus);
+    public static <T> T aHttpMateConfiguredAs(final HttpMateConfigurationType<T> type) {
+        validateNotNull(type, "type");
+        return type.configure();
     }
 }

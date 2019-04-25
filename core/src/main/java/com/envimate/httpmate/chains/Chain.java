@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 envimate GmbH - https://envimate.com/.
+ * Copyright (c) 2019 envimate GmbH - https://envimate.com/.
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -21,83 +21,81 @@
 
 package com.envimate.httpmate.chains;
 
-import com.envimate.httpmate.chains.rules.*;
-import com.envimate.messageMate.channel.Channel;
+import com.envimate.httpmate.chains.rules.Action;
+import com.envimate.httpmate.chains.rules.Rule;
 import lombok.AccessLevel;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.function.Consumer;
 
-import static com.envimate.httpmate.chains.HttpMateChainKeys.EXCEPTION;
-import static com.envimate.messageMate.channel.ChannelBuilder.aChannel;
-import static com.envimate.messageMate.channel.action.Subscription.subscription;
+import static com.envimate.httpmate.HttpMateChainKeys.EXCEPTION;
+import static com.envimate.httpmate.util.Validators.validateNotNull;
 
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class Chain {
-    @Getter(AccessLevel.PUBLIC)
     private final Action defaultAction;
-    @Getter(AccessLevel.PUBLIC)
     private final Action exceptionAction;
-    @Getter(AccessLevel.PUBLIC)
     private final List<Rule> rules;
-    @Getter
-    private final Channel<ProcessingContext> processChannel;
+    private final List<RegisteredProcessor> processors;
     private final ChainName name;
+    private final ModuleIdentifier moduleIdentifier;
 
     static Chain chain(final Action defaultAction,
                        final Action exceptionAction,
-                       final ChainName name) {
-        final Channel<ProcessingContext> processChannel = aChannel(ProcessingContext.class)
-                .withDefaultAction(subscription()).build();
-        return new Chain(defaultAction, exceptionAction, new LinkedList<>(), processChannel, name);
+                       final ChainName name,
+                       final ModuleIdentifier moduleIdentifier) {
+        validateNotNull(defaultAction, "defaultAction");
+        validateNotNull(exceptionAction, "exceptionAction");
+        validateNotNull(name, "name");
+        validateNotNull(moduleIdentifier, "moduleIdentifier");
+        return new Chain(defaultAction, exceptionAction, new LinkedList<>(), new LinkedList<>(), name, moduleIdentifier);
     }
 
-    public void addProcessor(final Processor processor) {
-        this.processChannel.addProcessFilter((processingContext, filterActions) -> {
-            processor.apply(processingContext.getPayload().getMetaData());
-            filterActions.pass(processingContext);
-        });
+    void addProcessor(final RegisteredProcessor processor) {
+        validateNotNull(processor, "processor");
+        processors.add(processor);
     }
 
-    public void addRoutingRule(final Rule routingRule) {
+    void addRoutingRule(final Rule routingRule) {
         rules.add(routingRule);
     }
 
-    void accept(final ProcessingContext processingContext) {
-        final MetaData metaData = processingContext.getMetaData();
+    Action accept(final ProcessingContext processingContext) {
+        final MetaData metaData = processingContext.metaData();
         try {
-            processChannel.send(processingContext);
-            final Action action = rules.stream()
+            processors.stream()
+                    .map(RegisteredProcessor::processor)
+                    .forEach(processor -> processor.apply(metaData));
+            return rules.stream()
                     .filter(rule -> rule.matches(metaData))
                     .findFirst()
                     .map(Rule::action)
                     .orElse(defaultAction);
-
-            handleAction(action, processingContext);
         } catch (final Exception e) {
             metaData.set(EXCEPTION, e);
-            handleAction(exceptionAction, processingContext);
+            return exceptionAction;
         }
     }
 
-    private static void handleAction(final Action action,
-                                     final ProcessingContext processingContext) {
-        if (action instanceof Jump) {
-            final Jump jump = (Jump) action;
-            final Chain targetChain = jump.target().orElseThrow();
-            targetChain.accept(processingContext);
-        } else if (action instanceof Consume) {
-            final Consumer<MetaData> consumer = processingContext.getConsumer();
-            final MetaData metaData = processingContext.getMetaData();
-            consumer.accept(metaData);
-        } else if (action instanceof Drop) {
-            // do nothing
-        } else {
-            throw new RuntimeException("Unknown action: " + action.getClass().getName());
-        }
+    Action defaultAction() {
+        return defaultAction;
+    }
+
+    Action exceptionAction() {
+        return exceptionAction;
+    }
+
+    List<RegisteredProcessor> processors() {
+        return processors;
+    }
+
+    List<Rule> rules() {
+        return rules;
+    }
+
+    ModuleIdentifier getModuleIdentifier() {
+        return moduleIdentifier;
     }
 
     public ChainName getName() {

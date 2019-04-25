@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 envimate GmbH - https://envimate.com/.
+ * Copyright (c) 2019 envimate GmbH - https://envimate.com/.
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -22,14 +22,14 @@
 package com.envimate.httpmate.processors;
 
 import com.envimate.httpmate.chains.MetaData;
-import com.envimate.httpmate.chains.rules.Processor;
-import com.envimate.httpmate.mapper.ExceptionSerializer;
+import com.envimate.httpmate.chains.Processor;
+import com.envimate.httpmate.exceptions.ExceptionSerializer;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
-import static com.envimate.httpmate.chains.HttpMateChainKeys.EXCEPTION;
+import static com.envimate.httpmate.HttpMateChainKeys.EXCEPTION;
 import static com.envimate.httpmate.util.Validators.validateNotNull;
 
 @ToString
@@ -46,12 +46,6 @@ public final class MapExceptionProcessor implements Processor {
     @Override
     public void apply(final MetaData metaData) {
         final Throwable exception = metaData.get(EXCEPTION);
-        final Throwable realException;
-        if(exception instanceof EventDispatchingException) {
-            realException = exception.getCause();
-        } else {
-            realException = exception;
-        }
-        exceptionSerializer.serializeException(realException, metaData);
+        exceptionSerializer.serializeException(exception, metaData);
     }
 }

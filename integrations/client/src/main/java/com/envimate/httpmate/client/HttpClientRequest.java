@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 envimate GmbH - https://envimate.com/.
+ * Copyright (c) 2019 envimate GmbH - https://envimate.com/.
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -34,7 +34,7 @@ import static com.envimate.httpmate.client.HeaderKey.headerKey;
 import static com.envimate.httpmate.client.HeaderValue.headerValue;
 import static com.envimate.httpmate.client.HttpClientRequestBuilder.httpClientRequestBuilderImplementation;
 import static com.envimate.httpmate.client.Query.parse;
-import static com.envimate.httpmate.convenience.Http.Headers.CONTENT_TYPE;
+import static com.envimate.httpmate.http.Http.Headers.CONTENT_TYPE;
 
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class HttpClientRequest<T> {

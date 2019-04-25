@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 envimate GmbH - https://envimate.com/.
+ * Copyright (c) 2019 envimate GmbH - https://envimate.com/.
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -22,9 +22,10 @@
 package com.envimate.httpmate.websockets.processors;
 
 import com.envimate.httpmate.chains.MetaData;
-import com.envimate.httpmate.chains.rules.Processor;
+import com.envimate.httpmate.chains.Processor;
+import com.envimate.httpmate.path.Path;
 import com.envimate.httpmate.path.PathTemplate;
-import com.envimate.httpmate.request.PathParameters;
+import com.envimate.httpmate.http.PathParameters;
 import com.envimate.httpmate.websockets.WebSocketMapping;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
@@ -34,9 +35,9 @@ import lombok.ToString;
 import java.util.List;
 import java.util.Map;
 
-import static com.envimate.httpmate.chains.HttpMateChainKeys.PATH;
-import static com.envimate.httpmate.chains.HttpMateChainKeys.PATH_PARAMETERS;
-import static com.envimate.httpmate.request.PathParameters.pathParameters;
+import static com.envimate.httpmate.HttpMateChainKeys.PATH;
+import static com.envimate.httpmate.HttpMateChainKeys.PATH_PARAMETERS;
+import static com.envimate.httpmate.http.PathParameters.pathParameters;
 import static com.envimate.httpmate.util.Validators.validateNotNull;
 import static com.envimate.httpmate.websockets.WebsocketChainKeys.WEBSOCKET_MAPPING;
 
@@ -53,7 +54,7 @@ public final class DetermineWebSocketTypeProcessor implements Processor {
 
     @Override
     public void apply(final MetaData metaData) {
-        final String path = metaData.get(PATH);
+        final Path path = metaData.get(PATH);
         webSocketMappings.stream()
                 .filter(webSocketMapping -> webSocketMapping.pathTemplate().matches(path))
                 .findFirst()

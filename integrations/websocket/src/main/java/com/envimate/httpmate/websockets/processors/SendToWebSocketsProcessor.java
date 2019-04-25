@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 envimate GmbH - https://envimate.com/.
+ * Copyright (c) 2019 envimate GmbH - https://envimate.com/.
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -22,36 +22,37 @@
 package com.envimate.httpmate.websockets.processors;
 
 import com.envimate.httpmate.chains.MetaData;
-import com.envimate.httpmate.chains.rules.Processor;
+import com.envimate.httpmate.chains.Processor;
 import com.envimate.httpmate.websockets.WebSocket;
-import com.envimate.httpmate.websockets.registry.WebSocketId;
-import com.envimate.httpmate.websockets.registry.WebSocketRegistry;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
-import static com.envimate.httpmate.chains.HttpMateChainKeys.STRING_RESPONSE;
-import static com.envimate.httpmate.util.Validators.validateNotNull;
-import static com.envimate.httpmate.websockets.WebsocketChainKeys.WEBSOCKET_ID;
+import java.util.List;
+
+import static com.envimate.httpmate.HttpMateChainKeys.STRING_RESPONSE;
+import static com.envimate.httpmate.websockets.WebsocketChainKeys.RECIPIENT_WEBSOCKETS;
 
 @ToString
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class SendToWebSocketsProcessor implements Processor {
-    private final WebSocketRegistry registry;
+    //private final WebSocketRegistry registry;
 
-    public static Processor sendToWebSocketsProcessor(final WebSocketRegistry registry) {
-        validateNotNull(registry, "registry");
-        return new SendToWebSocketsProcessor(registry);
+    public static Processor sendToWebSocketsProcessor() {
+        return new SendToWebSocketsProcessor();
     }
 
     @Override
     public void apply(final MetaData metaData) {
         metaData.getOptional(STRING_RESPONSE).ifPresent(message -> {
-            final WebSocketId webSocketId = metaData.get(WEBSOCKET_ID);
-            final WebSocket webSocket = registry.byId(webSocketId);
-            webSocket.sendText(message);
+            //final WebSocketId webSocketId = metaData.get(WEBSOCKET_ID);
+            //final WebSocketRegistry registry = metaData.get(WEBSOCKET_REGISTRY);
+            final List<WebSocket> webSockets = metaData.get(RECIPIENT_WEBSOCKETS);
+            webSockets.forEach(webSocket -> webSocket.sendText(message));
+            //final WebSocket webSocket = registry.byId(webSocketId);
+            //webSocket.sendText(message);
         });
     }
 }

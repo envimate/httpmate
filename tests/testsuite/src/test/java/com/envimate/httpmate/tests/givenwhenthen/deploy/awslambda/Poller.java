@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 envimate GmbH - https://envimate.com/.
+ * Copyright (c) 2019 envimate GmbH - https://envimate.com/.
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -24,6 +24,7 @@ package com.envimate.httpmate.tests.givenwhenthen.deploy.awslambda;
 import java.util.function.BooleanSupplier;
 
 final class Poller {
+    private static final int ONE_SECOND = 1000;
 
     private Poller() {
     }
@@ -42,7 +43,7 @@ final class Poller {
 
     static void sleep(final int seconds) {
         try {
-            Thread.sleep(1000 * seconds);
+            Thread.sleep(ONE_SECOND * seconds);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }

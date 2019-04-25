@@ -1,6 +1,6 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright (c) 2018 envimate GmbH - https://envimate.com/.
+  ~ Copyright (c) 2019 envimate GmbH - https://envimate.com/.
   ~
   ~ Licensed to the Apache Software Foundation (ASF) under one
   ~ or more contributor license agreements.  See the NOTICE file
@@ -25,15 +25,20 @@
         "http://www.puppycrawl.com/dtds/suppressions_1_1.dtd">
 <suppressions>
     <suppress checks="." files="HttpMateTestConfigurations.java"/>
-    <suppress checks="LineLength" files="HttpMateTestConfigurations.java" />
+    <suppress checks="LineLength" files="HttpMateTestConfigurations.java|LowLevelTestSuite.java" />
     <suppress checks="MethodLength" files="HttpMateTestConfigurations.java" />
     <suppress checks="UnnecessaryParentheses" files="HttpMateTestConfigurations.java" />
-    <suppress checks="MagicNumber" files="HttpMateTestConfigurations.java" />
+    <suppress checks="MagicNumber" files="HttpMateTestConfigurations.java|HttpMateSpecs.java|LowLevelTestSuite.java|AwsDeployer.java|MultipartSpecs|EventSpecs|LowLevelSpecs|Util|EventsHttpMateConfiguration" />
     <suppress checks="VisibilityModifier" files="DataTransferObject.java" />
     <suppress checks="VisibilityModifier" files="Parameter1.java" />
     <suppress checks="VisibilityModifier" files="Parameter2.java" />
     <suppress checks="VisibilityModifier" files="HeadersInResponseReturnValue.java" />
     <suppress checks="VisibilityModifier" files="SetContentTypeInResponseValue.java" />
-    <suppress checks="LineLength" files="EchoAuthenticationInformationUseCase.java" />
+    <suppress checks="VisibilityModifier" files="EventsHttpMateConfiguration|LowLevelHttpMateConfiguration" />
+    <suppress checks="LineLength" files="EchoAuthenticationInformationUseCase.java|HttpMateSpecs.java|MultipartSpecs|LowLevelSpecs" />
     <suppress checks="ClassDataAbstractionCoupling" files="HttpMateTestConfigurations.java" />
+    <suppress checks="IllegalSystemOutPrintln" files="AwsDeployer.java" />
+    <suppress checks="Regexp" files="AwsDeployer.java|LambdaStatus.java" />
+    <suppress checks="IllegalCatch" files="ServletDeployer.java|DeployerManager.java|JettyDeployer.java" />
+    <suppress checks="ClassFanOutComplexity|ClassDataAbstractionCoupling" files="ShittyHttpClientWrapper.java" />
 </suppressions>

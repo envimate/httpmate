@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 envimate GmbH - https://envimate.com/.
+ * Copyright (c) 2019 envimate GmbH - https://envimate.com/.
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -22,13 +22,13 @@
 package com.envimate.httpmate.websockets.builder;
 
 import com.envimate.httpmate.websockets.WebSocketForEventFilter;
-import com.envimate.httpmate.websockets.convenience.WebSocketTag;
+import com.envimate.httpmate.websockets.WebSocketTag;
 
 import java.util.Objects;
 
-import static com.envimate.httpmate.websockets.convenience.WebSocketTag.webSocketTag;
+import static com.envimate.httpmate.websockets.WebSocketTag.webSocketTag;
 
-public interface To<T, E> {
+public interface To<T> {
 
     @SuppressWarnings("EqualsBetweenInconvertibleTypes")
     default T toWebSocketsTaggedWith(final String tag) {
@@ -40,5 +40,5 @@ public interface To<T, E> {
         return toWebSocketsThat((category, event) -> true);
     }
 
-    T toWebSocketsThat(WebSocketForEventFilter<E> filter);
+    T toWebSocketsThat(WebSocketForEventFilter filter);
 }

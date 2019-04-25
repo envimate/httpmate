@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 envimate GmbH - https://envimate.com/.
+ * Copyright (c) 2019 envimate GmbH - https://envimate.com/.
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -52,20 +52,28 @@ public final class MetaData {
         map.put(key.key(), value);
     }
 
+    public void setUnchecked(final MetaDataKey<?> key, final Object value) {
+        validateNotNull(key, "key");
+        map.put(key.key(), value);
+    }
+
     public <T> T get(final MetaDataKey<T> key) {
         return getOptional(key).orElseThrow(() -> new RuntimeException(format(
                 "Could not find meta datum %s in %s", key.key(), map)));
     }
 
+    @SuppressWarnings("unchecked")
     public <T> T getAs(final MetaDataKey<? super T> key, final Class<T> type) {
         return (T) get(key);
     }
 
+    @SuppressWarnings("unchecked")
     public <T> Optional<T> getOptional(final MetaDataKey<T> key) {
         final T datum = (T) map.get(key.key());
         return ofNullable(datum);
     }
 
+    @SuppressWarnings("unchecked")
     public <T> Optional<T> getOptionalAs(final MetaDataKey<? super T> key, final Class<T> type) {
         return (Optional<T>) getOptional(key);
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 envimate GmbH - https://envimate.com/.
+ * Copyright (c) 2019 envimate GmbH - https://envimate.com/.
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -21,7 +21,7 @@
 
 package com.envimate.httpmate.processors;
 
-import com.envimate.httpmate.chains.rules.Processor;
+import com.envimate.httpmate.chains.Processor;
 import com.envimate.httpmate.chains.MetaData;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
@@ -30,8 +30,8 @@ import lombok.ToString;
 
 import java.io.InputStream;
 
-import static com.envimate.httpmate.chains.HttpMateChainKeys.BODY_STREAM;
-import static com.envimate.httpmate.chains.HttpMateChainKeys.BODY_STRING;
+import static com.envimate.httpmate.HttpMateChainKeys.BODY_STREAM;
+import static com.envimate.httpmate.HttpMateChainKeys.BODY_STRING;
 import static com.envimate.httpmate.util.Streams.inputStreamToString;
 
 @ToString

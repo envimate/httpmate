@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright (c) 2018 envimate GmbH - https://envimate.com/.
+  ~ Copyright (c) 2019 envimate GmbH - https://envimate.com/.
   ~
   ~ Licensed to the Apache Software Foundation (ASF) under one
   ~ or more contributor license agreements.  See the NOTICE file
@@ -27,7 +27,7 @@
     <parent>
         <groupId>com.envimate.httpmate</groupId>
         <artifactId>integrations-parent</artifactId>
-        <version>1.0.14</version>
+        <version>1.0.19</version>
     </parent>
 
     <groupId>com.envimate.httpmate.integrations</groupId>
@@ -42,9 +42,14 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
+            <groupId>com.envimate.httpmate.integrations</groupId>
+            <artifactId>httpmate-usecases</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
             <groupId>com.envimate.mapmate</groupId>
             <artifactId>core</artifactId>
-            <version>1.6.10</version>
+            <version>1.6.13</version>
         </dependency>
     </dependencies>
 </project>

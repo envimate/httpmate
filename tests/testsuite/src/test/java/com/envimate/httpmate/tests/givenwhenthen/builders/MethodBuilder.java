@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 envimate GmbH - https://envimate.com/.
+ * Copyright (c) 2019 envimate GmbH - https://envimate.com/.
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -22,9 +22,13 @@
 package com.envimate.httpmate.tests.givenwhenthen.builders;
 
 public interface MethodBuilder {
-    BodyBuilder viaTheGETMethod();
-    BodyBuilder viaThePOSTMethod();
-    BodyBuilder viaThePUTMethod();
-    BodyBuilder viaTheDELETEMethod();
-    BodyBuilder viaTheOPTIONSMethod();
+    BodyBuilder viaTheGetMethod();
+
+    BodyBuilder viaThePostMethod();
+
+    BodyBuilder viaThePutMethod();
+
+    BodyBuilder viaTheDeleteMethod();
+
+    BodyBuilder viaTheOptionsMethod();
 }

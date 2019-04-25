@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 envimate GmbH - https://envimate.com/.
+ * Copyright (c) 2019 envimate GmbH - https://envimate.com/.
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -28,15 +28,15 @@ import java.util.function.Function;
 
 import static com.envimate.httpmate.websockets.MetaDataEntry.metaDataEntry;
 
-public interface MetaDataEntryProvider {
+public interface MetaDataEntryProvider<T> {
 
-    static MetaDataEntryProvider saving(final MetaDataKey key) {
+    static <T> MetaDataEntryProvider<T> saving(final MetaDataKey<T> key) {
         return metaData -> metaDataEntry(key, metaData.get(key));
     }
 
-    static <T> MetaDataEntryProvider storing(final MetaDataKey<T> key, Function<MetaData, T> valueProvider) {
+    static <T> MetaDataEntryProvider<T> storing(final MetaDataKey<T> key, Function<MetaData, T> valueProvider) {
         return metaData -> metaDataEntry(key, valueProvider.apply(metaData));
     }
 
-    MetaDataEntry provide(MetaData metaData);
+    MetaDataEntry<T> provide(MetaData metaData);
 }

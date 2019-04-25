@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 envimate GmbH - https://envimate.com/.
+ * Copyright (c) 2019 envimate GmbH - https://envimate.com/.
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -21,12 +21,11 @@
 
 package com.envimate.httpmate.convenience.cors;
 
-import com.envimate.httpmate.Module;
-import com.envimate.httpmate.chains.Chain;
-import com.envimate.httpmate.chains.ChainRegistry;
-import com.envimate.httpmate.request.Headers;
-import com.envimate.httpmate.request.HttpRequestMethod;
-import com.envimate.messageMate.messageBus.MessageBus;
+import com.envimate.httpmate.chains.ChainExtender;
+import com.envimate.httpmate.chains.ChainModule;
+import com.envimate.httpmate.chains.ChainName;
+import com.envimate.httpmate.http.Headers;
+import com.envimate.httpmate.http.HttpRequestMethod;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
@@ -36,12 +35,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.envimate.httpmate.HttpMateChainKeys.*;
+import static com.envimate.httpmate.HttpMateChains.*;
 import static com.envimate.httpmate.chains.ChainName.chainName;
-import static com.envimate.httpmate.chains.HttpMateChainKeys.*;
-import static com.envimate.httpmate.chains.HttpMateChains.*;
 import static com.envimate.httpmate.chains.rules.Jump.jumpTo;
-import static com.envimate.httpmate.chains.rules.Rule.jumpRule;
-import static com.envimate.httpmate.convenience.Http.StatusCodes.OK;
+import static com.envimate.httpmate.http.Http.StatusCodes.OK;
+import static com.envimate.httpmate.http.HttpRequestMethod.OPTIONS;
 import static com.envimate.httpmate.util.Validators.validateNotNull;
 import static com.envimate.httpmate.util.Validators.validateNotNullNorEmpty;
 import static java.lang.String.join;
@@ -50,20 +49,22 @@ import static java.util.stream.Collectors.joining;
 @ToString
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-public final class CorsModule implements Module {
+public final class CorsModule implements ChainModule {
     private static final String ALLOW_ORIGIN_KEY = "Access-Control-Allow-Origin";
     private static final String REQUEST_METHOD_KEY = "Access-Control-Request-Method";
     private static final String ALLOW_METHOD_KEY = "Access-Control-Allow-Methods";
     private static final String REQUEST_HEADERS_KEY = "Access-Control-Request-Headers";
     private static final String ALLOW_HEADERS_KEY = "Access-Control-Allow-Headers";
 
+    private static final ChainName CORS_CHAIN = chainName("CORS");
+
     private final String allowedOrigin;
     private final List<HttpRequestMethod> allowedMethods;
     private final List<String> allowedHeaders;
 
-    public static Module corsModule(final String allowedOrigin,
-                                    final List<HttpRequestMethod> allowedMethods,
-                                    final List<String> allowedHeaders) {
+    public static ChainModule corsModule(final String allowedOrigin,
+                                            final List<HttpRequestMethod> allowedMethods,
+                                            final List<String> allowedHeaders) {
         validateNotNullNorEmpty(allowedOrigin, "allowedOrigin");
         validateNotNull(allowedMethods, "allowedMethods");
         validateNotNull(allowedHeaders, "allowedHeaders");
@@ -71,15 +72,10 @@ public final class CorsModule implements Module {
     }
 
     @Override
-    public void register(final ChainRegistry chainRegistry,
-                         final MessageBus messageBus) {
-        final Chain exceptionChain = chainRegistry.getChainFor(EXCEPTION_OCCURRED);
-        final Chain entryChain = chainRegistry.getChainFor(POST_SERIALIZATION);
-        final Chain corsChain = chainRegistry.createChain(chainName("CORS"), jumpTo(entryChain), jumpTo(exceptionChain));
-
-        corsChain.addProcessor(metaData -> {
+    public void register(final ChainExtender extender) {
+        extender.createChain(CORS_CHAIN, jumpTo(POST_PROCESS), jumpTo(EXCEPTION_OCCURRED));
+        extender.addProcessor(CORS_CHAIN, metaData -> {
             final Headers headers = metaData.get(HEADERS);
-
             final Map<String, String> responseHeaders = new HashMap<>();
             headers.getHeader(REQUEST_HEADERS_KEY)
                     .ifPresent(requestedHeaders -> responseHeaders.put(ALLOW_HEADERS_KEY, requestedHeaders));
@@ -90,13 +86,9 @@ public final class CorsModule implements Module {
             metaData.set(STRING_RESPONSE, "OK");
         });
 
-        final Chain attachChain = chainRegistry.getChainFor(PRE_PROCESS);
-        attachChain.addRoutingRule(jumpRule(corsChain, metaData -> {
-            final HttpRequestMethod httpRequestMethod = metaData.get(METHOD);
-            return httpRequestMethod.equals(HttpRequestMethod.OPTIONS);
-        }));
+        extender.routeIfEquals(PRE_PROCESS, jumpTo(CORS_CHAIN), METHOD, OPTIONS);
 
-        chainRegistry.addProcessorToChain(POST_SERIALIZATION, metaData -> {
+        extender.addProcessor(PREPARE_RESPONSE, metaData -> {
             final Map<String, String> headers = metaData.get(RESPONSE_HEADERS);
             headers.put(ALLOW_ORIGIN_KEY, allowedOrigin);
             headers.put(REQUEST_METHOD_KEY, allowedMethods.stream()

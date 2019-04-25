@@ -1,3 +1,24 @@
+/*
+ * Copyright (c) 2019 envimate GmbH - https://envimate.com/.
+ *
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 package websockets.givenwhenthen;
 
 import lombok.AccessLevel;
@@ -12,7 +33,9 @@ import websockets.givenwhenthen.configurations.artificial.usecases.count.CountUs
 import java.util.function.Predicate;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.startsWith;
 import static org.junit.Assert.assertThat;
+import static websockets.givenwhenthen.configurations.lowlevel.LowLevelConfiguration.logger;
 
 @ToString
 @EqualsAndHashCode
@@ -27,17 +50,17 @@ public final class Then {
     }
 
     public Then allWebSocketConnectionsCouldBeEstablishedSuccessfully() {
-        assertThat(reportBuilder.exceptionsDuringWebSocketConnecting.isEmpty(), is(true));
+        assertThat(reportBuilder.getExceptionsDuringWebSocketConnecting().isEmpty(), is(true));
         return this;
     }
 
     public Then theWebSocketConnectionCouldNotBeEstablished() {
-        assertThat(reportBuilder.exceptionsDuringWebSocketConnecting.isEmpty(), is(false));
+        assertThat(reportBuilder.getExceptionsDuringWebSocketConnecting().isEmpty(), is(false));
         return this;
     }
 
     public Then theResponseBodyWas(final String content) {
-        assertThat(reportBuilder.normalResponseBody, is(content));
+        assertThat(reportBuilder.getNormalResponseBody(), is(content));
         return this;
     }
 
@@ -75,11 +98,11 @@ public final class Then {
     }
 
     public Then theQueriedNumberOfActiveConnectionsWas(final int expected) {
-        assertThat(reportBuilder.numberOfActiveWebSockets, is(expected));
+        assertThat(reportBuilder.getNumberOfActiveWebSockets(), is(expected));
         return this;
     }
 
-    private Then exactlyNDifferentWebSocketsReceivedTheMessage(long n, final String expectedReceivedMessage) {
+    private Then exactlyNDifferentWebSocketsReceivedTheMessage(final long n, final String expectedReceivedMessage) {
         assertThat(numberOfDifferentWebSocketsThatReceived(expectedReceivedMessage), is(n));
         return this;
     }
@@ -96,6 +119,12 @@ public final class Then {
         return reportBuilder.getWebSocketReporters().stream()
                 .filter(predicate)
                 .count();
+    }
+
+    public Then theLogOutputStartedWith(final String expectedPrefix) {
+        final String logContent = logger.toString();
+        assertThat(logContent, startsWith(expectedPrefix));
+        return this;
     }
 
     public When andWhen() {

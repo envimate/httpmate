@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 envimate GmbH - https://envimate.com/.
+ * Copyright (c) 2019 envimate GmbH - https://envimate.com/.
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -24,13 +24,13 @@ package websockets.givenwhenthen;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public final class FreePortPool {
-
-    private static AtomicInteger CURRENT_PORT = new AtomicInteger(9000);
+    private static final int STARTING_PORT = 9000;
+    private static AtomicInteger currentPort = new AtomicInteger(STARTING_PORT);
 
     private FreePortPool() {
     }
 
     public static int freePort() {
-        return CURRENT_PORT.incrementAndGet();
+        return currentPort.incrementAndGet();
     }
 }

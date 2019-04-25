@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 envimate GmbH - https://envimate.com/.
+ * Copyright (c) 2019 envimate GmbH - https://envimate.com/.
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -21,19 +21,18 @@
 
 package com.envimate.httpmate.convenience.downloads;
 
-import com.envimate.httpmate.mapper.ResponseMapper;
+import com.envimate.httpmate.http.Http;
+import com.envimate.httpmate.convenience.handler.HttpResponse;
+import com.envimate.httpmate.http.ContentType;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 
 import java.io.InputStream;
-import java.util.Map;
 
-import static com.envimate.httpmate.chains.HttpMateChainKeys.*;
-import static com.envimate.httpmate.convenience.Http.Headers.CONTENT_DISPOSITION;
-import static com.envimate.httpmate.convenience.Http.Headers.CONTENT_TYPE;
-import static com.envimate.httpmate.convenience.Http.StatusCodes.OK;
-import static com.envimate.httpmate.convenience.downloads.ContentType.contentType;
+import static com.envimate.httpmate.http.Http.Headers.CONTENT_DISPOSITION;
+import static com.envimate.httpmate.http.Http.StatusCodes.OK;
 import static com.envimate.httpmate.convenience.downloads.FileName.fileName;
+import static com.envimate.httpmate.http.ContentType.fromString;
 import static com.envimate.httpmate.util.Streams.stringToInputStream;
 import static com.envimate.httpmate.util.Validators.validateNotNull;
 
@@ -80,16 +79,13 @@ public final class Download {
         validateNotNull(content, "content");
         validateNotNull(fileName, "fileName");
         validateNotNull(contentType, "contentType");
-        return new Download(content, fileName(fileName), contentType(contentType));
+        return new Download(content, fileName(fileName), fromString(contentType));
     }
 
-    public static ResponseMapper<Download> theDownloadSerializer() {
-        return (download, metaData) -> {
-            metaData.set(STREAM_RESPONSE, download.content);
-            metaData.set(RESPONSE_STATUS, OK);
-            final Map<String, String> responseHeaders = metaData.get(RESPONSE_HEADERS);
-            responseHeaders.put(CONTENT_TYPE, download.contentType.value());
-            responseHeaders.put(CONTENT_DISPOSITION, download.fileName.value());
-        };
+    void mapToResponse(final HttpResponse httpResponse) {
+        httpResponse.setBody(content);
+        httpResponse.setStatus(OK);
+        httpResponse.addHeader(Http.Headers.CONTENT_TYPE, contentType.internalValueForMapping());
+        httpResponse.addHeader(CONTENT_DISPOSITION, fileName.value());
     }
 }

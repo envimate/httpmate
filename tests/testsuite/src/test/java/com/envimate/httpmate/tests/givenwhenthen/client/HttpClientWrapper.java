@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 envimate GmbH - https://envimate.com/.
+ * Copyright (c) 2019 envimate GmbH - https://envimate.com/.
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -27,7 +27,12 @@ import java.util.List;
 import java.util.Map;
 
 public interface HttpClientWrapper {
-    HttpClientResponse issueRequestWithoutBody(String path, String method, Map<String, String> headers);
-    HttpClientResponse issueRequestWithStringBody(String path, String method, Map<String, String> headers, String body);
-    HttpClientResponse issueRequestWithMultipartBody(String path, String method, Map<String, String> headers, List<MultipartElement> parts);
+    HttpClientResponse issueRequestWithoutBody(
+            String path, String method, Map<String, String> headers);
+
+    HttpClientResponse issueRequestWithStringBody(
+            String path, String method, Map<String, String> headers, String body);
+
+    HttpClientResponse issueRequestWithMultipartBody(
+            String path, String method, Map<String, String> headers, List<MultipartElement> parts);
 }

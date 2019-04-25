@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 envimate GmbH - https://envimate.com/.
+ * Copyright (c) 2019 envimate GmbH - https://envimate.com/.
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -29,7 +29,6 @@ import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 
 import static com.envimate.httpmate.tests.givenwhenthen.client.real.HttpMateClientWrapper.realHttpMateClientWithConnectionReueWrapper;
-import static com.envimate.httpmate.tests.givenwhenthen.client.real.HttpMateClientWrapper.realHttpMateClientWrapper;
 
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 envimate GmbH - https://envimate.com/.
+ * Copyright (c) 2019 envimate GmbH - https://envimate.com/.
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -21,9 +21,9 @@
 
 package com.envimate.httpmate.multipart;
 
-import com.envimate.httpmate.chains.rules.Processor;
+import com.envimate.httpmate.chains.Processor;
 import com.envimate.httpmate.chains.MetaData;
-import com.envimate.httpmate.request.ContentType;
+import com.envimate.httpmate.http.ContentType;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
@@ -31,8 +31,8 @@ import lombok.ToString;
 
 import java.io.InputStream;
 
-import static com.envimate.httpmate.chains.HttpMateChainKeys.CONTENT_TYPE;
-import static com.envimate.httpmate.chains.HttpMateChainKeys.BODY_STREAM;
+import static com.envimate.httpmate.HttpMateChainKeys.CONTENT_TYPE;
+import static com.envimate.httpmate.HttpMateChainKeys.BODY_STREAM;
 import static com.envimate.httpmate.multipart.MultipartChainKeys.MULTIPART_ITERATOR_BODY;
 import static com.envimate.httpmate.multipart.MultipartHandler.parse;
 

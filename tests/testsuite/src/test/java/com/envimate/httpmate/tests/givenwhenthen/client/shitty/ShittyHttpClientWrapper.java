@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 envimate GmbH - https://envimate.com/.
+ * Copyright (c) 2019 envimate GmbH - https://envimate.com/.
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -98,7 +98,8 @@ public final class ShittyHttpClientWrapper implements HttpClientWrapper {
                                                             final Map<String, String> headers,
                                                             final List<MultipartElement> parts) {
         return issueRequest(path, method, headers, request -> {
-            MultipartEntityBuilder multipartEntityBuilder = MultipartEntityBuilder.create().setBoundary(MULTIPART_BOUNDARY);
+            final MultipartEntityBuilder multipartEntityBuilder = MultipartEntityBuilder
+                    .create().setBoundary(MULTIPART_BOUNDARY);
             for (final MultipartElement part : parts) {
                 if (part.fileName().isPresent()) {
                     final InputStream inputStream = Streams.stringToInputStream(part.content());
@@ -125,7 +126,6 @@ public final class ShittyHttpClientWrapper implements HttpClientWrapper {
         final HttpEntityEnclosingRequest request = new BasicHttpEntityEnclosingRequest(method, url);
         headers.forEach(request::addHeader);
         bodyAppender.accept(request);
-        final HttpRequestExecutor httpexecutor = new HttpRequestExecutor();
         final DefaultBHttpClientConnection connection = new DefaultBHttpClientConnection(8 * 1024);
         try {
             final Socket socket = createSocket(deployment);
@@ -137,6 +137,7 @@ public final class ShittyHttpClientWrapper implements HttpClientWrapper {
             final HttpCoreContext context = HttpCoreContext.create();
             context.setTargetHost(new HttpHost(deployment.hostname()));
             httpProcessor.process(request, context);
+            final HttpRequestExecutor httpexecutor = new HttpRequestExecutor();
             final HttpResponse response = httpexecutor.execute(request, connection, context);
             final int statusCode = response.getStatusLine().getStatusCode();
             final Map<String, String> responseHeaders = new HashMap<>();

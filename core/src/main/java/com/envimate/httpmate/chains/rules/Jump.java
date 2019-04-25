@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 envimate GmbH - https://envimate.com/.
+ * Copyright (c) 2019 envimate GmbH - https://envimate.com/.
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -21,7 +21,7 @@
 
 package com.envimate.httpmate.chains.rules;
 
-import com.envimate.httpmate.chains.Chain;
+import com.envimate.httpmate.chains.ChainName;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
@@ -36,15 +36,15 @@ import static lombok.AccessLevel.PRIVATE;
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = PRIVATE)
 public class Jump implements Action {
-    private final Chain targetChain;
+    private final ChainName targetChain;
 
-    public static Jump jumpTo(final Chain targetChain) {
+    public static Jump jumpTo(final ChainName targetChain) {
         validateNotNull(targetChain, "targetChain");
         return new Jump(targetChain);
     }
 
     @Override
-    public Optional<Chain> target() {
+    public Optional<ChainName> target() {
         return of(targetChain);
     }
 }

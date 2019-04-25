@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 envimate GmbH - https://envimate.com/.
+ * Copyright (c) 2019 envimate GmbH - https://envimate.com/.
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -21,12 +21,12 @@
 
 package com.envimate.httpmate.processors;
 
-import com.envimate.httpmate.chains.rules.Processor;
 import com.envimate.httpmate.chains.MetaData;
-import com.envimate.httpmate.convenience.Http;
-import com.envimate.httpmate.request.ContentType;
-import com.envimate.httpmate.request.Headers;
-import com.envimate.httpmate.request.QueryParameters;
+import com.envimate.httpmate.chains.Processor;
+import com.envimate.httpmate.http.Http;
+import com.envimate.httpmate.http.ContentType;
+import com.envimate.httpmate.http.Headers;
+import com.envimate.httpmate.http.QueryParameters;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
@@ -34,11 +34,12 @@ import lombok.ToString;
 
 import java.util.Map;
 
-import static com.envimate.httpmate.chains.HttpMateChainKeys.*;
-import static com.envimate.httpmate.request.ContentType.fromString;
-import static com.envimate.httpmate.request.Headers.headers;
-import static com.envimate.httpmate.request.HttpRequestMethod.parse;
-import static com.envimate.httpmate.request.QueryParameters.queryParameters;
+import static com.envimate.httpmate.HttpMateChainKeys.*;
+import static com.envimate.httpmate.path.Path.path;
+import static com.envimate.httpmate.http.ContentType.fromString;
+import static com.envimate.httpmate.http.Headers.headers;
+import static com.envimate.httpmate.http.HttpRequestMethod.parse;
+import static com.envimate.httpmate.http.QueryParameters.queryParameters;
 
 @ToString
 @EqualsAndHashCode
@@ -63,5 +64,8 @@ public final class TranslateToValueObjectsProcessor implements Processor {
 
         final String rawMethod = metaData.get(RAW_METHOD);
         metaData.set(METHOD, parse(rawMethod));
+
+        final String rawPath = metaData.get(RAW_PATH);
+        metaData.set(PATH, path(rawPath));
     }
 }

@@ -1,14 +1,33 @@
+/*
+ * Copyright (c) 2019 envimate GmbH - https://envimate.com/.
+ *
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 package websockets.givenwhenthen.configurations.artificial;
 
 import com.envimate.httpmate.HttpMate;
-import com.envimate.httpmate.request.HttpRequestMethod;
-import com.envimate.httpmate.websockets.WebSocketModule;
+import com.envimate.httpmate.path.Path;
+import com.envimate.httpmate.http.HttpRequestMethod;
 import com.envimate.messageMate.messageBus.MessageBus;
 import com.envimate.messageMate.messageBus.MessageBusType;
 import com.envimate.messageMate.useCaseAdapter.UseCaseAdapter;
 import com.google.gson.Gson;
-import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
 import websockets.givenwhenthen.configurations.TestConfiguration;
 import websockets.givenwhenthen.configurations.artificial.usecases.abc.UseCaseA;
 import websockets.givenwhenthen.configurations.artificial.usecases.abc.UseCaseB;
@@ -31,13 +50,19 @@ import websockets.givenwhenthen.configurations.artificial.usecases.queryfoo.Quer
 
 import java.util.Map;
 
-import static com.envimate.httpmate.HttpMate.aHttpMateDispatchingEventsUsing;
-import static com.envimate.httpmate.chains.HttpMateChainKeys.*;
-import static com.envimate.httpmate.request.ContentType.json;
+import static com.envimate.httpmate.HttpMate.aHttpMateConfiguredAs;
+import static com.envimate.httpmate.HttpMateChainKeys.*;
+import static com.envimate.httpmate.convenience.configurators.Configurators.toLogUsing;
+import static com.envimate.httpmate.events.EventDrivenBuilder.EVENT_DRIVEN;
+import static com.envimate.httpmate.logger.Loggers.stderrLogger;
+import static com.envimate.httpmate.http.ContentType.json;
+import static com.envimate.httpmate.security.Configurators.toAuthenticateRequests;
+import static com.envimate.httpmate.security.Configurators.toAuthorizeRequests;
 import static com.envimate.httpmate.unpacking.BodyMapParsingModule.aBodyMapParsingModule;
-import static com.envimate.httpmate.websockets.WebSocketModule.webSocketModule;
+import static com.envimate.httpmate.websockets.WebSocketsConfigurator.toUseWebSockets;
+import static com.envimate.httpmate.websocketsevents.Conditions.closingAllWebSocketsThat;
+import static com.envimate.httpmate.websocketsevents.Conditions.webSocketIsTaggedWith;
 import static com.envimate.messageMate.internal.pipe.configuration.AsynchronousConfiguration.constantPoolSizeAsynchronousPipeConfiguration;
-import static com.envimate.messageMate.messageBus.EventType.eventTypeFromString;
 import static com.envimate.messageMate.messageBus.MessageBusBuilder.aMessageBus;
 import static com.envimate.messageMate.useCaseAdapter.UseCaseAdapterBuilder.anUseCaseAdapter;
 import static websockets.givenwhenthen.configurations.TestConfiguration.testConfiguration;
@@ -47,15 +72,19 @@ import static websockets.givenwhenthen.configurations.artificial.usecases.header
 import static websockets.givenwhenthen.configurations.artificial.usecases.pathparameter.ParameterParameter.parameterParameter;
 import static websockets.givenwhenthen.configurations.artificial.usecases.query.QueryParameter.queryParameter;
 
-@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class ArtificialConfiguration {
 
-    public static volatile MessageBus MESSAGE_BUS;
+    private static final int POOL_SIZE = 4;
+    public static volatile MessageBus messageBus;
 
+    private ArtificialConfiguration() {
+    }
+
+    @SuppressWarnings("unchecked")
     public static TestConfiguration theExampleHttpMateInstanceWithWebSocketsSupport() {
-        MESSAGE_BUS = aMessageBus()
+        messageBus = aMessageBus()
                 .forType(MessageBusType.ASYNCHRONOUS)
-                .withAsynchronousConfiguration(constantPoolSizeAsynchronousPipeConfiguration(4))
+                .withAsynchronousConfiguration(constantPoolSizeAsynchronousPipeConfiguration(POOL_SIZE))
                 .build();
         final UseCaseAdapter useCaseAdapter = anUseCaseAdapter()
                 .invokingUseCase(NormalUseCase.class).forType("NormalUseCase").callingTheSingleUseCaseMethod()
@@ -82,58 +111,53 @@ public final class ArtificialConfiguration {
                 .throwingAnExceptionIfNoResponseMappingCanBeFound()
                 .puttingExceptionObjectNamedAsExceptionIntoResponseMapByDefault();
 
-        useCaseAdapter.attachTo(MESSAGE_BUS);
+        useCaseAdapter.attachTo(messageBus);
 
-        final WebSocketModule webSocketModule = webSocketModule()
-                .acceptingWebSocketsToThePath("/").taggedBy("ROOT")
-                .acceptingWebSocketsToThePath("/close").taggedBy("CLOSE")
-                .acceptingWebSocketsToThePath("/both").taggedBy("BOTH")
-                .acceptingWebSocketsToThePath("/authorized").taggedBy("AUTHORIZED")
-                .acceptingWebSocketsToThePath("/count").taggedBy("COUNT")
-                .acceptingWebSocketsToThePath("/query_foo").taggedBy("QUERY_FOO")
-                .acceptingWebSocketsToThePath("/echo").taggedBy("ECHO")
-                .acceptingWebSocketsToThePath("/pre/<var>/post").taggedBy("PARAMETERIZED")
-                .acceptingWebSocketsToThePath("/query").taggedBy("QUERY")
-                .acceptingWebSocketsToThePath("/header").taggedBy("HEADER")
-                .acceptingWebSocketsToThePath("/exception").taggedBy("EXCEPTION")
-                .choosingTheEvent("CloseUseCase").forWebSocketsTaggedWith("CLOSE")
-                .choosingTheEvent("CountUseCase").forWebSocketsTaggedWith("COUNT")
-                .choosingTheEvent("UseCaseA").when(metaData -> metaData.get(BODY_MAP).getOrDefault("useCase", "").equals("A"))
-                .choosingTheEvent("UseCaseB").when(metaData -> metaData.get(BODY_MAP).getOrDefault("useCase", "").equals("B"))
-                .choosingTheEvent("UseCaseC").when(metaData -> metaData.get(BODY_MAP).getOrDefault("useCase", "").equals("C"))
-                .choosingTheEvent("QueryFooUseCase").forWebSocketsTaggedWith("QUERY_FOO")
-                .choosingTheEvent("ExceptionUseCaseParameter").forWebSocketsTaggedWith("EXCEPTION")
-                .choosingTheEvent("EchoParameter").forWebSocketsTaggedWith("ECHO")
-                .choosingTheEvent("ParameterParameter").forWebSocketsTaggedWith("PARAMETERIZED")
-                .choosingTheEvent("QueryParameter").forWebSocketsTaggedWith("QUERY")
-                .choosingTheEvent("HeaderParameter").forWebSocketsTaggedWith("HEADER")
-                .closingOn("CloseEvent").allWebSockets()
+        final HttpMate httpMate = aHttpMateConfiguredAs(EVENT_DRIVEN).attachedTo(messageBus)
+                .triggeringTheEvent("NormalUseCase").forRequestPath("/normal").andRequestMethod(HttpRequestMethod.GET)
+                .triggeringTheEvent("BothUseCase").forRequestPath("/both").andRequestMethod(HttpRequestMethod.GET)
+                .triggeringTheEvent("CloseUseCase").when(webSocketIsTaggedWith("CLOSE"))
+                .triggeringTheEvent("CountUseCase").when(webSocketIsTaggedWith("COUNT"))
+                .triggeringTheEvent("UseCaseA").when(metaData -> metaData.get(BODY_MAP).getOrDefault("useCase", "").equals("A"))
+                .triggeringTheEvent("UseCaseB").when(metaData -> metaData.get(BODY_MAP).getOrDefault("useCase", "").equals("B"))
+                .triggeringTheEvent("UseCaseC").when(metaData -> metaData.get(BODY_MAP).getOrDefault("useCase", "").equals("C"))
+                .triggeringTheEvent("QueryFooUseCase").when(webSocketIsTaggedWith("QUERY_FOO"))
+                .triggeringTheEvent("ExceptionUseCaseParameter").when(webSocketIsTaggedWith("EXCEPTION"))
+                .triggeringTheEvent("EchoParameter").when(webSocketIsTaggedWith("ECHO"))
+                .triggeringTheEvent("ParameterParameter").when(webSocketIsTaggedWith("PARAMETERIZED"))
+                .triggeringTheEvent("QueryParameter").when(webSocketIsTaggedWith("QUERY"))
+                .triggeringTheEvent("HeaderParameter").when(webSocketIsTaggedWith("HEADER"))
+                .handlingTheEvent("CloseEvent").by(closingAllWebSocketsThat((metaData, event) -> true))
+                .mappingResponsesUsing((event, metaData) -> metaData.set(STRING_RESPONSE, event.toString()))
+                .configured(toAuthenticateRequests().beforeBodyProcessing().using(metaData -> metaData.get(QUERY_PARAMETERS).getQueryParameter("username")))
+                .configured(toAuthenticateRequests().beforeBodyProcessing().using(metaData -> metaData.get(HEADERS).getHeader("username")))
+                .configured(toAuthorizeRequests().beforeBodyProcessing().using(metaData -> {
+                    final Path path = metaData.get(PATH);
+                    if (path.matches("/authorized")) {
+                        return metaData.getOptional(AUTHENTICATION_INFORMATION)
+                                .map("admin"::equals)
+                                .orElse(false);
+                    }
+                    return true;
+                }))
+                .configured(toLogUsing(stderrLogger()))
+                .configured(toUseWebSockets()
+                        .acceptingWebSocketsToThePath("/").taggedBy("ROOT")
+                        .acceptingWebSocketsToThePath("/close").taggedBy("CLOSE")
+                        .acceptingWebSocketsToThePath("/both").taggedBy("BOTH")
+                        .acceptingWebSocketsToThePath("/authorized").taggedBy("AUTHORIZED")
+                        .acceptingWebSocketsToThePath("/count").taggedBy("COUNT")
+                        .acceptingWebSocketsToThePath("/query_foo").taggedBy("QUERY_FOO")
+                        .acceptingWebSocketsToThePath("/echo").taggedBy("ECHO")
+                        .acceptingWebSocketsToThePath("/pre/<var>/post").taggedBy("PARAMETERIZED")
+                        .acceptingWebSocketsToThePath("/query").taggedBy("QUERY")
+                        .acceptingWebSocketsToThePath("/header").taggedBy("HEADER")
+                        .acceptingWebSocketsToThePath("/exception").taggedBy("EXCEPTION"))
+                .usingTheModule(aBodyMapParsingModule()
+                        .parsingContentType(json()).with(body -> new Gson().fromJson(body, Map.class))
+                        .usingTheDefaultContentType(json()))
                 .build();
 
-        final HttpMate httpMate = aHttpMateDispatchingEventsUsing(MESSAGE_BUS)
-                .choosingTheEvent(eventTypeFromString("NormalUseCase")).forRequestPath("/normal").andRequestMethod(HttpRequestMethod.GET)
-                .choosingTheEvent(eventTypeFromString("BothUseCase")).forRequestPath("/both").andRequestMethod(HttpRequestMethod.GET)
-                .preparingRequestsForParameterMappingThatByDirectlyMappingAllData()
-                .mappingResponsesUsing((event, metaData) -> metaData.set(STRING_RESPONSE, event.toString()))
-                .configuredBy(configurator -> {
-                    configurator.configureSecurity().addAuthenticator(metaData -> metaData.get(QUERY_PARAMETERS).getQueryParameter("username"));
-                    configurator.configureSecurity().addAuthenticator(metaData -> metaData.get(HEADERS).getHeader("username"));
-                    configurator.configureSecurity().addAuthorizer(metaData -> {
-                        final String path = metaData.get(PATH);
-                        if ("/authorized".equals(path)) {
-                            return metaData.getOptional(AUTHENTICATION_INFORMATION)
-                                    .map("admin"::equals)
-                                    .orElse(false);
-                        }
-                        return true;
-                    });
-                    configurator.configureLogger().loggingToStderr();
-                    configurator.registerModule(webSocketModule);
-                    configurator.registerModule(aBodyMapParsingModule()
-                            .parsingContentType(json()).with(body -> new Gson().fromJson(body, Map.class))
-                            .usingTheDefaultContentType(json()));
-                });
-
-        return testConfiguration(httpMate, webSocketModule);
+        return testConfiguration(httpMate);
     }
 }

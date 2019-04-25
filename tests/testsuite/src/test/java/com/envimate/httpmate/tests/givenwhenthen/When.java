@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 envimate GmbH - https://envimate.com/.
+ * Copyright (c) 2019 envimate GmbH - https://envimate.com/.
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -40,15 +40,13 @@ import static com.envimate.httpmate.tests.givenwhenthen.Then.then;
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class When implements PathBuilder, MethodBuilder, BodyBuilder, HeaderBuilder {
     private final HttpClientWrapper clientWrapper;
-    private final StringBuilder log;
     private String path;
     private String method;
     private final Map<String, String> headers = new HashMap<>();
     private Object body;
 
-    static When theWhen(final HttpClientWrapper clientWrapper,
-                        final StringBuilder log) {
-        return new When(clientWrapper, log);
+    static When theWhen(final HttpClientWrapper clientWrapper) {
+        return new When(clientWrapper);
     }
 
     @Override
@@ -58,31 +56,31 @@ public final class When implements PathBuilder, MethodBuilder, BodyBuilder, Head
     }
 
     @Override
-    public BodyBuilder viaTheGETMethod() {
+    public BodyBuilder viaTheGetMethod() {
         method = "GET";
         return this;
     }
 
     @Override
-    public BodyBuilder viaThePOSTMethod() {
+    public BodyBuilder viaThePostMethod() {
         method = "POST";
         return this;
     }
 
     @Override
-    public BodyBuilder viaThePUTMethod() {
+    public BodyBuilder viaThePutMethod() {
         method = "PUT";
         return this;
     }
 
     @Override
-    public BodyBuilder viaTheDELETEMethod() {
+    public BodyBuilder viaTheDeleteMethod() {
         method = "DELETE";
         return this;
     }
 
     @Override
-    public BodyBuilder viaTheOPTIONSMethod() {
+    public BodyBuilder viaTheOptionsMethod() {
         method = "OPTIONS";
         return this;
     }
@@ -101,7 +99,7 @@ public final class When implements PathBuilder, MethodBuilder, BodyBuilder, Head
 
     @Override
     public HeaderBuilder withTheMultipartBody(final MultipartBuilder multipartBuilder) {
-        body = multipartBuilder.elements;
+        body = multipartBuilder.getElements();
         return this;
     }
 
@@ -127,6 +125,6 @@ public final class When implements PathBuilder, MethodBuilder, BodyBuilder, Head
         } else {
             response = clientWrapper.issueRequestWithMultipartBody(path, method, headers, (List<MultipartElement>) body);
         }
-        return then(response, log);
+        return then(response);
     }
 }

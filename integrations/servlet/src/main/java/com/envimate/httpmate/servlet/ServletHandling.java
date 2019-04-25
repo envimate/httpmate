@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 envimate GmbH - https://envimate.com/.
+ * Copyright (c) 2019 envimate GmbH - https://envimate.com/.
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -33,7 +33,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.envimate.httpmate.chains.HttpMateChainKeys.*;
+import static com.envimate.httpmate.HttpMateChainKeys.*;
 import static com.envimate.httpmate.chains.MetaData.emptyMetaData;
 import static com.envimate.httpmate.util.Streams.streamInputStreamToOutputStream;
 import static com.envimate.httpmate.util.Streams.stringToInputStream;
@@ -72,7 +72,7 @@ public final class ServletHandling {
         metaData.set(RAW_HEADERS, headers);
         metaData.set(RAW_QUERY_PARAMETERS, queryParameters);
         metaData.set(RAW_METHOD, method);
-        metaData.set(PATH, path);
+        metaData.set(RAW_PATH, path);
         return metaData;
     }
 

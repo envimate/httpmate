@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 envimate GmbH - https://envimate.com/.
+ * Copyright (c) 2019 envimate GmbH - https://envimate.com/.
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -21,28 +21,28 @@
 
 package com.envimate.httpmate.websockets.registry;
 
+import com.envimate.httpmate.MetricsProvider;
 import com.envimate.httpmate.websockets.WebSocket;
-import com.envimate.httpmate.websockets.WebSocketsMetrics;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
-import lombok.ToString;
 
 import java.util.Set;
 
-import static com.envimate.httpmate.websockets.WebSocketsMetrics.webSocketsMetrics;
+import static com.envimate.httpmate.util.Validators.validateNotNull;
 import static com.envimate.httpmate.websockets.registry.SaveMap.saveMap;
 import static com.envimate.httpmate.websockets.registry.WebSocketNotFoundException.webSocketNotFoundException;
 
-@ToString
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class WebSocketRegistry {
     private final SaveMap<WebSocketId, WebSocket> preActiveWebSockets;
     private final SaveMap<WebSocketId, WebSocket> activeWebSockets;
+    private final MetricsProvider<Integer> metricsProvider;
 
-    public static WebSocketRegistry webSocketRegistry() {
-        return new WebSocketRegistry(saveMap(), saveMap());
+    public static WebSocketRegistry webSocketRegistry(final MetricsProvider<Integer> metricsProvider) {
+        validateNotNull(metricsProvider, "metricsProvider");
+        return new WebSocketRegistry(saveMap(), saveMap(), metricsProvider);
     }
 
     public synchronized WebSocket byId(final WebSocketId id) {
@@ -52,6 +52,7 @@ public final class WebSocketRegistry {
     public synchronized void register(final WebSocketId id,
                                       final WebSocket webSocket) {
         preActiveWebSockets.put(id, webSocket);
+        updateMetrics();
     }
 
     public synchronized void activate(final WebSocketId id) {
@@ -61,13 +62,19 @@ public final class WebSocketRegistry {
 
     public synchronized void unregister(final WebSocketId id) {
         activeWebSockets.getAndRemove(id).orElseThrow(() -> webSocketNotFoundException(id));
+        updateMetrics();
     }
 
     public synchronized Set<WebSocket> allActiveWebSockets() {
         return activeWebSockets.copyOfValues();
     }
 
-    public synchronized WebSocketsMetrics metrics() {
-        return webSocketsMetrics(activeWebSockets.size() + preActiveWebSockets.size());
+    private void updateMetrics() {
+        metricsProvider.provideMetric(activeWebSockets.size() + preActiveWebSockets.size());
+    }
+
+    @Override
+    public String toString() {
+        return "WebSocketRegistry";
     }
 }

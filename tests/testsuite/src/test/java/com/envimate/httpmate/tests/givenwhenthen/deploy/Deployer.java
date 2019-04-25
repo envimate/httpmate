@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 envimate GmbH - https://envimate.com/.
+ * Copyright (c) 2019 envimate GmbH - https://envimate.com/.
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -27,8 +27,6 @@ import com.envimate.httpmate.tests.givenwhenthen.client.ClientFactory;
 import java.util.List;
 
 public interface Deployer {
-    Deployment ensureTheTestHttpMateInstanceIsDeployed();
-
     Deployment deploy(HttpMate httpMate);
 
     void cleanUp();

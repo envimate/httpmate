@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 envimate GmbH - https://envimate.com/.
+ * Copyright (c) 2019 envimate GmbH - https://envimate.com/.
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -30,7 +30,6 @@ import com.envimate.httpmate.tests.givenwhenthen.deploy.Deployment;
 import java.util.List;
 
 import static com.envimate.httpmate.jetty.JettyEndpoint.jettyEndpointFor;
-import static com.envimate.httpmate.tests.HttpMateTestConfigurations.theHttpMateInstanceUsedForTesting;
 import static com.envimate.httpmate.tests.givenwhenthen.client.real.RealHttpMateClientFactory.theRealHttpMateClient;
 import static com.envimate.httpmate.tests.givenwhenthen.client.real.RealHttpMateClientWithConnectionReuseFactory.theRealHttpMateClientWithConnectionReuse;
 import static com.envimate.httpmate.tests.givenwhenthen.client.shitty.ShittyClientFactory.theShittyTestClient;
@@ -50,16 +49,11 @@ public final class JettyDeployer implements Deployer {
     }
 
     @Override
-    public Deployment ensureTheTestHttpMateInstanceIsDeployed() {
+    public Deployment deploy(final HttpMate httpMate) {
         cleanUp();
         final int port = freePort();
-        current = jettyEndpointFor(theHttpMateInstanceUsedForTesting()).listeningOnThePort(port);
+        current = jettyEndpointFor(httpMate).listeningOnThePort(port);
         return httpDeployment("localhost", port);
-    }
-
-    @Override
-    public Deployment deploy(final HttpMate httpMate) {
-        throw new UnsupportedOperationException();
     }
 
     @Override

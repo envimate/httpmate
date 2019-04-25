@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 envimate GmbH - https://envimate.com/.
+ * Copyright (c) 2019 envimate GmbH - https://envimate.com/.
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -24,13 +24,13 @@ package com.envimate.httpmate.tests.givenwhenthen.deploy;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public final class FreePortPool {
-
-    private static AtomicInteger CURRENT_PORT = new AtomicInteger(8000);
+    private static final int START_PORT = 8000;
+    private static AtomicInteger currentPort = new AtomicInteger(START_PORT);
 
     private FreePortPool() {
     }
 
     public static int freePort() {
-        return CURRENT_PORT.incrementAndGet();
+        return currentPort.incrementAndGet();
     }
 }
