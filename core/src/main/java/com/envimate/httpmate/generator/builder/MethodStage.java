@@ -19,11 +19,11 @@
  * under the License.
  */
 
-package com.envimate.httpmate.events.builder;
+package com.envimate.httpmate.generator.builder;
 
 import com.envimate.httpmate.http.HttpRequestMethod;
 
-public interface EventStage3<T> {
+public interface MethodStage<T> {
     default T andRequestMethod(final HttpRequestMethod requestMethod) {
         return andRequestMethods(requestMethod);
     }

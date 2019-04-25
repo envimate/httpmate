@@ -26,13 +26,12 @@ import com.envimate.httpmate.HttpMate;
 import static com.envimate.httpmate.HttpMate.aLowLevelHttpMate;
 import static com.envimate.httpmate.convenience.configurators.Configurators.toLogUsing;
 import static com.envimate.httpmate.http.HttpRequestMethod.*;
-import static com.envimate.httpmate.path.PathTemplate.pathTemplate;
 import static com.envimate.httpmate.tests.lowlevel.handlers.ContentTypeInResponseHandler.contentTypeInResponseHandler;
-import static com.envimate.httpmate.tests.lowlevel.handlers.MyDownloadHandler.downloadHandler;
 import static com.envimate.httpmate.tests.lowlevel.handlers.EchoBodyHandler.echoBodyHandler;
 import static com.envimate.httpmate.tests.lowlevel.handlers.EchoContentTypeHandler.echoContentTypeHandler;
 import static com.envimate.httpmate.tests.lowlevel.handlers.HeadersInResponseHandler.headersInResponseHandler;
 import static com.envimate.httpmate.tests.lowlevel.handlers.LogHandler.logHandler;
+import static com.envimate.httpmate.tests.lowlevel.handlers.MyDownloadHandler.downloadHandler;
 
 public final class LowLevelHttpMateConfiguration {
     public static StringBuilder logger;
@@ -43,12 +42,18 @@ public final class LowLevelHttpMateConfiguration {
     public static HttpMate theLowLevelHttpMateInstanceUsedForTesting() {
         logger = new StringBuilder();
         return aLowLevelHttpMate()
-                .withHandler(echoBodyHandler(), pathTemplate("/echo"), GET, POST, PUT, DELETE)
-                .withHandler(echoContentTypeHandler(), pathTemplate("/echo_contenttype"), GET)
-                .withHandler(contentTypeInResponseHandler(), pathTemplate("/set_contenttype_in_response"), GET)
-                .withHandler(headersInResponseHandler(), pathTemplate("/headers_response"), GET)
-                .withHandler(logHandler(), pathTemplate("/log"), GET)
-                .withHandler(downloadHandler(), pathTemplate("/download"), GET)
+                .callingTheHandler(echoBodyHandler())
+                .forRequestPath("/echo").andRequestMethods(GET, POST, PUT, DELETE)
+                .callingTheHandler(echoContentTypeHandler())
+                .forRequestPath("echo_contenttype").andRequestMethod(GET)
+                .callingTheHandler(contentTypeInResponseHandler())
+                .forRequestPath("/set_contenttype_in_response").andRequestMethod(GET)
+                .callingTheHandler(headersInResponseHandler())
+                .forRequestPath("/headers_response").andRequestMethod(GET)
+                .callingTheHandler(logHandler())
+                .forRequestPath("/log").andRequestMethod(GET)
+                .callingTheHandler(downloadHandler())
+                .forRequestPath("/download").andRequestMethod(GET)
                 .thatIs().configured(toLogUsing((message, metaData) -> logger.append(message)))
                 .build();
     }

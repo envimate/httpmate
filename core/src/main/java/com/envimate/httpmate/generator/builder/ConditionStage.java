@@ -19,23 +19,22 @@
  * under the License.
  */
 
-package com.envimate.httpmate.events.builder;
+package com.envimate.httpmate.generator.builder;
 
-import com.envimate.messageMate.messageBus.EventType;
+import com.envimate.httpmate.generator.GenerationCondition;
 
-import static com.envimate.messageMate.messageBus.EventType.eventTypeFromString;
+import static com.envimate.httpmate.generator.PathAndMethodGenerationCondition.pathAndMethodEventTypeGenerationCondition;
+import static com.envimate.httpmate.path.PathTemplate.pathTemplate;
 
-public interface EventStage1<T> {
+public interface ConditionStage<T> {
 
-    default EventStage2<T> triggeringTheEvent(final String eventType) {
-        return triggeringTheEvent(eventTypeFromString(eventType));
+    default MethodStage<T> forRequestPath(final String pathTemplate) {
+        return requestMethods -> {
+            final GenerationCondition eventTypeGenerationCondition =
+                    pathAndMethodEventTypeGenerationCondition(pathTemplate(pathTemplate), requestMethods);
+            return when(eventTypeGenerationCondition);
+        };
     }
 
-    EventStage2<T> triggeringTheEvent(EventType eventType);
-
-    default By<T> handlingTheEvent(final String eventType) {
-        return handlingTheEvent(eventTypeFromString(eventType));
-    }
-
-    By<T> handlingTheEvent(EventType eventType);
+    T when(GenerationCondition condition);
 }

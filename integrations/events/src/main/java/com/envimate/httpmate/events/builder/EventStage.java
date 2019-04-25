@@ -21,20 +21,22 @@
 
 package com.envimate.httpmate.events.builder;
 
-import com.envimate.httpmate.generator.GenerationCondition;
+import com.envimate.httpmate.generator.builder.ConditionStage;
+import com.envimate.messageMate.messageBus.EventType;
 
-import static com.envimate.httpmate.generator.PathAndMethodGenerationCondition.pathAndMethodEventTypeGenerationCondition;
-import static com.envimate.httpmate.path.PathTemplate.pathTemplate;
+import static com.envimate.messageMate.messageBus.EventType.eventTypeFromString;
 
-public interface EventStage2<T> {
+public interface EventStage<T> {
 
-    default EventStage3<T> forRequestPath(final String pathTemplate) {
-        return requestMethods -> {
-            final GenerationCondition eventTypeGenerationCondition =
-                    pathAndMethodEventTypeGenerationCondition(pathTemplate(pathTemplate), requestMethods);
-            return when(eventTypeGenerationCondition);
-        };
+    default ConditionStage<T> triggeringTheEvent(final String eventType) {
+        return triggeringTheEvent(eventTypeFromString(eventType));
     }
 
-    T when(GenerationCondition condition);
+    ConditionStage<T> triggeringTheEvent(EventType eventType);
+
+    default By<T> handlingTheEvent(final String eventType) {
+        return handlingTheEvent(eventTypeFromString(eventType));
+    }
+
+    By<T> handlingTheEvent(EventType eventType);
 }

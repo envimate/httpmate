@@ -26,6 +26,7 @@ import com.envimate.httpmate.HttpMateBuilder;
 import com.envimate.httpmate.HttpMateConfigurationType;
 import com.envimate.httpmate.events.builder.*;
 import com.envimate.httpmate.events.mapper.EventToResponseMapper;
+import com.envimate.httpmate.generator.builder.ConditionStage;
 import com.envimate.messageMate.messageBus.EventType;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -36,13 +37,13 @@ import static com.envimate.httpmate.events.EventModule.eventModule;
 
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class EventDrivenBuilder {
-    public static final HttpMateConfigurationType<Attached<EventStage1<Stage1>>> EVENT_DRIVEN =
+    public static final HttpMateConfigurationType<Attached<EventStage<Stage1>>> EVENT_DRIVEN =
             EventDrivenBuilder::aHttpMateDispatchingEventsUsing;
 
     private final CoreModule coreModule;
     private final EventModule eventModule;
 
-    public static Attached<EventStage1<Stage1>> aHttpMateDispatchingEventsUsing() {
+    public static Attached<EventStage<Stage1>> aHttpMateDispatchingEventsUsing() {
         final CoreModule coreModule = coreModule();
         final EventModule eventModule = eventModule();
         return messageBus -> {
@@ -52,9 +53,9 @@ public final class EventDrivenBuilder {
         };
     }
 
-    public final class Stage1 implements EventStage1<Stage1>, MapToResponseStage<HttpMateBuilder> {
+    public final class Stage1 implements EventStage<Stage1>, MapToResponseStage<HttpMateBuilder> {
         @Override
-        public EventStage2<Stage1> triggeringTheEvent(final EventType eventType) {
+        public ConditionStage<Stage1> triggeringTheEvent(final EventType eventType) {
             return condition -> {
                 eventModule.addEventMapping(eventType, condition);
                 return this;

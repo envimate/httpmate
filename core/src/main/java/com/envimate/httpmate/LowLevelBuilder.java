@@ -23,10 +23,8 @@ package com.envimate.httpmate;
 
 import com.envimate.httpmate.chains.ChainModule;
 import com.envimate.httpmate.chains.Configurator;
-import com.envimate.httpmate.generator.GenerationCondition;
+import com.envimate.httpmate.generator.builder.ConditionStage;
 import com.envimate.httpmate.handler.Handler;
-import com.envimate.httpmate.path.PathTemplate;
-import com.envimate.httpmate.http.HttpRequestMethod;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
@@ -37,7 +35,6 @@ import java.util.List;
 
 import static com.envimate.httpmate.CoreModule.coreModule;
 import static com.envimate.httpmate.HttpMateBuilder.httpMateBuilder;
-import static com.envimate.httpmate.generator.PathAndMethodGenerationCondition.pathAndMethodEventTypeGenerationCondition;
 
 @ToString
 @EqualsAndHashCode
@@ -53,17 +50,11 @@ public final class LowLevelBuilder {
         return new LowLevelBuilder(coreModule());
     }
 
-    public LowLevelBuilder withHandler(final Handler handler,
-                                       final PathTemplate pathTemplate,
-                                       final HttpRequestMethod... methods) {
-        final GenerationCondition generationCondition = pathAndMethodEventTypeGenerationCondition(pathTemplate, methods);
-        return withHandler(handler, generationCondition);
-    }
-
-    public LowLevelBuilder withHandler(final Handler handler,
-                                       final GenerationCondition generationCondition) {
-        coreModule.addHandler(handler, generationCondition);
-        return this;
+    public ConditionStage<LowLevelBuilder> callingTheHandler(final Handler handler) {
+        return condition -> {
+            coreModule.addHandler(handler, condition);
+            return this;
+        };
     }
 
     public HttpMateBuilder thatIs() {

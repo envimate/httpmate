@@ -44,9 +44,9 @@ public final class LowLevelConfiguration {
     public static TestConfiguration theLowLevelHttpMateInstanceWithWebSocketsSupport() {
         logger = new StringBuilder();
         final HttpMate httpMate = aLowLevelHttpMate()
-                .withHandler(fooBarHandler(), metaData -> metaData.get(PATH).matches("/foobar"))
-                .withHandler(loggerHandler(), metaData -> metaData.get(PATH).matches("/logger"))
-                .withHandler(echoHandler(), metaData -> metaData.getOptional(IS_WEBSOCKET_MESSAGE).orElse(false))
+                .callingTheHandler(fooBarHandler()).when(metaData -> metaData.get(PATH).matches("/foobar"))
+                .callingTheHandler(loggerHandler()).when(metaData -> metaData.get(PATH).matches("/logger"))
+                .callingTheHandler(echoHandler()).when(metaData -> metaData.getOptional(IS_WEBSOCKET_MESSAGE).orElse(false))
                 .thatIs().usingTheModule(webSocketModule())
                 .configured(toUseWebSockets()
                         .acceptingWebSocketsToThePath("/").taggedBy("ROOT")

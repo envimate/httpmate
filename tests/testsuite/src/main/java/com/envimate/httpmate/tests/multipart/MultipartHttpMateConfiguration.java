@@ -22,20 +22,19 @@
 package com.envimate.httpmate.tests.multipart;
 
 import com.envimate.httpmate.HttpMate;
-import com.envimate.httpmate.security.NotAuthorizedException;
 import com.envimate.httpmate.multipart.MultipartIteratorBody;
 import com.envimate.httpmate.multipart.MultipartPart;
 import com.envimate.httpmate.path.Path;
+import com.envimate.httpmate.security.NotAuthorizedException;
 
 import static com.envimate.httpmate.HttpMate.aLowLevelHttpMate;
 import static com.envimate.httpmate.HttpMateChainKeys.*;
-import static com.envimate.httpmate.http.Http.StatusCodes.FORBIDDEN;
 import static com.envimate.httpmate.convenience.configurators.exceptions.ExceptionMappingConfigurator.toMapExceptions;
 import static com.envimate.httpmate.exceptions.DefaultExceptionMapper.theDefaultExceptionMapper;
+import static com.envimate.httpmate.http.Http.StatusCodes.FORBIDDEN;
+import static com.envimate.httpmate.http.HttpRequestMethod.*;
 import static com.envimate.httpmate.multipart.MultipartChainKeys.MULTIPART_ITERATOR_BODY;
 import static com.envimate.httpmate.multipart.MultipartModule.toExposeMultipartBodiesUsingMultipartIteratorBody;
-import static com.envimate.httpmate.path.PathTemplate.pathTemplate;
-import static com.envimate.httpmate.http.HttpRequestMethod.*;
 import static com.envimate.httpmate.security.Configurators.toAuthenticateRequests;
 import static com.envimate.httpmate.security.Configurators.toAuthorizeRequests;
 import static com.envimate.httpmate.tests.Util.extractUsername;
@@ -51,9 +50,12 @@ public final class MultipartHttpMateConfiguration {
 
     public static HttpMate theMultipartHttpMateInstanceUsedForTesting() {
         return aLowLevelHttpMate()
-                .withHandler(dumpMultipartBodyHandler(), pathTemplate("/dump"), GET, POST, PUT, DELETE)
-                .withHandler(authenticatedHandler(), pathTemplate("/authenticated"), GET, POST, PUT, DELETE)
-                .withHandler(authorizedHandler(), pathTemplate("/authorized"), GET, POST, PUT, DELETE)
+                .callingTheHandler(dumpMultipartBodyHandler())
+                .forRequestPath("/dump").andRequestMethods(GET, POST, PUT, DELETE)
+                .callingTheHandler(authenticatedHandler())
+                .forRequestPath("/authenticated").andRequestMethods(GET, POST, PUT, DELETE)
+                .callingTheHandler(authorizedHandler())
+                .forRequestPath("/authorized").andRequestMethods(GET, POST, PUT, DELETE)
                 .thatIs()
                 .configured(toAuthenticateRequests().afterBodyProcessing().using(metaData -> {
                     final Path path = metaData.get(PATH);
