@@ -37,7 +37,7 @@ import websockets.givenwhenthen.configurations.chat.usecases.SendMessageUseCase;
 import java.util.Map;
 import java.util.Objects;
 
-import static com.envimate.httpmate.HttpMate.aHttpMateConfiguredAs;
+import static com.envimate.httpmate.HttpMate.anHttpMateConfiguredAs;
 import static com.envimate.httpmate.HttpMateChainKeys.*;
 import static com.envimate.httpmate.convenience.configurators.Configurators.toLogUsing;
 import static com.envimate.httpmate.events.EventDrivenBuilder.EVENT_DRIVEN;
@@ -97,7 +97,7 @@ public final class ChatConfiguration {
 
         useCaseAdapter.attachTo(messageBus);
 
-        final HttpMate httpMate = aHttpMateConfiguredAs(EVENT_DRIVEN).attachedTo(messageBus)
+        final HttpMate httpMate = anHttpMateConfiguredAs(EVENT_DRIVEN).attachedTo(messageBus)
                 .triggeringTheEvent("ChatMessage").forRequestPath("/send").andRequestMethod(GET)
                 .handlingTheEvent("NewMessageEvent").by(forwardingItToAllWebSocketsThat((metaData, event) -> {
                     final String username = metaData.getAs(AUTHENTICATION_INFORMATION, User.class)
@@ -107,7 +107,7 @@ public final class ChatConfiguration {
                 .mappingResponsesUsing((event, metaData) -> {
                     final Map<String, Object> map = (Map<String, Object>) event;
                     final String content = (String) map.get("content");
-                    metaData.set(STRING_RESPONSE, content);
+                    metaData.set(RESPONSE_STRING, content);
                 })
                 .configured(toAuthenticateRequests().beforeBodyProcessing().using(authenticator))
                 .configured(toAuthorizeRequests().beforeBodyProcessing().using(authorizer))

@@ -72,7 +72,7 @@ final class PureJavaEndpointHandler implements HttpHandler {
             final int responseStatus = metaData.get(RESPONSE_STATUS);
             httpExchange.sendResponseHeaders(responseStatus, 0);
             final OutputStream outputStream = httpExchange.getResponseBody();
-            final InputStream responseBody = metaData.getOptional(STREAM_RESPONSE).orElseGet(() -> stringToInputStream(""));
+            final InputStream responseBody = metaData.getOptional(RESPONSE_STREAM).orElseGet(() -> stringToInputStream(""));
             streamInputStreamToOutputStream(responseBody, outputStream);
         });
     }

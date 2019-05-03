@@ -83,7 +83,7 @@ public final class CorsModule implements ChainModule {
                     .ifPresent(requestedMethods -> responseHeaders.put(ALLOW_METHOD_KEY, requestedMethods));
             metaData.set(RESPONSE_HEADERS, responseHeaders);
             metaData.set(RESPONSE_STATUS, OK);
-            metaData.set(STRING_RESPONSE, "OK");
+            metaData.set(RESPONSE_STRING, "OK");
         });
 
         extender.routeIfEquals(PRE_PROCESS, jumpTo(CORS_CHAIN), METHOD, OPTIONS);

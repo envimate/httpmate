@@ -39,5 +39,6 @@
 
     <modules>
         <module>aws-lambda</module>
+        <module>hello-world</module>
     </modules>
 </project>

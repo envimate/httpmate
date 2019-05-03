@@ -32,7 +32,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
 import static com.envimate.httpmate.HttpMateChainKeys.PATH;
-import static com.envimate.httpmate.HttpMateChainKeys.STRING_RESPONSE;
+import static com.envimate.httpmate.HttpMateChainKeys.RESPONSE_STRING;
 import static com.envimate.httpmate.HttpMateChains.POST_PROCESS;
 import static com.envimate.httpmate.HttpMateChains.PRE_PROCESS;
 import static com.envimate.httpmate.chains.ChainName.chainName;
@@ -58,7 +58,7 @@ public final class DebugModule implements ChainModule {
         extender.createChain(DEBUG_CHAIN, jumpTo(POST_PROCESS), drop());
         extender.addProcessor(DEBUG_CHAIN, metaData -> {
             final String dump = registry.dump();
-            metaData.set(STRING_RESPONSE, dump);
+            metaData.set(RESPONSE_STRING, dump);
         });
 
         extender.routeIf(PRE_PROCESS, jumpTo(DEBUG_CHAIN), PATH, PATH_TEMPLATE::matches, PATH_TEMPLATE.toString());

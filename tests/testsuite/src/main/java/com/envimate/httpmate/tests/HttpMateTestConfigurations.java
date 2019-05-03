@@ -63,7 +63,7 @@ import com.google.gson.Gson;
 import java.util.Map;
 import java.util.Objects;
 
-import static com.envimate.httpmate.HttpMate.aHttpMateConfiguredAs;
+import static com.envimate.httpmate.HttpMate.anHttpMateConfiguredAs;
 import static com.envimate.httpmate.HttpMateChainKeys.*;
 import static com.envimate.httpmate.convenience.configurators.Configurators.toCustomizeResponsesUsing;
 import static com.envimate.httpmate.convenience.configurators.Configurators.toLogUsing;
@@ -115,7 +115,7 @@ public final class HttpMateTestConfigurations {
 
     @SuppressWarnings("unchecked")
     public static HttpMate theHttpMateInstanceUsedForTesting() {
-        final HttpMate httpMate = aHttpMateConfiguredAs(USE_CASE_DRIVEN)
+        final HttpMate httpMate = anHttpMateConfiguredAs(USE_CASE_DRIVEN)
                 .servingTheUseCase(TestUseCase.class).forRequestPath("/test").andRequestMethods(GET, POST, PUT, DELETE)
                 .servingTheUseCase(EchoBodyUseCase.class).forRequestPath("/echo_body").andRequestMethods(GET, POST, PUT, DELETE)
                 .servingTheUseCase(MappedExceptionUseCase.class).forRequestPath("/mapped_exception").andRequestMethod(GET)
@@ -167,12 +167,12 @@ public final class HttpMateTestConfigurations {
                         .ofType(NoHandlerFoundException.class)
                         .toResponsesUsing((exception, metaData) -> {
                             metaData.set(RESPONSE_STATUS, METHOD_NOT_ALLOWED);
-                            metaData.set(STRING_RESPONSE, "No use case found.");
+                            metaData.set(RESPONSE_STRING, "No use case found.");
                         })
                         .ofType(MappedException.class).toResponsesUsing((exception, metaData) -> metaData.set(RESPONSE_STATUS, 201))
                         .ofType(NotAuthorizedException.class).toResponsesUsing((object, metaData) -> {
                             metaData.set(RESPONSE_STATUS, 403);
-                            metaData.set(STRING_RESPONSE, "Go away.");
+                            metaData.set(RESPONSE_STRING, "Go away.");
                         })
                         .ofAllRemainingTypesUsing(theDefaultExceptionMapper())
                 )

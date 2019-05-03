@@ -77,7 +77,7 @@ public final class MultipartHttpMateConfiguration {
                 .configured(toMapExceptions()
                         .ofType(NotAuthorizedException.class).toResponsesUsing((e, metaData) -> {
                             metaData.set(RESPONSE_STATUS, FORBIDDEN);
-                            metaData.set(STRING_RESPONSE, "Access denied!");
+                            metaData.set(RESPONSE_STRING, "Access denied!");
                         })
                         .ofAllRemainingTypesUsing(theDefaultExceptionMapper()))
                 .configured(toExposeMultipartBodiesUsingMultipartIteratorBody())

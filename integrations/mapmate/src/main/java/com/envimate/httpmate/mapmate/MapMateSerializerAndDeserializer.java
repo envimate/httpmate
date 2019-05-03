@@ -39,7 +39,7 @@ import lombok.ToString;
 import java.util.Map;
 
 import static com.envimate.httpmate.HttpMateChainKeys.RESPONSE_HEADERS;
-import static com.envimate.httpmate.HttpMateChainKeys.STRING_RESPONSE;
+import static com.envimate.httpmate.HttpMateChainKeys.RESPONSE_STRING;
 import static com.envimate.httpmate.http.Http.Headers.CONTENT_TYPE;
 import static com.envimate.httpmate.util.Validators.validateNotNull;
 
@@ -98,7 +98,7 @@ public final class MapMateSerializerAndDeserializer implements SerializerAndDese
             metaData.get(RESPONSE_HEADERS).put(CONTENT_TYPE, responseContentType.internalValueForMapping());
             final MarshallingType marshallingType = marshallingTypes.get(responseContentType);
             final Map<String, Object> eventMap = (Map<String, Object>) event;
-            metaData.set(STRING_RESPONSE, serializer.serializeFromMap(eventMap, marshallingType));
+            metaData.set(RESPONSE_STRING, serializer.serializeFromMap(eventMap, marshallingType));
         });
     }
 
