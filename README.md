@@ -1,3 +1,7 @@
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.envimate.httpmate/core/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.envimate.httpmate/core)
+
+<img src="httpmate_logo.png" align="left"/>
+
 # HttpMate
 
 HttpMate is an http framework that allows you to "just publish my business logic as HTTP endpoint".
