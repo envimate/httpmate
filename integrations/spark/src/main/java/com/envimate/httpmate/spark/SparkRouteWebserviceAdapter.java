@@ -74,7 +74,7 @@ final class SparkRouteWebserviceAdapter implements Route {
             final int responseStatus = metaData.get(RESPONSE_STATUS);
             sparkResponse.status(responseStatus);
             final OutputStream outputStream = sparkResponse.raw().getOutputStream();
-            final InputStream responseBody = metaData.getOptional(STREAM_RESPONSE).orElseGet(() -> stringToInputStream(""));
+            final InputStream responseBody = metaData.getOptional(RESPONSE_STREAM).orElseGet(() -> stringToInputStream(""));
             streamInputStreamToOutputStream(responseBody, outputStream);
         });
 

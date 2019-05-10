@@ -52,10 +52,10 @@ public final class HttpResponse {
     }
 
     public void setBody(final String body) {
-        metaData.set(STRING_RESPONSE, body);
+        metaData.set(RESPONSE_STRING, body);
     }
 
     public void setBody(final InputStream inputStream) {
-        metaData.set(STREAM_RESPONSE, inputStream);
+        metaData.set(RESPONSE_STREAM, inputStream);
     }
 }

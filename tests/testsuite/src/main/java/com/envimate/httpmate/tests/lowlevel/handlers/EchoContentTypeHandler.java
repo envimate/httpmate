@@ -26,7 +26,7 @@ import com.envimate.httpmate.handler.Handler;
 import com.envimate.httpmate.http.ContentType;
 
 import static com.envimate.httpmate.HttpMateChainKeys.CONTENT_TYPE;
-import static com.envimate.httpmate.HttpMateChainKeys.STRING_RESPONSE;
+import static com.envimate.httpmate.HttpMateChainKeys.RESPONSE_STRING;
 
 public final class EchoContentTypeHandler implements Handler {
 
@@ -37,6 +37,6 @@ public final class EchoContentTypeHandler implements Handler {
     @Override
     public void handle(final MetaData metaData) {
         final ContentType contentType = metaData.get(CONTENT_TYPE);
-        metaData.set(STRING_RESPONSE, contentType.internalValueForMapping());
+        metaData.set(RESPONSE_STRING, contentType.internalValueForMapping());
     }
 }

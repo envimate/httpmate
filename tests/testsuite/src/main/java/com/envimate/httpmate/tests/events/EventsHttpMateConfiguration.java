@@ -29,7 +29,7 @@ import com.envimate.messageMate.messageBus.MessageBusType;
 
 import java.util.HashMap;
 
-import static com.envimate.httpmate.HttpMate.aHttpMateConfiguredAs;
+import static com.envimate.httpmate.HttpMate.anHttpMateConfiguredAs;
 import static com.envimate.httpmate.HttpMateChainKeys.BODY_STRING;
 import static com.envimate.httpmate.events.EventDrivenBuilder.EVENT_DRIVEN;
 import static com.envimate.httpmate.http.HttpRequestMethod.GET;
@@ -48,7 +48,7 @@ public final class EventsHttpMateConfiguration {
                 .withAsynchronousConfiguration(constantPoolSizeAsynchronousPipeConfiguration(4))
                 .build();
 
-        final HttpMate httpMate = aHttpMateConfiguredAs(EVENT_DRIVEN).attachedTo(messageBus)
+        final HttpMate httpMate = anHttpMateConfiguredAs(EVENT_DRIVEN).attachedTo(messageBus)
                 .triggeringTheEvent("trigger").forRequestPath("/trigger").andRequestMethod(GET)
                 .mappingResponsesUsing((event, metaData) -> metaData.set(BODY_STRING, event.toString()))
                 .build();

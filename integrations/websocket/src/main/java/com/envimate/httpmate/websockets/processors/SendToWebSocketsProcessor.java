@@ -31,7 +31,7 @@ import lombok.ToString;
 
 import java.util.List;
 
-import static com.envimate.httpmate.HttpMateChainKeys.STRING_RESPONSE;
+import static com.envimate.httpmate.HttpMateChainKeys.RESPONSE_STRING;
 import static com.envimate.httpmate.websockets.WebsocketChainKeys.RECIPIENT_WEBSOCKETS;
 
 @ToString
@@ -46,7 +46,7 @@ public final class SendToWebSocketsProcessor implements Processor {
 
     @Override
     public void apply(final MetaData metaData) {
-        metaData.getOptional(STRING_RESPONSE).ifPresent(message -> {
+        metaData.getOptional(RESPONSE_STRING).ifPresent(message -> {
             //final WebSocketId webSocketId = metaData.get(WEBSOCKET_ID);
             //final WebSocketRegistry registry = metaData.get(WEBSOCKET_REGISTRY);
             final List<WebSocket> webSockets = metaData.get(RECIPIENT_WEBSOCKETS);

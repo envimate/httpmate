@@ -30,7 +30,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
 import static com.envimate.httpmate.HttpMateChainKeys.HEADERS;
-import static com.envimate.httpmate.HttpMateChainKeys.STRING_RESPONSE;
+import static com.envimate.httpmate.HttpMateChainKeys.RESPONSE_STRING;
 
 @ToString
 @EqualsAndHashCode
@@ -45,6 +45,6 @@ public final class FooBarHandler implements Handler {
     public void handle(final MetaData metaData) {
         final Headers headers = metaData.get(HEADERS);
         final String foo = headers.getHeader("foo").orElseThrow();
-        metaData.set(STRING_RESPONSE, foo);
+        metaData.set(RESPONSE_STRING, foo);
     }
 }

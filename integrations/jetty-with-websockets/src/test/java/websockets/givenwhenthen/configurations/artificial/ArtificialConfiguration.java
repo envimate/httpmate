@@ -50,7 +50,7 @@ import websockets.givenwhenthen.configurations.artificial.usecases.queryfoo.Quer
 
 import java.util.Map;
 
-import static com.envimate.httpmate.HttpMate.aHttpMateConfiguredAs;
+import static com.envimate.httpmate.HttpMate.anHttpMateConfiguredAs;
 import static com.envimate.httpmate.HttpMateChainKeys.*;
 import static com.envimate.httpmate.convenience.configurators.Configurators.toLogUsing;
 import static com.envimate.httpmate.events.EventDrivenBuilder.EVENT_DRIVEN;
@@ -113,7 +113,7 @@ public final class ArtificialConfiguration {
 
         useCaseAdapter.attachTo(messageBus);
 
-        final HttpMate httpMate = aHttpMateConfiguredAs(EVENT_DRIVEN).attachedTo(messageBus)
+        final HttpMate httpMate = anHttpMateConfiguredAs(EVENT_DRIVEN).attachedTo(messageBus)
                 .triggeringTheEvent("NormalUseCase").forRequestPath("/normal").andRequestMethod(HttpRequestMethod.GET)
                 .triggeringTheEvent("BothUseCase").forRequestPath("/both").andRequestMethod(HttpRequestMethod.GET)
                 .triggeringTheEvent("CloseUseCase").when(webSocketIsTaggedWith("CLOSE"))
@@ -128,7 +128,7 @@ public final class ArtificialConfiguration {
                 .triggeringTheEvent("QueryParameter").when(webSocketIsTaggedWith("QUERY"))
                 .triggeringTheEvent("HeaderParameter").when(webSocketIsTaggedWith("HEADER"))
                 .handlingTheEvent("CloseEvent").by(closingAllWebSocketsThat((metaData, event) -> true))
-                .mappingResponsesUsing((event, metaData) -> metaData.set(STRING_RESPONSE, event.toString()))
+                .mappingResponsesUsing((event, metaData) -> metaData.set(RESPONSE_STRING, event.toString()))
                 .configured(toAuthenticateRequests().beforeBodyProcessing().using(metaData -> metaData.get(QUERY_PARAMETERS).getQueryParameter("username")))
                 .configured(toAuthenticateRequests().beforeBodyProcessing().using(metaData -> metaData.get(HEADERS).getHeader("username")))
                 .configured(toAuthorizeRequests().beforeBodyProcessing().using(metaData -> {

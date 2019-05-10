@@ -77,10 +77,10 @@ public final class HttpMate {
     }
 
     public static LowLevelBuilder aLowLevelHttpMate() {
-        return aHttpMateConfiguredAs(LOW_LEVEL);
+        return anHttpMateConfiguredAs(LOW_LEVEL);
     }
 
-    public static <T> T aHttpMateConfiguredAs(final HttpMateConfigurationType<T> type) {
+    public static <T> T anHttpMateConfiguredAs(final HttpMateConfigurationType<T> type) {
         validateNotNull(type, "type");
         return type.configure();
     }

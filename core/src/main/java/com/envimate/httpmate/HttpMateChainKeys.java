@@ -60,8 +60,8 @@ public final class HttpMateChainKeys {
     public static final MetaDataKey<Headers> HEADERS = metaDataKey("HEADERS");
     public static final MetaDataKey<ContentType> CONTENT_TYPE = metaDataKey("CONTENT_TYPE");
 
-    public static final MetaDataKey<String> STRING_RESPONSE = metaDataKey("STRING_RESPONSE");
-    public static final MetaDataKey<InputStream> STREAM_RESPONSE = metaDataKey("STREAM_RESPONSE");
+    public static final MetaDataKey<String> RESPONSE_STRING = metaDataKey("RESPONSE_STRING");
+    public static final MetaDataKey<InputStream> RESPONSE_STREAM = metaDataKey("RESPONSE_STREAM");
     public static final MetaDataKey<Integer> RESPONSE_STATUS = metaDataKey("RESPONSE_STATUS");
     public static final MetaDataKey<Map<String, String>> RESPONSE_HEADERS = metaDataKey("RESPONSE_HEADERS");
 }

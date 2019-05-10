@@ -57,7 +57,7 @@ public final class ServletHandling {
             final int responseStatus = metaData.get(RESPONSE_STATUS);
             response.setStatus(responseStatus);
             final OutputStream outputStream = response.getOutputStream();
-            final InputStream responseBody = metaData.getOptional(STREAM_RESPONSE).orElseGet(() -> stringToInputStream(""));
+            final InputStream responseBody = metaData.getOptional(RESPONSE_STREAM).orElseGet(() -> stringToInputStream(""));
             streamInputStreamToOutputStream(responseBody, outputStream);
         });
     }
