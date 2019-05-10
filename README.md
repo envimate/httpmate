@@ -6,9 +6,16 @@
 
 HttpMate is an http framework that allows you to "just publish my business logic as HTTP endpoint".
 It's non-invasive, flexible and ultra-extendable and offers you 3 modes of handling http requests - UseCase driven, 
-low-level http and event-driven request handling.
+low-level http and event-driven request handling, as well as a mix of those modes.
+
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
 
 Let's see some low-level example:
+
 
 ```
 final HttpMate httpMate = HttpMate.aLowLevelHttpMate()
