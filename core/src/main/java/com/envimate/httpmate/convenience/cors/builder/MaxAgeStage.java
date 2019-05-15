@@ -19,10 +19,23 @@
  * under the License.
  */
 
-package com.envimate.httpmate.convenience.cors;
+package com.envimate.httpmate.convenience.cors.builder;
 
-import com.envimate.httpmate.http.HttpRequestMethod;
+import com.envimate.httpmate.chains.Configurator;
+import com.envimate.httpmate.convenience.cors.domain.MaxAge;
 
-public interface MethodsStage {
-    OriginStage usingTheHttpMethods(HttpRequestMethod... methods);
+import static com.envimate.httpmate.convenience.cors.domain.MaxAge.maxAgeInSeconds;
+import static com.envimate.httpmate.convenience.cors.domain.MaxAge.undefinedMaxAge;
+
+public interface MaxAgeStage {
+
+    default Configurator withTheBrowserDefaultTimeOutSettings() {
+        return withTheMaximumAge(undefinedMaxAge());
+    }
+
+    default Configurator thatWillTimeOutAfterSeconds(final int timeout) {
+        return withTheMaximumAge(maxAgeInSeconds(timeout));
+    }
+
+    Configurator withTheMaximumAge(MaxAge maximumAge);
 }

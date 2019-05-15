@@ -37,16 +37,16 @@ import websockets.givenwhenthen.configurations.chat.usecases.SendMessageUseCase;
 import java.util.Map;
 import java.util.Objects;
 
-import static com.envimate.httpmate.HttpMate.aHttpMateConfiguredAs;
+import static com.envimate.httpmate.HttpMate.anHttpMateConfiguredAs;
 import static com.envimate.httpmate.HttpMateChainKeys.*;
 import static com.envimate.httpmate.convenience.configurators.Configurators.toLogUsing;
 import static com.envimate.httpmate.events.EventDrivenBuilder.EVENT_DRIVEN;
-import static com.envimate.httpmate.logger.Loggers.stderrLogger;
 import static com.envimate.httpmate.http.ContentType.json;
 import static com.envimate.httpmate.http.HttpRequestMethod.GET;
+import static com.envimate.httpmate.logger.Loggers.stderrLogger;
 import static com.envimate.httpmate.security.Configurators.toAuthenticateRequests;
 import static com.envimate.httpmate.security.Configurators.toAuthorizeRequests;
-import static com.envimate.httpmate.unpacking.BodyMapParsingModule.aBodyMapParsingModule;
+import static com.envimate.httpmate.unpacking.BodyMapParsingModule.toParseBodiesBy;
 import static com.envimate.httpmate.websockets.WebSocketsConfigurator.toUseWebSockets;
 import static com.envimate.httpmate.websocketsevents.Conditions.forwardingItToAllWebSocketsThat;
 import static com.envimate.messageMate.internal.pipe.configuration.AsynchronousConfiguration.constantPoolSizeAsynchronousPipeConfiguration;
@@ -97,7 +97,7 @@ public final class ChatConfiguration {
 
         useCaseAdapter.attachTo(messageBus);
 
-        final HttpMate httpMate = aHttpMateConfiguredAs(EVENT_DRIVEN).attachedTo(messageBus)
+        final HttpMate httpMate = anHttpMateConfiguredAs(EVENT_DRIVEN).attachedTo(messageBus)
                 .triggeringTheEvent("ChatMessage").forRequestPath("/send").andRequestMethod(GET)
                 .handlingTheEvent("NewMessageEvent").by(forwardingItToAllWebSocketsThat((metaData, event) -> {
                     final String username = metaData.getAs(AUTHENTICATION_INFORMATION, User.class)
@@ -114,7 +114,7 @@ public final class ChatConfiguration {
                 .configured(toLogUsing(stderrLogger()))
                 .configured(toUseWebSockets()
                         .acceptingWebSocketsToThePath("/subscribe").saving(AUTHENTICATION_INFORMATION))
-                .usingTheModule(aBodyMapParsingModule()
+                .configured(toParseBodiesBy()
                         .parsingContentType(json()).with(body -> new Gson().fromJson(body, Map.class))
                         .usingTheDefaultContentType(json()))
                 .build();

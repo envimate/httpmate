@@ -40,8 +40,6 @@ import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
-import java.util.Map;
-import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 
 import static com.envimate.httpmate.CoreModule.coreModule;
@@ -97,7 +95,7 @@ public final class UseCaseDrivenBuilder {
 
         @Override
         public <X> Using<SerializationAndDeserializationStage<HttpMateBuilder>, RequestMapper<X>>
-        mappingUseCaseParametersThat(final BiPredicate<Class<?>, Map<String, Object>> filter) {
+        mappingUseCaseParametersThat(final EventFilter<?> filter) {
             return mapper -> {
                 useCasesModule.addRequestMapper(filter, mapper);
                 return this;

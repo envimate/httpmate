@@ -19,8 +19,10 @@
  * under the License.
  */
 
-package com.envimate.httpmate.convenience.cors;
+package com.envimate.httpmate.convenience.cors.policy;
 
-public interface OriginStage {
-    HeadersStage shouldOnlyOriginateFromSitesHostedOn(String origin);
+import com.envimate.httpmate.convenience.cors.domain.RequestedHeader;
+
+public interface AllowedHeaders {
+    boolean isAllowed(RequestedHeader requestedHeader);
 }

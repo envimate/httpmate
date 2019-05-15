@@ -54,10 +54,10 @@ public final class Then {
     }
 
     public Then theReponseContainsTheHeader(final String key, final String value) {
-        final String normalizedKey = key.toLowerCase();
         final Map<String, String> headers = response.getHeaders();
         final Map<String, String> normalizedHeaders = new HashMap<>();
         headers.forEach((k, v) -> normalizedHeaders.put(k.toLowerCase(), v));
+        final String normalizedKey = key.toLowerCase();
         assertThat(normalizedHeaders.keySet(), hasItem(normalizedKey));
         final String actualValue = normalizedHeaders.get(normalizedKey);
         assertThat(actualValue, is(value));

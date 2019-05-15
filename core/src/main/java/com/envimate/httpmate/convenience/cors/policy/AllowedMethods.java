@@ -19,10 +19,10 @@
  * under the License.
  */
 
-package com.envimate.httpmate.mapmate.builder;
+package com.envimate.httpmate.convenience.cors.policy;
 
-import com.envimate.mapmate.deserialization.Deserializer;
+import com.envimate.httpmate.convenience.cors.domain.RequestedMethod;
 
-public interface DeserializerStage<T> {
-    T andTheDeserializer(Deserializer deserializer);
+public interface AllowedMethods {
+    boolean isAllowed(RequestedMethod requestedMethod);
 }

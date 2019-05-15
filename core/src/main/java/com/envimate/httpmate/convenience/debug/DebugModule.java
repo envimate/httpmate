@@ -31,14 +31,16 @@ import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
-import static com.envimate.httpmate.HttpMateChainKeys.PATH;
-import static com.envimate.httpmate.HttpMateChainKeys.STRING_RESPONSE;
+import java.util.HashMap;
+
+import static com.envimate.httpmate.HttpMateChainKeys.*;
 import static com.envimate.httpmate.HttpMateChains.POST_PROCESS;
 import static com.envimate.httpmate.HttpMateChains.PRE_PROCESS;
 import static com.envimate.httpmate.chains.ChainName.chainName;
 import static com.envimate.httpmate.chains.ChainRegistry.CHAIN_REGISTRY;
 import static com.envimate.httpmate.chains.rules.Drop.drop;
 import static com.envimate.httpmate.chains.rules.Jump.jumpTo;
+import static com.envimate.httpmate.http.Http.StatusCodes.OK;
 import static com.envimate.httpmate.path.PathTemplate.pathTemplate;
 
 @ToString
@@ -59,8 +61,9 @@ public final class DebugModule implements ChainModule {
         extender.addProcessor(DEBUG_CHAIN, metaData -> {
             final String dump = registry.dump();
             metaData.set(STRING_RESPONSE, dump);
+            metaData.set(RESPONSE_STATUS, OK);
+            metaData.set(RESPONSE_HEADERS, new HashMap<>());
         });
-
         extender.routeIf(PRE_PROCESS, jumpTo(DEBUG_CHAIN), PATH, PATH_TEMPLATE::matches, PATH_TEMPLATE.toString());
     }
 }

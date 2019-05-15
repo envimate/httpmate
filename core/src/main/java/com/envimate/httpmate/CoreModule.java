@@ -94,7 +94,7 @@ public final class CoreModule implements ChainModule {
     }
 
     public void addExceptionMapper(final Predicate<Throwable> filter,
-                            final ExceptionMapper<Throwable> responseMapper) {
+                                   final ExceptionMapper<Throwable> responseMapper) {
         validateNotNull(filter, "filter");
         validateNotNull(responseMapper, "responseMapper");
         this.exceptionMappers.put(filter, responseMapper);

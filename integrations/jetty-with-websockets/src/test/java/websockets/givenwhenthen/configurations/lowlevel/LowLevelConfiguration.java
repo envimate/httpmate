@@ -27,7 +27,6 @@ import websockets.givenwhenthen.configurations.TestConfiguration;
 import static com.envimate.httpmate.HttpMate.aLowLevelHttpMate;
 import static com.envimate.httpmate.HttpMateChainKeys.PATH;
 import static com.envimate.httpmate.convenience.configurators.Configurators.toLogUsing;
-import static com.envimate.httpmate.websockets.WebSocketModule.webSocketModule;
 import static com.envimate.httpmate.websockets.WebSocketsConfigurator.toUseWebSockets;
 import static com.envimate.httpmate.websockets.WebsocketChainKeys.IS_WEBSOCKET_MESSAGE;
 import static websockets.givenwhenthen.configurations.TestConfiguration.testConfiguration;
@@ -47,7 +46,7 @@ public final class LowLevelConfiguration {
                 .callingTheHandler(fooBarHandler()).when(metaData -> metaData.get(PATH).matches("/foobar"))
                 .callingTheHandler(loggerHandler()).when(metaData -> metaData.get(PATH).matches("/logger"))
                 .callingTheHandler(echoHandler()).when(metaData -> metaData.getOptional(IS_WEBSOCKET_MESSAGE).orElse(false))
-                .thatIs().usingTheModule(webSocketModule())
+                .thatIs()
                 .configured(toUseWebSockets()
                         .acceptingWebSocketsToThePath("/").taggedBy("ROOT")
                         .acceptingWebSocketsToThePath("/foobar").taggedBy("FOOBAR")

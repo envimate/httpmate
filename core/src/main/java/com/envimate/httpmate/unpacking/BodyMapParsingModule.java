@@ -35,7 +35,6 @@ import java.util.function.Function;
 
 import static com.envimate.httpmate.HttpMateChainKeys.*;
 import static com.envimate.httpmate.HttpMateChains.PROCESS_BODY_STRING;
-import static com.envimate.httpmate.unpacking.BodyMapParsingModuleBuilder.bodyMapParsingModuleBuilder;
 import static com.envimate.httpmate.unpacking.UnsupportedContentTypeException.unsupportedContentTypeException;
 import static com.envimate.httpmate.util.Validators.validateNotNull;
 import static java.lang.String.format;
@@ -49,12 +48,12 @@ public final class BodyMapParsingModule implements ChainModule {
     private final ContentType defaultContentType;
     private final Map<ContentType, Function<String, Map<String, Object>>> bodyParsers;
 
-    public static BodyMapParsingModuleBuilder aBodyMapParsingModule() {
-        return bodyMapParsingModuleBuilder();
+    public static BodyMapParsingModuleBuilder toParseBodiesBy() {
+        return BodyMapParsingModuleBuilder.toParseBodiesBy();
     }
 
-    static ChainModule bodyMapParsingModule(final ContentType defaultContentType,
-                                        final Map<ContentType, Function<String, Map<String, Object>>> bodyParsers) {
+    public static ChainModule bodyMapParsingModule(final ContentType defaultContentType,
+                                                   final Map<ContentType, Function<String, Map<String, Object>>> bodyParsers) {
         validateNotNull(defaultContentType, "defaultContentType");
         validateNotNull(bodyParsers, "bodyParsers");
         if (!bodyParsers.containsKey(defaultContentType)) {

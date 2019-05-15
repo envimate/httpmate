@@ -22,11 +22,12 @@
 package com.envimate.httpmate.mapmate;
 
 import com.envimate.httpmate.chains.ChainModule;
-import com.envimate.httpmate.mapmate.builder.MarshallerTypeStage;
-import com.envimate.httpmate.mapmate.builder.SerializerStage;
 import com.envimate.httpmate.http.ContentType;
-import com.envimate.httpmate.unpacking.BodyMapParsingModuleBuilder;
+import com.envimate.httpmate.mapmate.builder.DeserializerStage;
+import com.envimate.httpmate.mapmate.builder.MarshallerTypeStage;
+import com.envimate.httpmate.unpacking.BodyMapParsingModule;
 import com.envimate.mapmate.marshalling.MarshallingType;
+import com.envimate.mapmate.serialization.Serializer;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
@@ -34,16 +35,25 @@ import lombok.ToString;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
+import java.util.function.Function;
 
 import static com.envimate.httpmate.mapmate.MapMateSerializerAndDeserializer.mapMateSerializerAndDeserializer;
-import static com.envimate.httpmate.unpacking.BodyMapParsingModule.aBodyMapParsingModule;
 import static com.envimate.httpmate.util.Validators.validateNotNull;
+import static java.util.Map.of;
+import static java.util.stream.Collectors.toMap;
 
 @ToString
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class MapMateIntegrationBuilder {
+    private static final Map<MarshallingType, ContentType> DEFAULT_CONTENT_TYPE_MAPPINGS = of(
+            MarshallingType.json(), ContentType.json(),
+            MarshallingType.xml(), ContentType.xml(),
+            MarshallingType.yaml(), ContentType.yaml()
+    );
     private final Map<ContentType, MarshallingType> contentTypeMappings = new HashMap<>();
+    private ContentType defaultContentType = ContentType.json();
 
     static MapMateIntegrationBuilder mapMate() {
         return new MapMateIntegrationBuilder();
@@ -58,20 +68,33 @@ public final class MapMateIntegrationBuilder {
         };
     }
 
-    public MapMateIntegrationBuilder mappingAllStandardContentTypes() {
-        matchingTheContentType(ContentType.json()).toTheMarshallerType(MarshallingType.json());
-        matchingTheContentType(ContentType.xml()).toTheMarshallerType(MarshallingType.xml());
-        matchingTheContentType(ContentType.yaml()).toTheMarshallerType(MarshallingType.yaml());
+    public MapMateIntegrationBuilder assumingTheDefaultContentType(final ContentType defaultContentType) {
+        validateNotNull(defaultContentType, "defaultContentType");
+        this.defaultContentType = defaultContentType;
         return this;
     }
 
-    public SerializerStage<MapMateSerializerAndDeserializer> assumingTheDefaultContentType(final ContentType defaultContentType) {
-        return serializer -> deserializer -> {
-            final BodyMapParsingModuleBuilder builder = aBodyMapParsingModule();
-            contentTypeMappings.forEach((contentType, marshallingType) ->
-                    builder.parsingContentType(contentType)
-                            .with(input -> deserializer.deserializeToMap(input, marshallingType)));
-            final ChainModule bodyMapParsingModule = builder.usingTheDefaultContentType(defaultContentType);
+    public DeserializerStage<MapMateSerializerAndDeserializer> usingTheSerializer(final Serializer serializer) {
+        return deserializer -> {
+            final Set<MarshallingType> supportedMarshallingTypes = deserializer.supportedMarshallingTypes();
+            for (final MarshallingType supportedMarshallingType : supportedMarshallingTypes) {
+                if (!contentTypeMappings.values().contains(supportedMarshallingType)) {
+                    if (DEFAULT_CONTENT_TYPE_MAPPINGS.containsKey(supportedMarshallingType)) {
+                        contentTypeMappings.put(
+                                DEFAULT_CONTENT_TYPE_MAPPINGS.get(supportedMarshallingType),
+                                supportedMarshallingType);
+                    }
+                }
+            }
+
+            final Map<ContentType, Function<String, Map<String, Object>>> bodyParsers = contentTypeMappings.entrySet()
+                    .stream()
+                    .collect(toMap(Map.Entry::getKey, entry -> {
+                        final MarshallingType marshallingType = entry.getValue();
+                        return (Function<String, Map<String, Object>>) input
+                                -> deserializer.deserializeToMap(input, marshallingType);
+                    }));
+            final ChainModule bodyMapParsingModule = BodyMapParsingModule.bodyMapParsingModule(defaultContentType, bodyParsers);
             return mapMateSerializerAndDeserializer(
                     deserializer, serializer, bodyMapParsingModule, defaultContentType, contentTypeMappings);
         };

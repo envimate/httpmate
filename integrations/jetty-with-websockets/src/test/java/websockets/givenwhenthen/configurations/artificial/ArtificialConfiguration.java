@@ -22,8 +22,8 @@
 package websockets.givenwhenthen.configurations.artificial;
 
 import com.envimate.httpmate.HttpMate;
-import com.envimate.httpmate.path.Path;
 import com.envimate.httpmate.http.HttpRequestMethod;
+import com.envimate.httpmate.path.Path;
 import com.envimate.messageMate.messageBus.MessageBus;
 import com.envimate.messageMate.messageBus.MessageBusType;
 import com.envimate.messageMate.useCaseAdapter.UseCaseAdapter;
@@ -50,15 +50,15 @@ import websockets.givenwhenthen.configurations.artificial.usecases.queryfoo.Quer
 
 import java.util.Map;
 
-import static com.envimate.httpmate.HttpMate.aHttpMateConfiguredAs;
+import static com.envimate.httpmate.HttpMate.anHttpMateConfiguredAs;
 import static com.envimate.httpmate.HttpMateChainKeys.*;
 import static com.envimate.httpmate.convenience.configurators.Configurators.toLogUsing;
 import static com.envimate.httpmate.events.EventDrivenBuilder.EVENT_DRIVEN;
-import static com.envimate.httpmate.logger.Loggers.stderrLogger;
 import static com.envimate.httpmate.http.ContentType.json;
+import static com.envimate.httpmate.logger.Loggers.stderrLogger;
 import static com.envimate.httpmate.security.Configurators.toAuthenticateRequests;
 import static com.envimate.httpmate.security.Configurators.toAuthorizeRequests;
-import static com.envimate.httpmate.unpacking.BodyMapParsingModule.aBodyMapParsingModule;
+import static com.envimate.httpmate.unpacking.BodyMapParsingModule.toParseBodiesBy;
 import static com.envimate.httpmate.websockets.WebSocketsConfigurator.toUseWebSockets;
 import static com.envimate.httpmate.websocketsevents.Conditions.closingAllWebSocketsThat;
 import static com.envimate.httpmate.websocketsevents.Conditions.webSocketIsTaggedWith;
@@ -113,7 +113,7 @@ public final class ArtificialConfiguration {
 
         useCaseAdapter.attachTo(messageBus);
 
-        final HttpMate httpMate = aHttpMateConfiguredAs(EVENT_DRIVEN).attachedTo(messageBus)
+        final HttpMate httpMate = anHttpMateConfiguredAs(EVENT_DRIVEN).attachedTo(messageBus)
                 .triggeringTheEvent("NormalUseCase").forRequestPath("/normal").andRequestMethod(HttpRequestMethod.GET)
                 .triggeringTheEvent("BothUseCase").forRequestPath("/both").andRequestMethod(HttpRequestMethod.GET)
                 .triggeringTheEvent("CloseUseCase").when(webSocketIsTaggedWith("CLOSE"))
@@ -153,7 +153,7 @@ public final class ArtificialConfiguration {
                         .acceptingWebSocketsToThePath("/query").taggedBy("QUERY")
                         .acceptingWebSocketsToThePath("/header").taggedBy("HEADER")
                         .acceptingWebSocketsToThePath("/exception").taggedBy("EXCEPTION"))
-                .usingTheModule(aBodyMapParsingModule()
+                .configured(toParseBodiesBy()
                         .parsingContentType(json()).with(body -> new Gson().fromJson(body, Map.class))
                         .usingTheDefaultContentType(json()))
                 .build();

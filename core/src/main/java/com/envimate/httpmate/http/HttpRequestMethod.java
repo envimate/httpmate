@@ -22,7 +22,7 @@
 package com.envimate.httpmate.http;
 
 public enum HttpRequestMethod {
-    GET, POST, PUT, DELETE, OPTIONS;
+    GET, POST, PUT, DELETE, OPTIONS, HEAD;
 
     public static HttpRequestMethod parse(final String requestMethod) {
         return valueOf(requestMethod);

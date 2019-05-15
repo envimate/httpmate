@@ -19,10 +19,10 @@
  * under the License.
  */
 
-package com.envimate.httpmate.mapmate.builder;
+package com.envimate.httpmate.usecases;
 
-import com.envimate.mapmate.deserialization.Deserializer;
+import java.util.Map;
 
-public interface DeserializerStage<T> {
-    T andTheDeserializer(Deserializer deserializer);
+public interface EventFilter<T> {
+    boolean filter(Class<T> clazz, Map<String, Object> event);
 }

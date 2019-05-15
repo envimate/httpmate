@@ -56,12 +56,6 @@ public final class HttpMateBuilder {
         return this;
     }
 
-    public HttpMateBuilder usingTheModule(final ChainModule module) {
-        validateNotNull(module, "module");
-        modules.add(module);
-        return this;
-    }
-
     public HttpMate build() {
         final ChainRegistryBuilder chainRegistryBuilder = chainRegistryBuilder();
         modules.forEach(chainRegistryBuilder::addModule);

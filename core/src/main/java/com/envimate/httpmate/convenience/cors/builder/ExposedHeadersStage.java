@@ -19,10 +19,13 @@
  * under the License.
  */
 
-package com.envimate.httpmate.convenience.cors;
+package com.envimate.httpmate.convenience.cors.builder;
 
-import com.envimate.httpmate.chains.Configurator;
+public interface ExposedHeadersStage {
 
-public interface HeadersStage {
-    Configurator andOnlyContainTheHeaders(String... headers);
+    default CredentialsStage exposingNoHeadersExceptForSimpleHeaders() {
+        return exposingTheHeaders();
+    }
+
+    CredentialsStage exposingTheHeaders(String... exposedHeaders);
 }

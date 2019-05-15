@@ -19,44 +19,38 @@
  * under the License.
  */
 
-package com.envimate.httpmate.unpacking;
+package com.envimate.httpmate.convenience.cors.domain;
 
-import com.envimate.httpmate.chains.Configurator;
-import com.envimate.httpmate.http.ContentType;
+import com.envimate.httpmate.chains.MetaData;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.function.Function;
+import java.util.Optional;
 
-import static com.envimate.httpmate.chains.Configurator.toUseModules;
-import static com.envimate.httpmate.unpacking.BodyMapParsingModule.bodyMapParsingModule;
+import static com.envimate.httpmate.HttpMateChainKeys.HEADERS;
+import static com.envimate.httpmate.convenience.cors.Cors.ORIGIN;
 import static com.envimate.httpmate.util.Validators.validateNotNull;
+import static com.envimate.httpmate.util.Validators.validateNotNullNorEmpty;
 
 @ToString
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-public final class BodyMapParsingModuleBuilder {
-    private final Map<ContentType, Function<String, Map<String, Object>>> bodyParsers;
+public final class Origin {
+    private final String origin;
 
-    static BodyMapParsingModuleBuilder toParseBodiesBy() {
-        return new BodyMapParsingModuleBuilder(new HashMap<>());
+    public static Optional<Origin> load(final MetaData metaData) {
+        validateNotNull(metaData, "metaData");
+        return metaData.get(HEADERS).getHeader(ORIGIN).map(Origin::fromString);
     }
 
-    public With parsingContentType(final ContentType contentType) {
-        validateNotNull(contentType, "contentType");
-        return parser -> {
-            validateNotNull(parser, "parser");
-            bodyParsers.put(contentType, parser);
-            return this;
-        };
+    public static Origin fromString(final String origin) {
+        validateNotNullNorEmpty(origin, "origin");
+        return new Origin(origin);
     }
 
-    public Configurator usingTheDefaultContentType(final ContentType contentType) {
-        validateNotNull(contentType, "contentType");
-        return toUseModules(bodyMapParsingModule(contentType, bodyParsers));
+    public String internalValueForMapping() {
+        return origin;
     }
 }

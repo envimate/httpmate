@@ -21,11 +21,18 @@
 
 package com.envimate.httpmate.convenience.cors;
 
+import com.envimate.httpmate.convenience.cors.builder.MethodsStage;
+import com.envimate.httpmate.convenience.cors.domain.ExposedHeader;
+import com.envimate.httpmate.convenience.cors.domain.ExposedHeaders;
+import com.envimate.httpmate.convenience.cors.policy.ResourceSharingPolicy;
+
 import static com.envimate.httpmate.chains.Configurator.toUseModules;
 import static com.envimate.httpmate.convenience.cors.CorsModule.corsModule;
+import static com.envimate.httpmate.convenience.cors.domain.ExposedHeaders.exposedHeaders;
+import static com.envimate.httpmate.convenience.cors.policy.ResourceSharingPolicy.resourceSharingPolicy;
 import static com.envimate.httpmate.util.Validators.validateNotNull;
-import static com.envimate.httpmate.util.Validators.validateNotNullNorEmpty;
-import static java.util.Arrays.asList;
+import static java.util.Arrays.stream;
+import static java.util.stream.Collectors.toList;
 
 public final class CorsConfigurator {
 
@@ -33,11 +40,18 @@ public final class CorsConfigurator {
     }
 
     public static MethodsStage toProtectAjaxRequestsAgainstCsrfAttacksByTellingTheBrowserThatRequests() {
-        return methods -> origin -> headers -> {
-            validateNotNull(methods, "methods");
-            validateNotNullNorEmpty(origin, "origin");
-            validateNotNull(headers, "headers");
-            return toUseModules(corsModule(origin, asList(methods), asList(headers)));
+        return allowedMethods -> allowedOrigins -> allowedHeaders -> exposedHeaders -> credentialsSupport -> maximumAge -> {
+            validateNotNull(allowedMethods, "allowedMethods");
+            validateNotNull(allowedOrigins, "allowedOrigins");
+            validateNotNull(allowedHeaders, "allowedHeaders");
+            validateNotNull(exposedHeaders, "exposedHeaders");
+            validateNotNull(maximumAge, "maximumAge");
+            final ExposedHeaders exposedHeadersObject = exposedHeaders(stream(exposedHeaders)
+                    .map(ExposedHeader::exposedHeader)
+                    .collect(toList()));
+            final ResourceSharingPolicy resourceSharingPolicy = resourceSharingPolicy(
+                    allowedOrigins, allowedMethods, allowedHeaders, exposedHeadersObject, credentialsSupport, maximumAge);
+            return toUseModules(corsModule(resourceSharingPolicy));
         };
     }
 }

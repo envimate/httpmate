@@ -19,10 +19,17 @@
  * under the License.
  */
 
-package com.envimate.httpmate.mapmate.builder;
+package com.envimate.httpmate.convenience.cors.builder;
 
-import com.envimate.mapmate.deserialization.Deserializer;
+public interface CredentialsStage {
 
-public interface DeserializerStage<T> {
-    T andTheDeserializer(Deserializer deserializer);
+    default MaxAgeStage requiringResourceUsersToForwardCredentials() {
+        return withCredentialsSupport(true);
+    }
+
+    default MaxAgeStage notRequiringRessourceUsersToForwardCredentials() {
+        return withCredentialsSupport(false);
+    }
+
+    MaxAgeStage withCredentialsSupport(boolean credentialsSupport);
 }

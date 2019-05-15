@@ -25,10 +25,12 @@ import com.envimate.httpmate.HttpMate;
 
 import static com.envimate.httpmate.HttpMate.aLowLevelHttpMate;
 import static com.envimate.httpmate.convenience.configurators.Configurators.toLogUsing;
+import static com.envimate.httpmate.convenience.debug.DebugConfigurator.toBeInDebugMode;
 import static com.envimate.httpmate.http.HttpRequestMethod.*;
 import static com.envimate.httpmate.tests.lowlevel.handlers.ContentTypeInResponseHandler.contentTypeInResponseHandler;
 import static com.envimate.httpmate.tests.lowlevel.handlers.EchoBodyHandler.echoBodyHandler;
 import static com.envimate.httpmate.tests.lowlevel.handlers.EchoContentTypeHandler.echoContentTypeHandler;
+import static com.envimate.httpmate.tests.lowlevel.handlers.ExceptionThrowingHandler.exceptionThrowingHandler;
 import static com.envimate.httpmate.tests.lowlevel.handlers.HeadersInResponseHandler.headersInResponseHandler;
 import static com.envimate.httpmate.tests.lowlevel.handlers.LogHandler.logHandler;
 import static com.envimate.httpmate.tests.lowlevel.handlers.MyDownloadHandler.downloadHandler;
@@ -41,7 +43,7 @@ public final class LowLevelHttpMateConfiguration {
 
     public static HttpMate theLowLevelHttpMateInstanceUsedForTesting() {
         logger = new StringBuilder();
-        return aLowLevelHttpMate()
+        final HttpMate httpMate = aLowLevelHttpMate()
                 .callingTheHandler(echoBodyHandler())
                 .forRequestPath("/echo").andRequestMethods(GET, POST, PUT, DELETE)
                 .callingTheHandler(echoContentTypeHandler())
@@ -54,7 +56,12 @@ public final class LowLevelHttpMateConfiguration {
                 .forRequestPath("/log").andRequestMethod(GET)
                 .callingTheHandler(downloadHandler())
                 .forRequestPath("/download").andRequestMethod(GET)
-                .thatIs().configured(toLogUsing((message, metaData) -> logger.append(message)))
+                .callingTheHandler(exceptionThrowingHandler())
+                .forRequestPath("/exception").andRequestMethod(GET)
+                .thatIs()
+                .configured(toLogUsing((message, metaData) -> logger.append(message)))
+                .configured(toBeInDebugMode())
                 .build();
+        return httpMate;
     }
 }

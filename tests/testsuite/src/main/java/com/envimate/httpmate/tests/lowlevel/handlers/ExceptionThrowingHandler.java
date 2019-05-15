@@ -19,10 +19,28 @@
  * under the License.
  */
 
-package com.envimate.httpmate.mapmate.builder;
+package com.envimate.httpmate.tests.lowlevel.handlers;
 
-import com.envimate.mapmate.deserialization.Deserializer;
+import com.envimate.httpmate.convenience.handler.HttpHandler;
+import com.envimate.httpmate.convenience.handler.HttpRequest;
+import com.envimate.httpmate.convenience.handler.HttpResponse;
+import lombok.AccessLevel;
+import lombok.EqualsAndHashCode;
+import lombok.RequiredArgsConstructor;
+import lombok.ToString;
 
-public interface DeserializerStage<T> {
-    T andTheDeserializer(Deserializer deserializer);
+@ToString
+@EqualsAndHashCode
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
+public final class ExceptionThrowingHandler implements HttpHandler {
+
+    public static ExceptionThrowingHandler exceptionThrowingHandler() {
+        return new ExceptionThrowingHandler();
+    }
+
+    @Override
+    public void handle(final HttpRequest request,
+                       final HttpResponse httpResponse) {
+        throw new RuntimeException();
+    }
 }

@@ -63,7 +63,7 @@ import com.google.gson.Gson;
 import java.util.Map;
 import java.util.Objects;
 
-import static com.envimate.httpmate.HttpMate.aHttpMateConfiguredAs;
+import static com.envimate.httpmate.HttpMate.anHttpMateConfiguredAs;
 import static com.envimate.httpmate.HttpMateChainKeys.*;
 import static com.envimate.httpmate.convenience.configurators.Configurators.toCustomizeResponsesUsing;
 import static com.envimate.httpmate.convenience.configurators.Configurators.toLogUsing;
@@ -115,7 +115,7 @@ public final class HttpMateTestConfigurations {
 
     @SuppressWarnings("unchecked")
     public static HttpMate theHttpMateInstanceUsedForTesting() {
-        final HttpMate httpMate = aHttpMateConfiguredAs(USE_CASE_DRIVEN)
+        final HttpMate httpMate = anHttpMateConfiguredAs(USE_CASE_DRIVEN)
                 .servingTheUseCase(TestUseCase.class).forRequestPath("/test").andRequestMethods(GET, POST, PUT, DELETE)
                 .servingTheUseCase(EchoBodyUseCase.class).forRequestPath("/echo_body").andRequestMethods(GET, POST, PUT, DELETE)
                 .servingTheUseCase(MappedExceptionUseCase.class).forRequestPath("/mapped_exception").andRequestMethod(GET)
@@ -158,10 +158,8 @@ public final class HttpMateTestConfigurations {
                 .serializingResponseObjectsOfType(String.class).using(string -> of("response", string))
                 .serializingResponseObjectsOfType(ToStringWrapper.class).using(wrapper -> of("response", wrapper.toString()))
                 .mappingRequestsAndResponsesUsing(mapMate()
-                        .mappingAllStandardContentTypes()
-                        .assumingTheDefaultContentType(json())
-                        .bySerializingUsing(SERIALIZER)
-                        .andDeserializingUsing(DESERIALIZER))
+                        .usingTheSerializer(SERIALIZER)
+                        .andTheDeserializer(DESERIALIZER))
 
                 .configured(toMapExceptions()
                         .ofType(NoHandlerFoundException.class)
@@ -184,8 +182,11 @@ public final class HttpMateTestConfigurations {
 
                 .configured(toProtectAjaxRequestsAgainstCsrfAttacksByTellingTheBrowserThatRequests()
                         .usingTheHttpMethods(GET, POST, PUT, DELETE)
-                        .shouldOnlyOriginateFromSitesHostedOn("*")
-                        .andOnlyContainTheHeaders("X-Custom-Header", "Upgrade-Insecure-Requests"))
+                        .canOriginateFromAnyHost()
+                        .andOnlyContainTheHeaders("X-Custom-Header", "Upgrade-Insecure-Requests")
+                        .exposingNoHeadersExceptForSimpleHeaders()
+                        .notRequiringRessourceUsersToForwardCredentials()
+                        .withTheBrowserDefaultTimeOutSettings())
 
                 .configured(toLogUsing(stderrLogger()))
 

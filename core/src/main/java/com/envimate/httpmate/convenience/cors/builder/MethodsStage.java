@@ -19,10 +19,23 @@
  * under the License.
  */
 
-package com.envimate.httpmate.mapmate.builder;
+package com.envimate.httpmate.convenience.cors.builder;
 
-import com.envimate.mapmate.serialization.Serializer;
+import com.envimate.httpmate.convenience.cors.policy.AllowedMethods;
+import com.envimate.httpmate.http.HttpRequestMethod;
 
-public interface SerializerStage<T> {
-    DeserializerStage<T> bySerializingUsing(Serializer serializer);
+import java.util.List;
+
+import static com.envimate.httpmate.util.Validators.validateNotNull;
+import static java.util.Arrays.asList;
+
+public interface MethodsStage {
+
+    default OriginStage usingTheHttpMethods(final HttpRequestMethod... methods) {
+        validateNotNull(methods, "methods");
+        final List<HttpRequestMethod> methodList = asList(methods);
+        return allowingTheHttpMethods(requestedMethod -> methodList.parallelStream().anyMatch(requestedMethod::matches));
+    }
+
+    OriginStage allowingTheHttpMethods(AllowedMethods allowedMethods);
 }

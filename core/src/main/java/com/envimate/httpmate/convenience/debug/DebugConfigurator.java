@@ -19,10 +19,19 @@
  * under the License.
  */
 
-package com.envimate.httpmate.mapmate.builder;
+package com.envimate.httpmate.convenience.debug;
 
-import com.envimate.mapmate.deserialization.Deserializer;
+import com.envimate.httpmate.chains.Configurator;
 
-public interface DeserializerStage<T> {
-    T andTheDeserializer(Deserializer deserializer);
+import static com.envimate.httpmate.chains.Configurator.toUseModules;
+import static com.envimate.httpmate.convenience.debug.DebugModule.debugModule;
+
+public final class DebugConfigurator {
+
+    private DebugConfigurator() {
+    }
+
+    public static Configurator toBeInDebugMode() {
+        return toUseModules(debugModule());
+    }
 }

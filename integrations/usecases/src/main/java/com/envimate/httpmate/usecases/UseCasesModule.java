@@ -80,13 +80,13 @@ public final class UseCasesModule implements ChainModule {
         useCaseToEventMappings.put(useCaseClass, eventType);
     }
 
-    @SuppressWarnings("unchecked")
-    public void addRequestMapper(final BiPredicate<Class<?>, Map<String, Object>> filter,
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    public void addRequestMapper(final EventFilter filter,
                                  final RequestMapper<?> requestMapper) {
         validateNotNull(filter, "filter");
         validateNotNull(requestMapper, "requestMapper");
         deserializers.add(deserializationStage -> deserializationStage
-                .mappingRequestsToUseCaseParametersThat(filter)
+                .mappingRequestsToUseCaseParametersThat((BiPredicate<Class<?>, Map<String, Object>>) filter::filter)
                 .using((RequestMapper<Object>) requestMapper));
     }
 

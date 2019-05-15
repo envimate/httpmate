@@ -22,14 +22,13 @@
 package com.envimate.httpmate.usecases.builder;
 
 import com.envimate.httpmate.events.builder.Using;
+import com.envimate.httpmate.usecases.EventFilter;
 import com.envimate.httpmate.usecases.usecase.SerializerAndDeserializer;
 import com.envimate.messageMate.useCaseAdapter.mapping.RequestFilters;
 import com.envimate.messageMate.useCaseAdapter.mapping.RequestMapper;
 import com.envimate.messageMate.useCaseAdapter.mapping.ResponseFilters;
 import com.envimate.messageMate.useCaseAdapter.mapping.ResponseMapper;
 
-import java.util.Map;
-import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 
 import static com.envimate.httpmate.usecases.usecase.DelegatingDeserializerAndSerializer.delegatingDeserializerAndSerializer;
@@ -37,17 +36,17 @@ import static com.envimate.messageMate.useCaseAdapter.mapping.RequestFilters.are
 
 public interface SerializationAndDeserializationStage<T> {
 
-    <X> Using<SerializationAndDeserializationStage<T>, RequestMapper<X>> mappingUseCaseParametersThat(
-            BiPredicate<Class<?>, Map<String, Object>> filter);
+    <X> Using<SerializationAndDeserializationStage<T>, RequestMapper<X>> mappingUseCaseParametersThat(EventFilter<?> filter);
 
     Using<SerializationAndDeserializationStage<T>, ResponseMapper<Object>> serializingResponseObjectsThat(
             Predicate<Object> filter);
 
     T mappingRequestsAndResponsesUsing(SerializerAndDeserializer serializerAndDeserializer);
 
+    @SuppressWarnings("unchecked")
     default <X> Using<SerializationAndDeserializationStage<T>, RequestMapper<X>> mappingUseCaseParametersOfType(
             final Class<X> type) {
-        return mappingUseCaseParametersThat(areOfType(type));
+        return mappingUseCaseParametersThat((clazz, event) -> areOfType(type).test((Class<X>) clazz, event));
     }
 
     default T throwAnExceptionByDefault() {

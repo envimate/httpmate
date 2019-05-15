@@ -120,14 +120,19 @@ public final class LowLevelSpecs {
                 .theReponseContainsTheHeader("Content-Disposition", "foo.txt");
     }
 
-    /*
-        authentication
-        authorization
-        template
-        empty template
-        test exception mapping module
-        test invalid route
-        cors tests here
-        test debug module
-     */
+    @Test
+    public void testDebugModule() {
+        given(theLowLevelHttpMateInstanceUsedForTesting())
+                .when().aRequestToThePath("/internals").viaTheGetMethod().withAnEmptyBody().isIssued()
+                .theStatusCodeWas(200)
+                .theResponseBodyContains("digraph");
+    }
+
+    @Test
+    public void testDefaultExceptionHandler() {
+        given(theLowLevelHttpMateInstanceUsedForTesting())
+                .when().aRequestToThePath("/exception").viaTheGetMethod().withAnEmptyBody().isIssued()
+                .theStatusCodeWas(500)
+                .theResponseBodyContains("");
+    }
 }

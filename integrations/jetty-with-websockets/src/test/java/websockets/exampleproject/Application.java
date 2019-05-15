@@ -33,7 +33,7 @@ import websockets.exampleproject.usecases.SendMessageResponse;
 import websockets.exampleproject.usecases.SendMessageUseCase;
 import websockets.exampleproject.usecases.events.NewMessageEvent;
 
-import static com.envimate.httpmate.HttpMate.aHttpMateConfiguredAs;
+import static com.envimate.httpmate.HttpMate.anHttpMateConfiguredAs;
 import static com.envimate.httpmate.HttpMateChainKeys.AUTHENTICATION_INFORMATION;
 import static com.envimate.httpmate.events.EventDrivenBuilder.EVENT_DRIVEN;
 import static com.envimate.httpmate.http.HttpRequestMethod.DELETE;
@@ -96,7 +96,7 @@ public final class Application {
                 .puttingExceptionObjectNamedAsExceptionIntoResponseMapByDefault();
         useCaseAdapter.attachTo(MESSAGE_BUS);
 
-        aHttpMateConfiguredAs(EVENT_DRIVEN).attachedTo(MESSAGE_BUS)
+        anHttpMateConfiguredAs(EVENT_DRIVEN).attachedTo(MESSAGE_BUS)
                 .triggeringTheEvent("SendMessageRequest").forRequestPath("/qwrefewiflrwefjierwipower").andRequestMethod(DELETE)
                 .triggeringTheEvent("SendMessageRequest").when(metaData -> metaData.getOptional(IS_WEBSOCKET_MESSAGE).orElse(false))
                 .handlingTheEvent("NewMessageEvent").by(forwardingItToAllWebSocketsThat((metaData, event) -> {

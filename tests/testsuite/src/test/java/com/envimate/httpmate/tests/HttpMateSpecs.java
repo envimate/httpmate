@@ -29,7 +29,8 @@ import org.junit.runners.Parameterized;
 
 import java.util.Collection;
 
-import static com.envimate.httpmate.tests.givenwhenthen.Given.givenTheTestHttpMateInstance;
+import static com.envimate.httpmate.tests.HttpMateTestConfigurations.theHttpMateInstanceUsedForTesting;
+import static com.envimate.httpmate.tests.givenwhenthen.Given.given;
 import static com.envimate.httpmate.tests.givenwhenthen.deploy.DeployerManager.*;
 
 @RunWith(Parameterized.class)
@@ -51,7 +52,7 @@ public final class HttpMateSpecs {
 
     @Test
     public void testGetRequest() {
-        givenTheTestHttpMateInstance()
+        given(theHttpMateInstanceUsedForTesting())
                 .when().aRequestToThePath("/test").viaTheGetMethod().withAnEmptyBody().isIssued()
                 .theStatusCodeWas(200)
                 .theResponseContentTypeWas("application/json")
@@ -60,7 +61,7 @@ public final class HttpMateSpecs {
 
     @Test
     public void testPostRequest() {
-        givenTheTestHttpMateInstance()
+        given(theHttpMateInstanceUsedForTesting())
                 .when().aRequestToThePath("/test").viaThePostMethod().withAnEmptyBody().isIssued()
                 .theStatusCodeWas(200)
                 .theResponseContentTypeWas("application/json")
@@ -69,7 +70,7 @@ public final class HttpMateSpecs {
 
     @Test
     public void testPutRequest() {
-        givenTheTestHttpMateInstance()
+        given(theHttpMateInstanceUsedForTesting())
                 .when().aRequestToThePath("/test").viaThePutMethod().withAnEmptyBody().isIssued()
                 .theStatusCodeWas(200)
                 .theResponseContentTypeWas("application/json")
@@ -78,7 +79,7 @@ public final class HttpMateSpecs {
 
     @Test
     public void testDeleteRequest() {
-        givenTheTestHttpMateInstance()
+        given(theHttpMateInstanceUsedForTesting())
                 .when().aRequestToThePath("/test").viaTheDeleteMethod().withAnEmptyBody().isIssued()
                 .theStatusCodeWas(200)
                 .theResponseContentTypeWas("application/json")
@@ -87,32 +88,30 @@ public final class HttpMateSpecs {
 
     @Test
     public void testCorsOptionsRequest() {
-        givenTheTestHttpMateInstance()
+        given(theHttpMateInstanceUsedForTesting())
                 .when().aRequestToThePath("/the/path/does/not/matter/for/options/requests")
-                .viaTheOptionsMethod().withAnEmptyBody()
-                .withTheHeader("Access-Control-Request-Headers", "X-Custom-Header, Upgrade-Insecure-Requests")
-                .withTheHeader("Access-Control-Request-Method", "POST, GET, OPTIONS").isIssued()
+                .viaTheOptionsMethod().withAnEmptyBody().withTheHeader("Origin", "foo.bar")
+                .withTheHeader("Access-Control-Request-Headers", "X-Custom-Header")
+                .withTheHeader("Access-Control-Request-Method", "PUT").isIssued()
                 .theStatusCodeWas(200)
-                .theReponseContainsTheHeader("Access-Control-Allow-Headers", "X-Custom-Header, Upgrade-Insecure-Requests")
-                .theReponseContainsTheHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS")
-                .theResponseBodyWas("OK");
+                .theReponseContainsTheHeader("Access-Control-Allow-Headers", "x-custom-header")
+                .theReponseContainsTheHeader("Access-Control-Allow-Methods", "PUT")
+                .theResponseBodyWas("");
     }
 
     @Test
     public void testCorsHeadersArePresent() {
-        givenTheTestHttpMateInstance()
-                .when().aRequestToThePath("/test").viaTheGetMethod().withAnEmptyBody().isIssued()
+        given(theHttpMateInstanceUsedForTesting())
+                .when().aRequestToThePath("/test").viaTheGetMethod().withAnEmptyBody().withTheHeader("Origin", "foo.bar").isIssued()
                 .theStatusCodeWas(200)
                 .theResponseContentTypeWas("application/json")
                 .theResponseBodyWas("{\"response\":\"foo\"}")
-                .theReponseContainsTheHeader("Access-Control-Allow-Origin", "*")
-                .theReponseContainsTheHeader("Access-Control-Request-Method", "GET, POST, PUT, DELETE")
-                .theReponseContainsTheHeader("Access-Control-Allow-Headers", "X-Custom-Header, Upgrade-Insecure-Requests");
+                .theReponseContainsTheHeader("Access-Control-Allow-Origin", "foo.bar");
     }
 
     @Test
     public void testUseCaseWithParameters() {
-        givenTheTestHttpMateInstance()
+        given(theHttpMateInstanceUsedForTesting())
                 .when().aRequestToThePath("/parameterized").viaTheGetMethod().withAnEmptyBody().isIssued()
                 .theStatusCodeWas(200)
                 .theResponseContentTypeWas("application/json")
@@ -121,7 +120,7 @@ public final class HttpMateSpecs {
 
     @Test
     public void testHeadersInRequest() {
-        givenTheTestHttpMateInstance()
+        given(theHttpMateInstanceUsedForTesting())
                 .when().aRequestToThePath("/headers").viaTheGetMethod().withAnEmptyBody().withTheHeader("testheader", "foo").isIssued()
                 .theStatusCodeWas(200)
                 .theResponseContentTypeWas("application/json")
@@ -130,7 +129,7 @@ public final class HttpMateSpecs {
 
     @Test
     public void testWildcardRoute() {
-        givenTheTestHttpMateInstance()
+        given(theHttpMateInstanceUsedForTesting())
                 .when().aRequestToThePath("/wild/foo/card").viaTheGetMethod().withAnEmptyBody().isIssued()
                 .theStatusCodeWas(200)
                 .theResponseContentTypeWas("application/json")
@@ -139,7 +138,7 @@ public final class HttpMateSpecs {
 
     @Test
     public void testWildcardRouteWithEmptyMiddleWildcard() {
-        givenTheTestHttpMateInstance()
+        given(theHttpMateInstanceUsedForTesting())
                 .when().aRequestToThePath("/wild/card").viaTheGetMethod().withAnEmptyBody().isIssued()
                 .theStatusCodeWas(405)
                 .theResponseBodyWas("No use case found.");
@@ -147,7 +146,7 @@ public final class HttpMateSpecs {
 
     @Test
     public void testQueryParameters() {
-        givenTheTestHttpMateInstance()
+        given(theHttpMateInstanceUsedForTesting())
                 .when().aRequestToThePath("/queryparameters?param1=derp&param2=").viaTheGetMethod().withAnEmptyBody().isIssued()
                 .theStatusCodeWas(200)
                 .theResponseContentTypeWas("application/json")
@@ -157,7 +156,7 @@ public final class HttpMateSpecs {
 
     @Test
     public void testQueryParametersAndPathParameters() {
-        givenTheTestHttpMateInstance()
+        given(theHttpMateInstanceUsedForTesting())
                 .when().aRequestToThePath("/echo_path_and_query_parameters/foo?test=bar").viaTheGetMethod().withAnEmptyBody().isIssued()
                 .theStatusCodeWas(200)
                 .theResponseContentTypeWas("application/json")
@@ -167,7 +166,7 @@ public final class HttpMateSpecs {
 
     @Test
     public void testUseCaseNotFoundExceptionHandler() {
-        givenTheTestHttpMateInstance()
+        given(theHttpMateInstanceUsedForTesting())
                 .when().aRequestToThePath("/this_has_no_usecase").viaTheGetMethod().withAnEmptyBody().isIssued()
                 .theStatusCodeWas(405)
                 .theResponseBodyWas("No use case found.");
@@ -175,7 +174,7 @@ public final class HttpMateSpecs {
 
     @Test
     public void testMappedExceptionHandler() {
-        givenTheTestHttpMateInstance()
+        given(theHttpMateInstanceUsedForTesting())
                 .when().aRequestToThePath("/mapped_exception").viaTheGetMethod().withAnEmptyBody().isIssued()
                 .theStatusCodeWas(201)
                 .theResponseBodyWas("");
@@ -183,7 +182,7 @@ public final class HttpMateSpecs {
 
     @Test
     public void testDefaultExceptionHandlerDoesNotDiscloseTheExceptionInTheResponse() {
-        givenTheTestHttpMateInstance()
+        given(theHttpMateInstanceUsedForTesting())
                 .when().aRequestToThePath("/unmapped_exception").viaTheGetMethod().withAnEmptyBody().isIssued()
                 .theStatusCodeWas(500)
                 .theResponseBodyWas("");
@@ -191,7 +190,7 @@ public final class HttpMateSpecs {
 
     @Test
     public void testAuthenticationByHeader() {
-        givenTheTestHttpMateInstance()
+        given(theHttpMateInstanceUsedForTesting())
                 .when().aRequestToThePath("/authentication_echo").viaTheGetMethod().withAnEmptyBody().withTheHeader("username", "bob1").isIssued()
                 .theStatusCodeWas(200)
                 .theResponseContentTypeWas("application/json")
@@ -200,7 +199,7 @@ public final class HttpMateSpecs {
 
     @Test
     public void testAuthenticationByBody() {
-        givenTheTestHttpMateInstance()
+        given(theHttpMateInstanceUsedForTesting())
                 .when().aRequestToThePath("/authentication_echo").viaThePostMethod().withTheBody("{ \"username\": \"bob2\" }").withContentType("application/json").isIssued()
                 .theStatusCodeWas(200)
                 .theResponseContentTypeWas("application/json")
@@ -209,7 +208,7 @@ public final class HttpMateSpecs {
 
     @Test
     public void testAuthenticationByQueryParameter() {
-        givenTheTestHttpMateInstance()
+        given(theHttpMateInstanceUsedForTesting())
                 .when().aRequestToThePath("/authentication_echo?username=bob3").viaTheGetMethod().withAnEmptyBody().isIssued()
                 .theStatusCodeWas(200)
                 .theResponseContentTypeWas("application/json")
@@ -218,7 +217,7 @@ public final class HttpMateSpecs {
 
     @Test
     public void testNoAuthentication() {
-        givenTheTestHttpMateInstance()
+        given(theHttpMateInstanceUsedForTesting())
                 .when().aRequestToThePath("/authentication_echo").viaTheGetMethod().withAnEmptyBody().isIssued()
                 .theStatusCodeWas(200)
                 .theResponseContentTypeWas("application/json")
@@ -227,7 +226,7 @@ public final class HttpMateSpecs {
 
     @Test
     public void testAuthorization() {
-        givenTheTestHttpMateInstance()
+        given(theHttpMateInstanceUsedForTesting())
                 .when().aRequestToThePath("/authorized").viaThePostMethod().withAnEmptyBody().withTheHeader("username", "admin").isIssued()
                 .theStatusCodeWas(200)
                 .theResponseContentTypeWas("application/json")
@@ -236,7 +235,7 @@ public final class HttpMateSpecs {
 
     @Test
     public void testUnauthorized() {
-        givenTheTestHttpMateInstance()
+        given(theHttpMateInstanceUsedForTesting())
                 .when().aRequestToThePath("/authorized").viaThePostMethod().withAnEmptyBody().withTheHeader("username", "mallory").isIssued()
                 .theStatusCodeWas(403)
                 .theResponseBodyWas("Go away.");
@@ -244,7 +243,7 @@ public final class HttpMateSpecs {
 
     @Test
     public void testMapMate() {
-        givenTheTestHttpMateInstance()
+        given(theHttpMateInstanceUsedForTesting())
                 .when().aRequestToThePath("/mapmate/derp").viaThePostMethod().withTheBody("{value1=derp,value2=merp,value3=herp,value4=qerp}").withContentType("application/json").isIssued()
                 .theStatusCodeWas(200)
                 .theResponseContentTypeWas("application/json")
@@ -260,7 +259,7 @@ public final class HttpMateSpecs {
 
     @Test
     public void testMapMateWithInjection() {
-        givenTheTestHttpMateInstance()
+        given(theHttpMateInstanceUsedForTesting())
                 .when().aRequestToThePath("/mapmate/derp?value2=merp").viaThePostMethod().withTheBody("{value4=qerp}").withTheHeader("value3", "herp").withContentType("application/json").isIssued()
                 .theStatusCodeWas(200)
                 .theResponseContentTypeWas("application/json")
@@ -276,7 +275,7 @@ public final class HttpMateSpecs {
 
     @Test
     public void testMapMateOnlyWithInjectionAndWithoutBody() {
-        givenTheTestHttpMateInstance()
+        given(theHttpMateInstanceUsedForTesting())
                 .when().aRequestToThePath("/mapmate/derp").viaTheGetMethod().withAnEmptyBody()
                 .withTheHeader("value2", "merp").withTheHeader("value3", "herp").withTheHeader("value4", "qerp").isIssued()
                 .theStatusCodeWas(200)
@@ -293,7 +292,7 @@ public final class HttpMateSpecs {
 
     @Test
     public void testTwoUseCaseParameters() {
-        givenTheTestHttpMateInstance()
+        given(theHttpMateInstanceUsedForTesting())
                 .when().aRequestToThePath("/twoparameters").viaTheGetMethod().withAnEmptyBody().withTheHeader("param1", "Hello").withTheHeader("param2", "World").isIssued()
                 .theStatusCodeWas(200)
                 .theResponseContentTypeWas("application/json")
@@ -302,7 +301,7 @@ public final class HttpMateSpecs {
 
     @Test
     public void testVoidUseCase() {
-        givenTheTestHttpMateInstance()
+        given(theHttpMateInstanceUsedForTesting())
                 .when().aRequestToThePath("/void").viaTheGetMethod().withAnEmptyBody().isIssued()
                 .theStatusCodeWas(200)
                 .theResponseContentTypeWas("application/json")

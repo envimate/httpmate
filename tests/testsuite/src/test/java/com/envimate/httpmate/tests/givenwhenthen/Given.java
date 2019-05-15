@@ -30,26 +30,19 @@ import com.envimate.httpmate.tests.givenwhenthen.deploy.DeployerManager;
 import com.envimate.httpmate.tests.givenwhenthen.deploy.Deployment;
 import lombok.RequiredArgsConstructor;
 
-import static com.envimate.httpmate.tests.HttpMateTestConfigurations.theHttpMateInstanceUsedForTesting;
 import static com.envimate.httpmate.tests.givenwhenthen.deploy.DeployerManager.currentDeployer;
 
 @RequiredArgsConstructor
 public final class Given {
-    private final Deployment deployment;
-
-    public static Given givenTheTestHttpMateInstance() {
-        final Deployer deployer = currentDeployer();
-        final Deployment deployment = deployer.deploy(theHttpMateInstanceUsedForTesting());
-        return new Given(deployment);
-    }
+    private final HttpMate httpMate;
 
     public static Given given(final HttpMate httpMate) {
-        final Deployer deployer = currentDeployer();
-        final Deployment deployment = deployer.deploy(httpMate);
-        return new Given(deployment);
+        return new Given(httpMate);
     }
 
     public PathBuilder when() {
+        final Deployer deployer = currentDeployer();
+        final Deployment deployment = deployer.deploy(httpMate);
         final ClientFactory clientFactory = DeployerManager.currentClientFactory();
         final HttpClientWrapper clientWrapper = clientFactory.createClient(deployment);
         return When.theWhen(clientWrapper);

@@ -19,22 +19,36 @@
  * under the License.
  */
 
-package com.envimate.httpmate.convenience.handler;
+package com.envimate.httpmate.convenience.cors.domain;
 
-import com.envimate.httpmate.chains.MetaData;
-import com.envimate.httpmate.handler.Handler;
+import lombok.AccessLevel;
+import lombok.EqualsAndHashCode;
+import lombok.RequiredArgsConstructor;
+import lombok.ToString;
 
-import static com.envimate.httpmate.convenience.handler.HttpRequest.httpRequest;
-import static com.envimate.httpmate.convenience.handler.HttpResponse.httpResponse;
+import java.util.Optional;
 
-public interface HttpHandler extends Handler {
+import static java.lang.String.format;
+import static java.util.Optional.ofNullable;
 
-    @Override
-    default void handle(final MetaData metaData) {
-        final HttpRequest httpRequest = httpRequest(metaData);
-        final HttpResponse httpResponse = httpResponse(metaData);
-        handle(httpRequest, httpResponse);
+@ToString
+@EqualsAndHashCode
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
+public final class MaxAge {
+    private final Long maxAge;
+
+    public static MaxAge maxAgeInSeconds(final long seconds) {
+        if(seconds <= 0) {
+            throw new IllegalArgumentException(format("seconds must be positive but was '%d'", seconds));
+        }
+        return new MaxAge(seconds);
     }
 
-    void handle(HttpRequest request, HttpResponse response);
+    public static MaxAge undefinedMaxAge() {
+        return new MaxAge(null);
+    }
+
+    public Optional<String> generateHeaderValue() {
+        return ofNullable(maxAge).map(Object::toString);
+    }
 }
