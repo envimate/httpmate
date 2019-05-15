@@ -67,7 +67,7 @@ public final class CorsModule implements ChainModule {
                     .ifPresent(requestedMethods -> responseHeaders.put(ACCESS_CONTROL_ALLOW_METHODS, requestedMethods));
             metaData.set(RESPONSE_HEADERS, responseHeaders);
             metaData.set(RESPONSE_STATUS, OK);
-            metaData.set(STRING_RESPONSE, "OK");
+            metaData.set(RESPONSE_STRING, "OK");
         });
          */
 

@@ -25,5 +25,5 @@ import com.envimate.httpmate.chains.MetaData;
 
 @FunctionalInterface
 public interface ExceptionMapper<T extends Throwable> {
-    void map(T object, MetaData metaData);
+    void map(T exception, MetaData metaData);
 }

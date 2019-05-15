@@ -67,7 +67,7 @@ public final class BypassIssuer implements Issuer {
 
         final Map<String, String> responseHeaders = metaData.get(RESPONSE_HEADERS);
         final int responseStatus = metaData.get(RESPONSE_STATUS);
-        final InputStream responseBody = metaData.get(STREAM_RESPONSE);
+        final InputStream responseBody = metaData.get(RESPONSE_STREAM);
 
         final RawClientResponse response = rawClientResponse(responseStatus, responseHeaders, responseBody);
         return responseMapper.apply(response);

@@ -20,25 +20,8 @@
   ~ under the License.
   -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-
-    <modelVersion>4.0.0</modelVersion>
-
-    <parent>
-        <groupId>com.envimate</groupId>
-        <artifactId>httpmate-parent</artifactId>
-        <version>1.0.19</version>
-    </parent>
-
-    <packaging>pom</packaging>
-
-    <groupId>com.envimate.httpmate.examples</groupId>
-    <artifactId>parent</artifactId>
-    <name>HttpMate - Examples - Parent</name>
-
-    <modules>
-        <module>aws-lambda</module>
-        <module>hello-world</module>
-    </modules>
-</project>
+<FindBugsFilter
+		xmlns="https://github.com/spotbugs/filter/3.0.0"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:schemaLocation="https://github.com/spotbugs/filter/3.0.0 https://raw.githubusercontent.com/spotbugs/spotbugs/3.1.0/spotbugs/etc/findbugsfilter.xsd">
+</FindBugsFilter>

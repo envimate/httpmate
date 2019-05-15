@@ -28,8 +28,8 @@ import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
-import static com.envimate.httpmate.HttpMateChainKeys.STREAM_RESPONSE;
-import static com.envimate.httpmate.HttpMateChainKeys.STRING_RESPONSE;
+import static com.envimate.httpmate.HttpMateChainKeys.RESPONSE_STREAM;
+import static com.envimate.httpmate.HttpMateChainKeys.RESPONSE_STRING;
 import static com.envimate.httpmate.util.Streams.stringToInputStream;
 
 @ToString
@@ -43,9 +43,9 @@ public final class StringBodyToStreamProcessor implements Processor {
 
     @Override
     public void apply(final MetaData metaData) {
-        if (!metaData.contains(STREAM_RESPONSE)) {
-            metaData.getOptional(STRING_RESPONSE).ifPresent(stringResponse ->
-                    metaData.set(STREAM_RESPONSE, stringToInputStream(stringResponse)));
+        if (!metaData.contains(RESPONSE_STREAM)) {
+            metaData.getOptional(RESPONSE_STRING).ifPresent(stringResponse ->
+                    metaData.set(RESPONSE_STREAM, stringToInputStream(stringResponse)));
         }
     }
 }

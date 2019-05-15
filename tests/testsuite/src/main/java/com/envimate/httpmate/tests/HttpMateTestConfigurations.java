@@ -165,12 +165,12 @@ public final class HttpMateTestConfigurations {
                         .ofType(NoHandlerFoundException.class)
                         .toResponsesUsing((exception, metaData) -> {
                             metaData.set(RESPONSE_STATUS, METHOD_NOT_ALLOWED);
-                            metaData.set(STRING_RESPONSE, "No use case found.");
+                            metaData.set(RESPONSE_STRING, "No use case found.");
                         })
                         .ofType(MappedException.class).toResponsesUsing((exception, metaData) -> metaData.set(RESPONSE_STATUS, 201))
                         .ofType(NotAuthorizedException.class).toResponsesUsing((object, metaData) -> {
                             metaData.set(RESPONSE_STATUS, 403);
-                            metaData.set(STRING_RESPONSE, "Go away.");
+                            metaData.set(RESPONSE_STRING, "Go away.");
                         })
                         .ofAllRemainingTypesUsing(theDefaultExceptionMapper())
                 )

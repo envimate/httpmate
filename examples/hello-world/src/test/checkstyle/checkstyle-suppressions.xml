@@ -20,25 +20,10 @@
   ~ under the License.
   -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-
-    <modelVersion>4.0.0</modelVersion>
-
-    <parent>
-        <groupId>com.envimate</groupId>
-        <artifactId>httpmate-parent</artifactId>
-        <version>1.0.19</version>
-    </parent>
-
-    <packaging>pom</packaging>
-
-    <groupId>com.envimate.httpmate.examples</groupId>
-    <artifactId>parent</artifactId>
-    <name>HttpMate - Examples - Parent</name>
-
-    <modules>
-        <module>aws-lambda</module>
-        <module>hello-world</module>
-    </modules>
-</project>
+<!DOCTYPE suppressions PUBLIC
+        "-//Puppy Crawl//DTD Suppressions 1.1//EN"
+        "http://www.puppycrawl.com/dtds/suppressions_1_1.dtd">
+<suppressions>
+    <suppress checks="IllegalSystemOutPrintln" files="com.envimate.httpmate.examples.helloworld.Application.*"/>
+    <suppress checks="RegexpCheck" files="com.envimate.httpmate.examples.helloworld.Application.*"/>
+</suppressions>

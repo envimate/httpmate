@@ -45,6 +45,6 @@ public final class LoggerHandler implements Handler {
         final String message = metaData.get(BODY_STRING);
         final Logger logger = metaData.get(LOGGER);
         logger.log(message, metaData);
-        metaData.set(STRING_RESPONSE, "success");
+        metaData.set(RESPONSE_STRING, "success");
     }
 }

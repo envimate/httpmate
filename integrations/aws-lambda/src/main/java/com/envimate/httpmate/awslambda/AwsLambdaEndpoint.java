@@ -83,7 +83,7 @@ public final class AwsLambdaEndpoint {
 
         final int statusCode = metaData.get(RESPONSE_STATUS);
         final Map<String, String> responseHeaders = metaData.get(RESPONSE_HEADERS);
-        final InputStream responseStream = metaData.get(STREAM_RESPONSE);
+        final InputStream responseStream = metaData.get(RESPONSE_STREAM);
         final String responseBody = inputStreamToString(responseStream);
         return new APIGatewayProxyResponseEvent().withStatusCode(statusCode).withHeaders(responseHeaders).withBody(responseBody);
     }

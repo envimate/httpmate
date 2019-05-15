@@ -1,178 +1,279 @@
-#HttpMate
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.envimate.httpmate/core/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.envimate.httpmate/core)
 
-_"Make use cases great again" -Source Unknown_
+<img src="httpmate_logo.png" align="left"/>
 
-Following Robert Martin's [Clean Architecture](https://8thlight.com/blog/uncle-bob/2012/08/13/the-clean-architecture.html) proposal, HttpMate builds an _interface adapter_ for use cases implemented on the jvm, with the following characteristics:
+# HttpMate
 
-- use case classes need not import anything from the httpmate package (⓵)
-- the configuration of httpmate is done once at application startup using a fluent builder, making autocompletion possible, and intent clearer (⓶)
-- the resulting adapter becomes a web endpoint using the httpmate spark integration now, with more integrations coming later (⓷)
+HttpMate is an http framework that allows you to "just publish my business logic as HTTP endpoint".
+It's non-invasive, flexible and ultra-extendable and offers you 3 modes of handling http requests - UseCase driven, 
+low-level http and event-driven request handling, as well as a mix of those modes.
 
-HttpMate publishes your business UseCases as http endpoints. You are free to chose _how_ you run the underlying server, serving the http requests yourself.
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
 
-HttpMate provides integrations with
+Let's see some low-level example:
 
-* embedded jetty
-* spark
-* aws-lambda
 
-The example below works through httpmate mechanics on spark example
+```
+final HttpMate httpMate = HttpMate.aLowLevelHttpMate()
+        .callingTheHandler(new HttpHandler() {
+            @Override
+            public void handle(final HttpRequest request, final HttpResponse httpResponse) {
+                httpResponse.setBody("Hello World!");
+                httpResponse.setStatus(200);
+            }
+        })
+        .forRequestPath("/api/hello")
+        .andRequestMethod(HttpRequestMethod.GET)
+        .thatIs()
+        .build();
+```
 
-Show me the code
-----------------
-```xml
-<!-- maven pom.xml -->
+Treat HttpMate instance as a description of your endpoints: we have here a request handler, for the path `api/hello`, 
+with the request method `GET`, which handles the request by setting the response to the String `Hello World!` and the 
+status to 200. Pretty descriptive right?
+
+This way of saying hello gives you full control over the HTTP protocol. Once your UseCase is more complicated than just 
+saying hello, you want to focus on implementing it instead of dealing with protocol details.
+
+Let's say we have a UseCase of sending an email:
+
+```
+public class SendEmail {
+    private final EmailService emailService;
+
+    //    @Inject if you so wish
+    public SendEmail(final EmailService emailService) {
+        this.emailService = emailService;
+    }
+
+    public Receipt sendEmail(final Email email) {
+        final String trackingId = emailService.send(email.sender, email.receiver, email.subject, email.body);
+        final String timestamp = String.valueOf(Instant.now().toEpochMilli());
+
+        return new Receipt(trackingId, timestamp);
+    }
+}
+```
+
+Now we can expose this UseCase using HttpMate:
+
+```
+final HttpMate useCaseDrivenHttpMate = HttpMate.anHttpMateConfiguredAs(UseCaseDrivenBuilder.USE_CASE_DRIVEN)
+        .servingTheUseCase(SendEmail.class)
+        .forRequestPath("/api/sendEmail")
+        .andRequestMethod(HttpRequestMethod.POST)
+        .mappingRequestsAndResponsesUsing(
+                mapMate()
+                        .mappingAllStandardContentTypes()
+                        .assumingTheDefaultContentType(ContentType.json())
+                        .bySerializingUsing(SERIALIZER)
+                        .andDeserializingUsing(DESERIALIZER))
+        .configured(Configurators.toCreateUseCaseInstancesUsing(INJECTOR::getInstance))
+        .build();
+```
+
+Want to extract the sender from the authorization, the receiver and subject from path and 
+the email contents from the request body?
+
+```
+final HttpMate useCaseDrivenHttpMate = HttpMate.anHttpMateConfiguredAs(UseCaseDrivenBuilder.USE_CASE_DRIVEN)
+        .servingTheUseCase(SendEmail.class)
+        .forRequestPath("/api/sendEmail/<receiver>/<subject>")
+        .andRequestMethod(HttpRequestMethod.POST)
+        .mappingRequestsAndResponsesUsing(
+                mapMate()
+                        .mappingAllStandardContentTypes()
+                        .assumingTheDefaultContentType(ContentType.json())
+                        .bySerializingUsing(SERIALIZER)
+                        .andDeserializingUsing(DESERIALIZER))
+        .configured(Configurators.toCreateUseCaseInstancesUsing(INJECTOR::getInstance))
+        .configured(Configurator.configuratorForType(EventModule.class, eventModule -> {
+            eventModule.setDefaultRequestToEventMapper(RequestToEventMapper.byDirectlyMappingAllData());
+        }))
+        .configured(com.envimate.httpmate.security.Configurators.toAuthenticateRequests().afterBodyProcessing().using(new Authenticator() {
+            @Override
+            public Optional<?> authenticateAs(final MetaData metaData) {
+                final Optional<String> jwtToken = metaData.get(HttpMateChainKeys.HEADERS).getHeader("Authorization");
+                final Optional<String> userEmail = TOKEN_SERVICE.decrypt(jwtToken);
+                userEmail.ifPresent(email -> {
+                    metaData.get(BODY_MAP).put("sender", email);
+                });
+                return userEmail; 
+            }
+        }))
+        .build();
+```
+
+Want to use the very same UseCase to handle SendEmail events coming from an SNS topic? Refer to the 
+"Event Driven HttpMate" (TODO) part of the README to see what modifications should be done to the httpMate object to 
+achieve that. 
+
+## What is HttpMate doing for you?
+
+> A good architecture is less about the decisions you make and more about the decisions you defer making.
+
+HttpMate allows you to write your UseCases decoupled from the underlying hazards of an Http/Rest infrastructure.
+
+Debating questions like:
+ 
+- "Should it be a PUT or a POST?"
+- "Is the Username coming from the request body, the JWT token or a plain text header value?"
+- "Are we talking JSON, YAML, XML or a custom (binary?) ContentType?"
+
+is tiresome because you can't possibly know the answer until you've faced the customer. Furthermore, he might just change
+his mind.   
+
+And that's what HttMate is doing for you.
+
+## Other Features
+
+Besides providing you with the described interface to build http request handlers, expose UseCases or handle events, 
+HttpMate offers following features:
+
+* Several endpoint integrations such as 
+        - AWS Lambda
+        - Jetty
+        - Spark
+        - Servlet
+* Integration with (de)serialization framework MapMate
+* Websockets
+* Predefined CORS configurations
+* Predefined MultiPart support 
+
+## Why another HTTP framework?
+
+_The goal of refactoring is to actively counteract the natural increase in the degree of chaos_ 
+
+We did not find any framework that would allow us to develop a web application and claim in good conscience that it's 
+business logic does not depend on the underlying HTTP server, persistence layer or (de)serialization mechanism (also
+referred to as "infrastructure code" in DDD).
+
+## Getting started
+
+ Add the dependency:
+
+```
 <dependency>
-    <groupId>com.envimate.httpmate.integrations</groupId>
-    <artifactId>httpmate-spark</artifactId>
-    <version>1.0.12</version>
+    <groupId>com.envimate.httpmate</groupId>
+    <artifactId>core</artifactId>
+    <version>1.0.19</version>
 </dependency>
 ```
----
-```java
-package hello.usecases; // ⓵
 
-public class HelloUseCase {
-    public String sayHello(String who) {
-        if ("throw".equals(who)) {
-            throw new RuntimeException("\uD83D\uDE23");
-        } else {
-            return String.format("Hello %s!", who);
-        }
-    }
-}
+Configure HttpMate with an HttpHandler and expose as a PureJavaEndpoint
+
 ```
----
-```java
-package hello.webapp;
-
-import com.google.gson.Gson;
-import hello.usecases.HelloUseCase;
-import static com.envimate.httpmate.Core.*;
-
-public class HelloWeb {
+public class Application {
     public static void main(String[] args) {
-        aHttpMateInstance() // ⓶
-            .servingTheUseCase(HelloUseCase.class).forRequestPath(httpRequestPathTemplate("/hello")).andRequestMethod(postMethod()) // ⓸
-            .obtainingUseCaseInstancesUsing((usecase, webRequest) -> usecase.useCaseClass == HelloUseCase.class? new HelloUseCase() : null) // ⓹
-            .mappingAllOtherExceptionsBy(exception -> theExceptionResponse(internalServerError(), exception.toString())) // ⓺
-            .mappingRequestBodiesToUseCaseParametersUsing((webRequest, targetClass) -> new Gson().fromJson(webRequest.body, targetClass)) // ⓻
-            .serializingResponseObjectsToResponseBodiesUsing(result -> new Gson().toJson(result)) // ⓼
-            .usingForSerializedResponsesTheContentType("application/json") // ⓽
-            .usingTheEndpoint(sparkEndpoint()).listeningOnPort(8000) // ⓷⓾
-            .listen();
-    }
-}
-```
----
-```shell
-$ curl -X POST -H "Content-Type: application/json" -d "\"envimate\"" http://localhost:8000/hello
-"Hello envimate!"
+        final HttpMate httpMate = HttpMate.aLowLevelHttpMate()
+                .callingTheHandler(new HttpHandler() {
+                    @Override
+                    public void handle(final HttpRequest request, final HttpResponse httpResponse) {
+                        httpResponse.setBody("Hello World!");
+                        httpResponse.setStatus(200);
+                    }
+                })
+                .forRequestPath("/api/hello")
+                .andRequestMethod(HttpRequestMethod.GET)
+                .thatIs()
+                .build();
 
-$ curl -X POST -H "Content-Type: application/json" -d "\"throw\"" http://localhost:8000/hello
-"java.lang.RuntimeException: 😣"
-```
-
-What is going on
-----------------
-- ⓸ Use case routing: maps use cases to request paths and methods
-- ⓹ Decide how you want to instantiate the use cases (guice injector, spring context, etc...). The callback is invoked on every request
-- ⓺ Map other (usually unexpected) runtime exceptions. Here we only return the exception toString() representation
-- ⓻ Map request parameters to objects expected by the use case. These are usually in json format for REST endpoints
-- ⓼ Map use case result objects and exception response result objects to serialized text form
-- ⓽ Indicate what text-based mime type the response is in. This is usually "application/json" for REST endpoints
-- ⓾ Hookup with a web framework to expose the use case to the web.
-
-Integrating with Dependency Injection frameworks
-------------------------------------------------
-
-Use cases have dependencies that need to be provided at construction time, either by you (if you call _new_, and _new_-like factory methods directly), or by a dependency injection framework.
-This section shows how you can make use of dependency injection frameworks in conjunction with httpmate.
-
-Since the use case class must not be modified to import framework specific objects, the example use case class won't use framework-specific annotations such as `@Inject` or `@Autowired` on the use case itself.
-
-###Use Case
-The use case used for dependency injection integration is a variation of the previous one, with an added dependency on a translation service, which will translate the greeting to a language preferred by the client.
-
-```
-public class TranslatedHelloUseCase {
-    private final TranslationService translationService;
-
-    public TranslatedHelloUseCase(final TranslationService translationService) {
-        this.translationService = translationService;
-    }
-
-    public String sayTranslatedHello(final Locale targetLocale, final String who) {
-        final String translated = translationService.translate(String.format("Hello %s!", who), targetLocale);
-        return translated;
+        PureJavaEndpoint.pureJavaEndpointFor(httpMate).listeningOnThePort(1337);
     }
 }
 ```
 
-### Google Guice
-Guice is configured to instantiate use case instances using a *Module*. Here, we need to configure the providers for the usecase and the concrete translation service.
-
-```java
-final Injector injector = Guice.createInjector(new AbstractModule() {
-    @Provides
-    TranslatedHelloUseCase translatedHelloUseCase(TranslationService translationService) {
-        return new TranslatedHelloUseCase(translationService);
-    }
-    @Provides
-    TranslationService translationService() {
-        return new AwsTranslationService(
-                DefaultAWSCredentialsProviderChain.getInstance(), Regions.EU_WEST_1);
-    }
-});
-aHttpMateInstance()
-    ...
-    .obtainingUseCaseInstancesUsing((usecase, webRequest) ->
-        injector.getInstance(usecase.useCaseClass)) // ⓹
-```
-
-### Spring Framework
-
-Spring uses java `@Configuration` classes in place of Guice's _Module_...
-
-```java
-@Configuration
-public static class Config {
-    @Bean
-    public TranslatedHelloUseCase translatedHelloUseCase(final TranslationService translationService) {
-        return new TranslatedHelloUseCase(translationService);
-    }
-
-    @Bean
-    public TranslationService translationService() {
-        return new AwsTranslationService(
-                DefaultAWSCredentialsProviderChain.getInstance(), Regions.EU_WEST_1);
-    }
-}
-```
-..and an application context must be told to scan for config annotations in a package or class:
-```java
-final AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
-ctx.register(Config.class);
-ctx.refresh();
-ctx.registerShutdownHook();
-aHttpMateInstance()
-    ...
-    .obtainingUseCaseInstancesUsing((usecase, webRequest) ->
-        ctx.getBean(usecase.useCaseClass)) // ⓹
+Run the example and try
 
 ```
-### PicoContainer
+    curl http://localhost:1337/api/hello
+```
 
-PicoContainer uses a *DefaultPicoContainer* class which is able to instantiate components through annotationless constructor taking one or more arguments out of the box. This is something other frameworks do not allow without more complex configuration. It is therefore added here for completeness:
+## Changing the endpoint
 
-```java
-final DefaultPicoContainer pico = new DefaultPicoContainer();
-pico.addComponent(Regions.EU_WEST_1);
-pico.addComponent(DefaultAWSCredentialsProviderChain.getInstance());
-pico.addComponent(AwsTranslationService.class);
-pico.addComponent(TranslatedHelloUseCase.class);
-aHttpMateInstance()
-    ...
-    .obtainingUseCaseInstancesUsing((usecase, webRequest) ->
-        pico.getComponent(usecase.useCaseClass)) // ⓹
+Since HttpMate separates the _how_ is from the _what_, you can focus on defining _what_ your http endpoints should do and decide on _how_ to serve them best separately, based on the requirements of your infrastructure.
+ 
+To expose the same httpMate instance using a Jetty endpoint, include the following dependency:
+
+```
+<dependency>
+    <groupId>com.envimate.httpmate.integrations</groupId>
+    <artifactId>httpmate-jetty</artifactId>
+    <version>${httpmate.version}</version>
+</dependency>
+```
+
+And replace the `PureJavaEndpoint` line with:
+
+```
+    JettyEndpoint.jettyEndpointFor(httpMate).listeningOnThePort(1337);
+```
+
+Restart the application and enjoy the benefits of Jetty.
+
+## Servlet
+
+...
+
+## Detailed Examples
+
+In the following sections we will explore different features of HttpMate and show detailed examples.
+You can also check out the examples submodule as well as the tests of HttpMate.
+
+### Low level HttpMate
+
+`HttpMate.aLowLevelHttpMate()` is a step builder to configure HttpMate when dealing with requests directly.
+
+Step1. Configure the handler
+In it's most generic form, handler must implement the `com.envimate.httpmate.handler.Handler` interface, which gives you access to a MetaData object containing all details of the request 
+and means to communicate the response.
+
+For details about the MetaData object refer to a section [What is MetaData?](#What-is-MetaData?)
+
+Step2. Configure the request path
+
+Step3. Configure the request method(s) this handler is answering to
+
+Step4. Apply additional Configurators
+ 
+
+#### What is MetaData?
+
+MetaData allows access to http request details and provides means of communicating the response back.
+
+`com.envimate.httpmate.HttpMateChainKeys` class provides a list of keys that are accessible in the MetaData object.
+e.g. the `BODY_STRING` key will give you access to the body of the request represented as a String, `HEADERS` will give
+you access to get the headers, etc. 
+
+Here's an example of how it will look like with MetaData to get the name of the user from the query parameters vs the 
+convenience HttpRequest object
+
+```
+final HttpMate httpMate = HttpMate.aLowLevelHttpMate()
+        .callingTheHandler(new HttpHandler() {
+            @Override
+            public void handle(final HttpRequest request, final HttpResponse httpResponse) {
+                final Optional<String> name = request.queryParameters().getQueryParameter("name");
+                httpResponse.setBody("Hello " + name.orElse("World!"));
+                httpResponse.setStatus(200);
+            }
+        })
+        .forRequestPath("/api/hello")
+        .andRequestMethod(HttpRequestMethod.GET)
+        .callingTheHandler(new Handler() {
+            @Override
+            public void handle(final MetaData metaData) {
+                final Optional<String> name = metaData.get(QUERY_PARAMETERS).getQueryParameter("name");
+                metaData.set(RESPONSE_STRING, "Hello " + name.orElse("World!"));
+                metaData.set(RESPONSE_STATUS, 200);
+            }
+        })
+        .forRequestPath("/api/helloDirect")
+        .andRequestMethod(HttpRequestMethod.GET)
+        .thatIs()
+        .build();
 ```

@@ -77,7 +77,7 @@ final class JettyEndpointHandler extends AbstractHandler {
             final int responseStatus = metaData.get(RESPONSE_STATUS);
             httpServletResponse.setStatus(responseStatus);
             final OutputStream outputStream = httpServletResponse.getOutputStream();
-            final InputStream inputStream = metaData.getOptional(STREAM_RESPONSE).orElseGet(() -> stringToInputStream(""));
+            final InputStream inputStream = metaData.getOptional(RESPONSE_STREAM).orElseGet(() -> stringToInputStream(""));
             streamInputStreamToOutputStream(inputStream, outputStream);
         });
     }

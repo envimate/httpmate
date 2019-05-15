@@ -128,7 +128,7 @@ public final class ArtificialConfiguration {
                 .triggeringTheEvent("QueryParameter").when(webSocketIsTaggedWith("QUERY"))
                 .triggeringTheEvent("HeaderParameter").when(webSocketIsTaggedWith("HEADER"))
                 .handlingTheEvent("CloseEvent").by(closingAllWebSocketsThat((metaData, event) -> true))
-                .mappingResponsesUsing((event, metaData) -> metaData.set(STRING_RESPONSE, event.toString()))
+                .mappingResponsesUsing((event, metaData) -> metaData.set(RESPONSE_STRING, event.toString()))
                 .configured(toAuthenticateRequests().beforeBodyProcessing().using(metaData -> metaData.get(QUERY_PARAMETERS).getQueryParameter("username")))
                 .configured(toAuthenticateRequests().beforeBodyProcessing().using(metaData -> metaData.get(HEADERS).getHeader("username")))
                 .configured(toAuthorizeRequests().beforeBodyProcessing().using(metaData -> {

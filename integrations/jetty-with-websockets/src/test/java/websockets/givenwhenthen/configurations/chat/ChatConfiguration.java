@@ -107,7 +107,7 @@ public final class ChatConfiguration {
                 .mappingResponsesUsing((event, metaData) -> {
                     final Map<String, Object> map = (Map<String, Object>) event;
                     final String content = (String) map.get("content");
-                    metaData.set(STRING_RESPONSE, content);
+                    metaData.set(RESPONSE_STRING, content);
                 })
                 .configured(toAuthenticateRequests().beforeBodyProcessing().using(authenticator))
                 .configured(toAuthorizeRequests().beforeBodyProcessing().using(authorizer))

@@ -24,7 +24,7 @@ package com.envimate.httpmate.tests.multipart;
 import com.envimate.httpmate.chains.MetaData;
 import com.envimate.httpmate.handler.Handler;
 
-import static com.envimate.httpmate.HttpMateChainKeys.STRING_RESPONSE;
+import static com.envimate.httpmate.HttpMateChainKeys.RESPONSE_STRING;
 
 public final class AuthorizedHandler implements Handler {
 
@@ -34,6 +34,6 @@ public final class AuthorizedHandler implements Handler {
 
     @Override
     public void handle(final MetaData metaData) {
-        metaData.set(STRING_RESPONSE, "Welcome to the admin section!");
+        metaData.set(RESPONSE_STRING, "Welcome to the admin section!");
     }
 }

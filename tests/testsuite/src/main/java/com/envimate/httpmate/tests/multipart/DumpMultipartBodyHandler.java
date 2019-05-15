@@ -27,7 +27,7 @@ import com.envimate.httpmate.multipart.MultipartIteratorBody;
 
 import java.util.StringJoiner;
 
-import static com.envimate.httpmate.HttpMateChainKeys.STRING_RESPONSE;
+import static com.envimate.httpmate.HttpMateChainKeys.RESPONSE_STRING;
 import static com.envimate.httpmate.multipart.MultipartChainKeys.MULTIPART_ITERATOR_BODY;
 
 public final class DumpMultipartBodyHandler implements Handler {
@@ -40,7 +40,7 @@ public final class DumpMultipartBodyHandler implements Handler {
     public void handle(final MetaData metaData) {
         final MultipartIteratorBody multipartIteratorBody = metaData.get(MULTIPART_ITERATOR_BODY);
         final String dump = dumpMultipart(multipartIteratorBody);
-        metaData.set(STRING_RESPONSE, dump);
+        metaData.set(RESPONSE_STRING, dump);
     }
 
     private static String dumpMultipart(final MultipartIteratorBody body) {

@@ -25,7 +25,7 @@ import com.envimate.httpmate.chains.MetaData;
 import com.envimate.httpmate.handler.Handler;
 
 import static com.envimate.httpmate.HttpMateChainKeys.BODY_STRING;
-import static com.envimate.httpmate.HttpMateChainKeys.STRING_RESPONSE;
+import static com.envimate.httpmate.HttpMateChainKeys.RESPONSE_STRING;
 
 public final class EchoBodyHandler implements Handler {
 
@@ -36,6 +36,6 @@ public final class EchoBodyHandler implements Handler {
     @Override
     public void handle(final MetaData metaData) {
         final String responseBody = metaData.getOptional(BODY_STRING).orElse("");
-        metaData.set(STRING_RESPONSE, responseBody);
+        metaData.set(RESPONSE_STRING, responseBody);
     }
 }
