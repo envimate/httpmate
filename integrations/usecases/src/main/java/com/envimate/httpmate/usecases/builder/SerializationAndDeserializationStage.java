@@ -26,11 +26,15 @@ import com.envimate.httpmate.usecases.EventFilter;
 import com.envimate.httpmate.usecases.usecase.SerializerAndDeserializer;
 import com.envimate.messageMate.mapping.Demapifier;
 import com.envimate.messageMate.mapping.Mapifier;
+import com.envimate.messageMate.mapping.SerializationFilters;
 
 import java.util.function.Predicate;
 
 import static com.envimate.httpmate.usecases.usecase.DelegatingDeserializerAndSerializer.delegatingDeserializerAndSerializer;
 import static com.envimate.messageMate.mapping.DeserializationFilters.areOfType;
+import static com.envimate.messageMate.mapping.MissingDeserializationException.missingDeserializationException;
+import static com.envimate.messageMate.mapping.MissingSerializationException.missingSerializationException;
+import static java.lang.String.format;
 
 public interface SerializationAndDeserializationStage<T> {
 
@@ -49,15 +53,18 @@ public interface SerializationAndDeserializationStage<T> {
 
     default T throwAnExceptionByDefault() {
         return mappingRequestsAndResponsesUsing(delegatingDeserializerAndSerializer(
-                RequestFilters.failWithMessage("No request mapper found"),
-                ResponseFilters.failWithMessage("No response mapper found")));
+                (targetType, map) -> {
+                    throw missingDeserializationException(format("No deserialization found for type %s", targetType));
+                }, object -> {
+                    throw missingSerializationException(format("No serialization found for object %s", object));
+                }));
     }
 
     @SuppressWarnings("unchecked")
     default <X> Using<SerializationAndDeserializationStage<T>, Mapifier<X>>
     serializingResponseObjectsOfType(final Class<X> type) {
         return mapper ->
-                serializingResponseObjectsThat(ResponseFilters.areOfType(type))
+                serializingResponseObjectsThat(SerializationFilters.areOfType(type))
                         .using((Mapifier<Object>) mapper);
     }
 }

@@ -72,7 +72,6 @@ import static com.envimate.httpmate.convenience.cors.CorsConfigurator.toProtectA
 import static com.envimate.httpmate.events.EventModule.EVENT_TYPE;
 import static com.envimate.httpmate.events.EventsChains.MAP_REQUEST_TO_EVENT;
 import static com.envimate.httpmate.exceptions.DefaultExceptionMapper.theDefaultExceptionMapper;
-import static com.envimate.httpmate.http.ContentType.json;
 import static com.envimate.httpmate.http.Http.StatusCodes.METHOD_NOT_ALLOWED;
 import static com.envimate.httpmate.http.Http.StatusCodes.OK;
 import static com.envimate.httpmate.http.HttpRequestMethod.*;
@@ -85,7 +84,7 @@ import static com.envimate.httpmate.usecases.UseCaseDrivenBuilder.USE_CASE_DRIVE
 import static com.envimate.mapmate.deserialization.Deserializer.aDeserializer;
 import static com.envimate.mapmate.filters.ClassFilters.allBut;
 import static com.envimate.mapmate.filters.ClassFilters.allClassesThatHaveAStaticFactoryMethodWithASingleStringArgument;
-import static com.envimate.messageMate.messageBus.EventType.eventTypeFromString;
+import static com.envimate.messageMate.processingContext.EventType.eventTypeFromString;
 import static java.util.Map.of;
 
 public final class HttpMateTestConfigurations {

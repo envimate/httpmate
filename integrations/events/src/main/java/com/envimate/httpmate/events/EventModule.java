@@ -153,13 +153,15 @@ public final class EventModule implements ChainModule {
     @SuppressWarnings("unchecked")
     private void registerEventHandlers(final MessageBus messageBus,
                                        final ChainRegistry chainRegistry) {
-        externalEventMappings.forEach((type, mapping) -> messageBus.subscribe(type, event -> {
-            final MetaData metaData = emptyMetaData();
-            metaData.set(EVENT_RETURN_VALUE, of((Map<String, Object>) event));
-            metaData.set(EVENT_TYPE, type);
-            metaData.set(IS_EXTERNAL_EVENT, true);
-            chainRegistry.putIntoChain(INIT, metaData, m -> {
+        externalEventMappings.forEach((type, mapping) -> {
+            messageBus.subscribe(type, event -> {
+                final MetaData metaData = emptyMetaData();
+                metaData.set(EVENT_RETURN_VALUE, of((Map<String, Object>) event));
+                metaData.set(EVENT_TYPE, type);
+                metaData.set(IS_EXTERNAL_EVENT, true);
+                chainRegistry.putIntoChain(INIT, metaData, m -> {
+                });
             });
-        }));
+        });
     }
 }

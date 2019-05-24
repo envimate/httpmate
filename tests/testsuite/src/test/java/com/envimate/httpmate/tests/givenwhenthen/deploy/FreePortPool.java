@@ -24,7 +24,7 @@ package com.envimate.httpmate.tests.givenwhenthen.deploy;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public final class FreePortPool {
-    private static final int START_PORT = 8000;
+    private static final int START_PORT = 9000;
     private static AtomicInteger currentPort = new AtomicInteger(START_PORT);
 
     private FreePortPool() {

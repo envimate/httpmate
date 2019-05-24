@@ -25,9 +25,11 @@ import websockets.givenwhenthen.configurations.artificial.ArtificialConfiguratio
 
 import java.util.HashMap;
 
+import static com.envimate.messageMate.processingContext.EventType.eventTypeFromString;
+
 public final class CloseUseCase {
 
     public void closeAllWebSockets() {
-        ArtificialConfiguration.messageBus.send("CloseEvent", new HashMap<>());
+        ArtificialConfiguration.messageBus.send(eventTypeFromString("CloseEvent"), new HashMap<>());
     }
 }

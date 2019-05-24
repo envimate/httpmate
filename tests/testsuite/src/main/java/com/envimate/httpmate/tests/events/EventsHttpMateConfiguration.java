@@ -23,7 +23,6 @@ package com.envimate.httpmate.tests.events;
 
 import com.envimate.httpmate.HttpMate;
 import com.envimate.messageMate.identification.CorrelationId;
-import com.envimate.messageMate.messageBus.EventType;
 import com.envimate.messageMate.messageBus.MessageBus;
 import com.envimate.messageMate.messageBus.MessageBusType;
 
@@ -35,6 +34,7 @@ import static com.envimate.httpmate.events.EventDrivenBuilder.EVENT_DRIVEN;
 import static com.envimate.httpmate.http.HttpRequestMethod.GET;
 import static com.envimate.messageMate.internal.pipe.configuration.AsynchronousConfiguration.constantPoolSizeAsynchronousPipeConfiguration;
 import static com.envimate.messageMate.messageBus.MessageBusBuilder.aMessageBus;
+import static com.envimate.messageMate.processingContext.EventType.eventTypeFromString;
 
 public final class EventsHttpMateConfiguration {
     public static MessageBus messageBus;
@@ -53,9 +53,9 @@ public final class EventsHttpMateConfiguration {
                 .mappingResponsesUsing((event, metaData) -> metaData.set(BODY_STRING, event.toString()))
                 .build();
 
-        messageBus.subscribeRaw(EventType.eventTypeFromString("trigger"), processingContext -> {
+        messageBus.subscribeRaw(eventTypeFromString("trigger"), processingContext -> {
             final CorrelationId correlationId = processingContext.generateCorrelationIdForAnswer();
-            messageBus.send(EventType.eventTypeFromString("answer"), new HashMap<>(), correlationId);
+            messageBus.send(eventTypeFromString("answer"), new HashMap<>(), correlationId);
         });
 
         return httpMate;

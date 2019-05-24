@@ -26,7 +26,7 @@ import com.envimate.httpmate.http.HttpRequestMethod;
 import com.envimate.httpmate.path.Path;
 import com.envimate.messageMate.messageBus.MessageBus;
 import com.envimate.messageMate.messageBus.MessageBusType;
-import com.envimate.messageMate.useCaseAdapter.UseCaseAdapter;
+import com.envimate.messageMate.useCases.useCaseAdapter.UseCaseAdapter;
 import com.google.gson.Gson;
 import websockets.givenwhenthen.configurations.TestConfiguration;
 import websockets.givenwhenthen.configurations.artificial.usecases.abc.UseCaseA;
@@ -64,7 +64,7 @@ import static com.envimate.httpmate.websocketsevents.Conditions.closingAllWebSoc
 import static com.envimate.httpmate.websocketsevents.Conditions.webSocketIsTaggedWith;
 import static com.envimate.messageMate.internal.pipe.configuration.AsynchronousConfiguration.constantPoolSizeAsynchronousPipeConfiguration;
 import static com.envimate.messageMate.messageBus.MessageBusBuilder.aMessageBus;
-import static com.envimate.messageMate.useCaseAdapter.UseCaseAdapterBuilder.anUseCaseAdapter;
+import static com.envimate.messageMate.useCases.useCaseAdapter.UseCaseInvocationBuilder.anUseCaseAdapter;
 import static websockets.givenwhenthen.configurations.TestConfiguration.testConfiguration;
 import static websockets.givenwhenthen.configurations.artificial.usecases.echo.EchoParameter.echoParameter;
 import static websockets.givenwhenthen.configurations.artificial.usecases.exception.ExceptionUseCaseParameter.exceptionUseCaseParameter;
@@ -106,12 +106,13 @@ public final class ArtificialConfiguration {
                 .mappingRequestsToUseCaseParametersOfType(ParameterParameter.class).using((targetType, map) -> parameterParameter((String) map.get("var")))
                 .mappingRequestsToUseCaseParametersOfType(EchoParameter.class).using((targetType, map) -> echoParameter((String) map.get("echoValue")))
                 .mappingRequestsToUseCaseParametersOfType(ExceptionUseCaseParameter.class).using((targetType, map) -> exceptionUseCaseParameter((String) map.get("mode")))
-                .throwAnExceptionByDefault()
+                .throwAnExceptionByDefaultIfNoParameterMappingCanBeApplied()
                 .serializingResponseObjectsOfType(String.class).using(object -> Map.of("stringValue", object))
-                .throwingAnExceptionIfNoResponseMappingCanBeFound()
-                .puttingExceptionObjectNamedAsExceptionIntoResponseMapByDefault();
+                .throwingAnExceptionByDefaultIfNoResponseMappingCanBeApplied()
+                .puttingExceptionObjectNamedAsExceptionIntoResponseMapByDefault()
+                .buildAsStandaloneAdapter();
 
-        useCaseAdapter.attachTo(messageBus);
+        useCaseAdapter.attachAndEnhance(messageBus);
 
         final HttpMate httpMate = anHttpMateConfiguredAs(EVENT_DRIVEN).attachedTo(messageBus)
                 .triggeringTheEvent("NormalUseCase").forRequestPath("/normal").andRequestMethod(HttpRequestMethod.GET)

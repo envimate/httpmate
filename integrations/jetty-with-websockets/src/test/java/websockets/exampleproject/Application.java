@@ -24,7 +24,7 @@ package websockets.exampleproject;
 import com.envimate.mapmate.deserialization.methods.DeserializationCPMethod;
 import com.envimate.messageMate.messageBus.MessageBus;
 import com.envimate.messageMate.messageBus.MessageBusType;
-import com.envimate.messageMate.useCaseAdapter.UseCaseAdapter;
+import com.envimate.messageMate.useCases.useCaseAdapter.UseCaseAdapter;
 import com.google.gson.Gson;
 import websockets.exampleproject.domain.*;
 import websockets.exampleproject.usecases.AntiHateSpeechUseCase;
@@ -44,7 +44,7 @@ import static com.envimate.mapmate.deserialization.Deserializer.aDeserializer;
 import static com.envimate.mapmate.serialization.Serializer.aSerializer;
 import static com.envimate.messageMate.internal.pipe.configuration.AsynchronousConfiguration.constantPoolSizeAsynchronousPipeConfiguration;
 import static com.envimate.messageMate.messageBus.MessageBusBuilder.aMessageBus;
-import static com.envimate.messageMate.useCaseAdapter.UseCaseAdapterBuilder.anUseCaseAdapter;
+import static com.envimate.messageMate.useCases.useCaseAdapter.UseCaseInvocationBuilder.anUseCaseAdapter;
 
 public final class Application {
 
@@ -91,10 +91,11 @@ public final class Application {
         final UseCaseAdapter useCaseAdapter = anUseCaseAdapter()
                 .invokingUseCase(SendMessageUseCase.class).forType("SendMessageRequest").callingTheSingleUseCaseMethod()
                 .obtainingUseCaseInstancesUsingTheZeroArgumentConstructor()
-                .throwAnExceptionByDefault()
-                .throwingAnExceptionIfNoResponseMappingCanBeFound()
-                .puttingExceptionObjectNamedAsExceptionIntoResponseMapByDefault();
-        useCaseAdapter.attachTo(MESSAGE_BUS);
+                .throwAnExceptionByDefaultIfNoParameterMappingCanBeApplied()
+                .throwingAnExceptionByDefaultIfNoResponseMappingCanBeApplied()
+                .puttingExceptionObjectNamedAsExceptionIntoResponseMapByDefault()
+                .buildAsStandaloneAdapter();
+        useCaseAdapter.attachAndEnhance(MESSAGE_BUS);
 
         anHttpMateConfiguredAs(EVENT_DRIVEN).attachedTo(MESSAGE_BUS)
                 .triggeringTheEvent("SendMessageRequest").forRequestPath("/qwrefewiflrwefjierwipower").andRequestMethod(DELETE)

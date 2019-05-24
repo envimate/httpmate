@@ -26,13 +26,13 @@ import com.envimate.httpmate.chains.ChainModule;
 import com.envimate.httpmate.usecases.usecase.SerializerAndDeserializer;
 import com.envimate.messageMate.mapping.Demapifier;
 import com.envimate.messageMate.mapping.Mapifier;
-import com.envimate.messageMate.processingContext.EventType;
 import com.envimate.messageMate.messageBus.MessageBus;
-import com.envimate.messageMate.useCases.useCaseAdapter.UseCaseAdapter;
+import com.envimate.messageMate.processingContext.EventType;
 import com.envimate.messageMate.useCases.building.DeserializationStep1Builder;
 import com.envimate.messageMate.useCases.building.ResponseSerializationStep1Builder;
 import com.envimate.messageMate.useCases.building.Step1Builder;
 import com.envimate.messageMate.useCases.building.Step3Builder;
+import com.envimate.messageMate.useCases.useCaseAdapter.UseCaseAdapter;
 import com.envimate.messageMate.useCases.useCaseAdapter.usecaseInstantiating.UseCaseInstantiator;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
@@ -139,10 +139,10 @@ public final class UseCasesModule implements ChainModule {
         final UseCaseAdapter useCaseAdapter = useCaseAdapterResponseSerializationStep1Builder
                 .serializingObjectsByDefaultUsing(defaultResponseMapper)
                 .puttingExceptionObjectNamedAsExceptionIntoResponseMapByDefault()
-                //TODO: is that the right build call???
                 .buildAsStandaloneAdapter();
 
         final MessageBus messageBus = extender.getMetaDatum(MESSAGE_BUS);
-        useCaseAdapter.attachTo(messageBus);
+
+        useCaseAdapter.attachAndEnhance(messageBus);
     }
 }

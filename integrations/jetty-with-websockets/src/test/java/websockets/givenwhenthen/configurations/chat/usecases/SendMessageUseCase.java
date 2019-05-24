@@ -28,6 +28,7 @@ import websockets.givenwhenthen.configurations.chat.domain.Username;
 
 import java.util.Map;
 
+import static com.envimate.messageMate.processingContext.EventType.eventTypeFromString;
 import static websockets.givenwhenthen.configurations.chat.ChatConfiguration.messageBus;
 import static websockets.givenwhenthen.configurations.chat.domain.UserRepository.userRepository;
 import static websockets.givenwhenthen.configurations.chat.usecases.NewMessageEvent.newMessageEvent;
@@ -46,6 +47,6 @@ public final class SendMessageUseCase {
         final String recipientString = event.recipient().name().internalValueForMapping();
         final Map<String, Object> e = Map.of("content", contentString, "recipient", recipientString);
 
-        messageBus.send("NewMessageEvent", e);
+        messageBus.send(eventTypeFromString("NewMessageEvent"), e);
     }
 }

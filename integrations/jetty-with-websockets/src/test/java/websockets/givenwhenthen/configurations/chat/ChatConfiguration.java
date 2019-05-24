@@ -25,7 +25,7 @@ import com.envimate.httpmate.HttpMate;
 import com.envimate.httpmate.security.Authenticator;
 import com.envimate.httpmate.security.Authorizer;
 import com.envimate.messageMate.messageBus.MessageBus;
-import com.envimate.messageMate.useCaseAdapter.UseCaseAdapter;
+import com.envimate.messageMate.useCases.useCaseAdapter.UseCaseAdapter;
 import com.google.gson.Gson;
 import websockets.givenwhenthen.configurations.TestConfiguration;
 import websockets.givenwhenthen.configurations.chat.domain.User;
@@ -52,7 +52,7 @@ import static com.envimate.httpmate.websocketsevents.Conditions.forwardingItToAl
 import static com.envimate.messageMate.internal.pipe.configuration.AsynchronousConfiguration.constantPoolSizeAsynchronousPipeConfiguration;
 import static com.envimate.messageMate.messageBus.MessageBusBuilder.aMessageBus;
 import static com.envimate.messageMate.messageBus.MessageBusType.ASYNCHRONOUS;
-import static com.envimate.messageMate.useCaseAdapter.UseCaseAdapterBuilder.anUseCaseAdapter;
+import static com.envimate.messageMate.useCases.useCaseAdapter.UseCaseInvocationBuilder.anUseCaseAdapter;
 import static websockets.givenwhenthen.configurations.TestConfiguration.testConfiguration;
 import static websockets.givenwhenthen.configurations.chat.domain.MessageContent.messageContent;
 import static websockets.givenwhenthen.configurations.chat.domain.UserRepository.userRepository;
@@ -90,12 +90,13 @@ public final class ChatConfiguration {
                     final String recipient = (String) map.get("recipient");
                     return chatMessage(messageContent(content), username(recipient));
                 })
-                .throwAnExceptionByDefault()
+                .throwAnExceptionByDefaultIfNoParameterMappingCanBeApplied()
                 .serializingResponseObjectsThat(Objects::isNull).using(object -> null)
-                .throwingAnExceptionIfNoResponseMappingCanBeFound()
-                .puttingExceptionObjectNamedAsExceptionIntoResponseMapByDefault();
+                .throwingAnExceptionByDefaultIfNoResponseMappingCanBeApplied()
+                .puttingExceptionObjectNamedAsExceptionIntoResponseMapByDefault()
+                .buildAsStandaloneAdapter();
 
-        useCaseAdapter.attachTo(messageBus);
+        useCaseAdapter.attachAndEnhance(messageBus);
 
         final HttpMate httpMate = anHttpMateConfiguredAs(EVENT_DRIVEN).attachedTo(messageBus)
                 .triggeringTheEvent("ChatMessage").forRequestPath("/send").andRequestMethod(GET)
