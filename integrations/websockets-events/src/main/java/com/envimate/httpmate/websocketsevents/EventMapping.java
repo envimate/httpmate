@@ -22,7 +22,7 @@
 package com.envimate.httpmate.websocketsevents;
 
 import com.envimate.httpmate.chains.MetaData;
-import com.envimate.messageMate.messageBus.EventType;
+import com.envimate.messageMate.processingContext.EventType;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;

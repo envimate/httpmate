@@ -24,7 +24,7 @@ package com.envimate.httpmate.usecases;
 import com.envimate.httpmate.chains.ChainExtender;
 import com.envimate.httpmate.chains.ChainModule;
 import com.envimate.httpmate.usecases.usecase.SerializerAndDeserializer;
-import com.envimate.messageMate.messageBus.EventType;
+import com.envimate.messageMate.processingContext.EventType;
 import com.envimate.messageMate.messageBus.MessageBus;
 import com.envimate.messageMate.useCaseAdapter.UseCaseAdapter;
 import com.envimate.messageMate.useCaseAdapter.building.UseCaseAdapterDeserializationStep1Builder;

@@ -24,7 +24,7 @@ package com.envimate.httpmate.events.processors;
 import com.envimate.httpmate.chains.MetaData;
 import com.envimate.httpmate.chains.Processor;
 import com.envimate.httpmate.events.ExternalEventMapping;
-import com.envimate.messageMate.messageBus.EventType;
+import com.envimate.messageMate.processingContext.EventType;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;

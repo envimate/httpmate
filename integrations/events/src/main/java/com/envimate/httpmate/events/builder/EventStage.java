@@ -22,9 +22,9 @@
 package com.envimate.httpmate.events.builder;
 
 import com.envimate.httpmate.generator.builder.ConditionStage;
-import com.envimate.messageMate.messageBus.EventType;
+import com.envimate.messageMate.processingContext.EventType;
 
-import static com.envimate.messageMate.messageBus.EventType.eventTypeFromString;
+import static com.envimate.messageMate.processingContext.EventType.eventTypeFromString;
 
 public interface EventStage<T> {
 

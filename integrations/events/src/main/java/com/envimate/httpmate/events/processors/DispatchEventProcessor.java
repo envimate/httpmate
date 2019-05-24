@@ -23,10 +23,10 @@ package com.envimate.httpmate.events.processors;
 
 import com.envimate.httpmate.chains.MetaData;
 import com.envimate.httpmate.chains.Processor;
-import com.envimate.messageMate.messageBus.EventType;
 import com.envimate.messageMate.messageBus.MessageBus;
 import com.envimate.messageMate.messageFunction.MessageFunction;
 import com.envimate.messageMate.messageFunction.ResponseFuture;
+import com.envimate.messageMate.processingContext.EventType;
 import com.envimate.messageMate.processingContext.ProcessingContext;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;

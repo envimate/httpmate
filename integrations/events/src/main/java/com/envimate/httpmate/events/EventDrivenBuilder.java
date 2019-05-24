@@ -27,7 +27,7 @@ import com.envimate.httpmate.HttpMateConfigurationType;
 import com.envimate.httpmate.events.builder.*;
 import com.envimate.httpmate.events.mapper.EventToResponseMapper;
 import com.envimate.httpmate.generator.builder.ConditionStage;
-import com.envimate.messageMate.messageBus.EventType;
+import com.envimate.messageMate.processingContext.EventType;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 
