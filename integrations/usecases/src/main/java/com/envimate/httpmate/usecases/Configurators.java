@@ -22,7 +22,7 @@
 package com.envimate.httpmate.usecases;
 
 import com.envimate.httpmate.chains.Configurator;
-import com.envimate.messageMate.useCaseAdapter.usecaseInstantiating.UseCaseInstantiator;
+import com.envimate.messageMate.useCases.useCaseAdapter.usecaseInstantiating.UseCaseInstantiator;
 
 import static com.envimate.httpmate.util.Validators.validateNotNull;
 

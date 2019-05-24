@@ -21,8 +21,8 @@
 
 package com.envimate.httpmate.usecases.usecase;
 
-import com.envimate.messageMate.useCaseAdapter.mapping.RequestMapper;
-import com.envimate.messageMate.useCaseAdapter.mapping.ResponseMapper;
+import com.envimate.messageMate.mapping.Demapifier;
+import com.envimate.messageMate.mapping.Mapifier;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 
@@ -32,11 +32,11 @@ import static com.envimate.httpmate.util.Validators.validateNotNull;
 
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class DelegatingDeserializerAndSerializer implements SerializerAndDeserializer {
-    private final RequestMapper<Object> requestMapper;
-    private final ResponseMapper<Object> responseMapper;
+    private final Demapifier<Object> requestMapper;
+    private final Mapifier<Object> responseMapper;
 
-    public static SerializerAndDeserializer delegatingDeserializerAndSerializer(final RequestMapper<Object> requestMapper,
-                                                                                final ResponseMapper<Object> responseMapper) {
+    public static SerializerAndDeserializer delegatingDeserializerAndSerializer(final Demapifier<Object> requestMapper,
+                                                                                final Mapifier<Object> responseMapper) {
         validateNotNull(requestMapper, "requestMapper");
         validateNotNull(responseMapper, "responseMapper");
         return new DelegatingDeserializerAndSerializer(requestMapper, responseMapper);

@@ -24,27 +24,25 @@ package com.envimate.httpmate.usecases.builder;
 import com.envimate.httpmate.events.builder.Using;
 import com.envimate.httpmate.usecases.EventFilter;
 import com.envimate.httpmate.usecases.usecase.SerializerAndDeserializer;
-import com.envimate.messageMate.useCaseAdapter.mapping.RequestFilters;
-import com.envimate.messageMate.useCaseAdapter.mapping.RequestMapper;
-import com.envimate.messageMate.useCaseAdapter.mapping.ResponseFilters;
-import com.envimate.messageMate.useCaseAdapter.mapping.ResponseMapper;
+import com.envimate.messageMate.mapping.Demapifier;
+import com.envimate.messageMate.mapping.Mapifier;
 
 import java.util.function.Predicate;
 
 import static com.envimate.httpmate.usecases.usecase.DelegatingDeserializerAndSerializer.delegatingDeserializerAndSerializer;
-import static com.envimate.messageMate.useCaseAdapter.mapping.RequestFilters.areOfType;
+import static com.envimate.messageMate.mapping.DeserializationFilters.areOfType;
 
 public interface SerializationAndDeserializationStage<T> {
 
-    <X> Using<SerializationAndDeserializationStage<T>, RequestMapper<X>> mappingUseCaseParametersThat(EventFilter<?> filter);
+    <X> Using<SerializationAndDeserializationStage<T>, Demapifier<X>> mappingUseCaseParametersThat(EventFilter<?> filter);
 
-    Using<SerializationAndDeserializationStage<T>, ResponseMapper<Object>> serializingResponseObjectsThat(
+    Using<SerializationAndDeserializationStage<T>, Mapifier<Object>> serializingResponseObjectsThat(
             Predicate<Object> filter);
 
     T mappingRequestsAndResponsesUsing(SerializerAndDeserializer serializerAndDeserializer);
 
     @SuppressWarnings("unchecked")
-    default <X> Using<SerializationAndDeserializationStage<T>, RequestMapper<X>> mappingUseCaseParametersOfType(
+    default <X> Using<SerializationAndDeserializationStage<T>, Demapifier<X>> mappingUseCaseParametersOfType(
             final Class<X> type) {
         return mappingUseCaseParametersThat((clazz, event) -> areOfType(type).test((Class<X>) clazz, event));
     }
@@ -56,10 +54,10 @@ public interface SerializationAndDeserializationStage<T> {
     }
 
     @SuppressWarnings("unchecked")
-    default <X> Using<SerializationAndDeserializationStage<T>, ResponseMapper<X>>
+    default <X> Using<SerializationAndDeserializationStage<T>, Mapifier<X>>
     serializingResponseObjectsOfType(final Class<X> type) {
         return mapper ->
                 serializingResponseObjectsThat(ResponseFilters.areOfType(type))
-                        .using((ResponseMapper<Object>) mapper);
+                        .using((Mapifier<Object>) mapper);
     }
 }

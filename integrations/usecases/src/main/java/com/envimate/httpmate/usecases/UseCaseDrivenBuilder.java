@@ -31,10 +31,10 @@ import com.envimate.httpmate.usecases.builder.SerializationAndDeserializationSta
 import com.envimate.httpmate.usecases.builder.UseCaseStage1;
 import com.envimate.httpmate.usecases.builder.UseCaseStage2;
 import com.envimate.httpmate.usecases.usecase.SerializerAndDeserializer;
-import com.envimate.messageMate.messageBus.EventType;
+import com.envimate.messageMate.mapping.Demapifier;
+import com.envimate.messageMate.mapping.Mapifier;
 import com.envimate.messageMate.messageBus.MessageBus;
-import com.envimate.messageMate.useCaseAdapter.mapping.RequestMapper;
-import com.envimate.messageMate.useCaseAdapter.mapping.ResponseMapper;
+import com.envimate.messageMate.processingContext.EventType;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
@@ -50,9 +50,9 @@ import static com.envimate.httpmate.path.PathTemplate.pathTemplate;
 import static com.envimate.httpmate.usecases.UseCasesModule.useCasesModule;
 import static com.envimate.httpmate.util.Validators.validateNotNull;
 import static com.envimate.messageMate.internal.pipe.configuration.AsynchronousConfiguration.constantPoolSizeAsynchronousPipeConfiguration;
-import static com.envimate.messageMate.messageBus.EventType.eventTypeFromString;
 import static com.envimate.messageMate.messageBus.MessageBusBuilder.aMessageBus;
 import static com.envimate.messageMate.messageBus.MessageBusType.ASYNCHRONOUS;
+import static com.envimate.messageMate.processingContext.EventType.eventTypeFromString;
 
 @ToString
 @EqualsAndHashCode
@@ -85,7 +85,7 @@ public final class UseCaseDrivenBuilder {
         }
 
         @Override
-        public Using<SerializationAndDeserializationStage<HttpMateBuilder>, ResponseMapper<Object>>
+        public Using<SerializationAndDeserializationStage<HttpMateBuilder>, Mapifier<Object>>
         serializingResponseObjectsThat(final Predicate<Object> filter) {
             return mapper -> {
                 useCasesModule.addResponseSerializer(filter, mapper);
@@ -94,7 +94,7 @@ public final class UseCaseDrivenBuilder {
         }
 
         @Override
-        public <X> Using<SerializationAndDeserializationStage<HttpMateBuilder>, RequestMapper<X>>
+        public <X> Using<SerializationAndDeserializationStage<HttpMateBuilder>, Demapifier<X>>
         mappingUseCaseParametersThat(final EventFilter<?> filter) {
             return mapper -> {
                 useCasesModule.addRequestMapper(filter, mapper);

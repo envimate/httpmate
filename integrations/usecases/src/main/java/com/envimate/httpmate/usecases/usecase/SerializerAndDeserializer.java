@@ -25,12 +25,12 @@ import com.envimate.httpmate.chains.ChainExtender;
 import com.envimate.httpmate.chains.ChainModule;
 import com.envimate.httpmate.chains.DependencyRegistry;
 import com.envimate.httpmate.usecases.UseCasesModule;
-import com.envimate.messageMate.useCaseAdapter.mapping.RequestMapper;
-import com.envimate.messageMate.useCaseAdapter.mapping.ResponseMapper;
+import com.envimate.messageMate.mapping.Demapifier;
+import com.envimate.messageMate.mapping.Mapifier;
 
 import java.util.Map;
 
-public interface SerializerAndDeserializer extends RequestMapper<Object>, ResponseMapper<Object>, ChainModule {
+public interface SerializerAndDeserializer extends Demapifier<Object>, Mapifier<Object>, ChainModule {
 
     @Override
     default Object map(final Class<Object> targetType, final Map<String, Object> map) {
