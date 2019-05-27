@@ -23,6 +23,7 @@ package com.envimate.httpmate;
 
 import com.envimate.httpmate.chains.ChainModule;
 import com.envimate.httpmate.chains.Configurator;
+import com.envimate.httpmate.chains.MetaData;
 import com.envimate.httpmate.convenience.handler.HttpHandler;
 import com.envimate.httpmate.convenience.handler.HttpRequest;
 import com.envimate.httpmate.convenience.handler.HttpResponse;
@@ -37,6 +38,7 @@ import lombok.ToString;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 import static com.envimate.httpmate.CoreModule.coreModule;
 import static com.envimate.httpmate.HttpMateBuilder.httpMateBuilder;
@@ -79,6 +81,33 @@ public final class LowLevelBuilder {
     public LowLevelBuilder delete(final String url, final BiConsumer<HttpRequest, HttpResponse> handler) {
         return this
                 .callingTheHandler((HttpHandler) handler::accept)
+                .forRequestPath(url)
+                .andRequestMethod(HttpRequestMethod.DELETE);
+    }
+    public LowLevelBuilder get(final String url, final Consumer<MetaData> handler) {
+        return this
+                .callingTheHandler(handler::accept)
+                .forRequestPath(url)
+                .andRequestMethod(HttpRequestMethod.GET);
+    }
+
+    public LowLevelBuilder post(final String url, final Consumer<MetaData> handler) {
+        return this
+                .callingTheHandler(handler::accept)
+                .forRequestPath(url)
+                .andRequestMethod(HttpRequestMethod.POST);
+    }
+
+    public LowLevelBuilder put(final String url, final Consumer<MetaData> handler) {
+        return this
+                .callingTheHandler(handler::accept)
+                .forRequestPath(url)
+                .andRequestMethod(HttpRequestMethod.PUT);
+    }
+
+    public LowLevelBuilder delete(final String url, final Consumer<MetaData> handler) {
+        return this
+                .callingTheHandler(handler::accept)
                 .forRequestPath(url)
                 .andRequestMethod(HttpRequestMethod.DELETE);
     }
