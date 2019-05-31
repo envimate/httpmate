@@ -64,9 +64,23 @@ public final class LowLevelBuilder {
                 .andRequestMethod(HttpRequestMethod.GET);
     }
 
+    public LowLevelBuilder get(final String url, final Consumer<MetaData> handler) {
+        return this
+                .callingTheHandler(handler::accept)
+                .forRequestPath(url)
+                .andRequestMethod(HttpRequestMethod.GET);
+    }
+
     public LowLevelBuilder post(final String url, final BiConsumer<HttpRequest, HttpResponse> handler) {
         return this
                 .callingTheHandler((HttpHandler) handler::accept)
+                .forRequestPath(url)
+                .andRequestMethod(HttpRequestMethod.POST);
+    }
+
+    public LowLevelBuilder post(final String url, final Consumer<MetaData> handler) {
+        return this
+                .callingTheHandler(handler::accept)
                 .forRequestPath(url)
                 .andRequestMethod(HttpRequestMethod.POST);
     }
@@ -78,31 +92,18 @@ public final class LowLevelBuilder {
                 .andRequestMethod(HttpRequestMethod.PUT);
     }
 
-    public LowLevelBuilder delete(final String url, final BiConsumer<HttpRequest, HttpResponse> handler) {
-        return this
-                .callingTheHandler((HttpHandler) handler::accept)
-                .forRequestPath(url)
-                .andRequestMethod(HttpRequestMethod.DELETE);
-    }
-    public LowLevelBuilder get(final String url, final Consumer<MetaData> handler) {
-        return this
-                .callingTheHandler(handler::accept)
-                .forRequestPath(url)
-                .andRequestMethod(HttpRequestMethod.GET);
-    }
-
-    public LowLevelBuilder post(final String url, final Consumer<MetaData> handler) {
-        return this
-                .callingTheHandler(handler::accept)
-                .forRequestPath(url)
-                .andRequestMethod(HttpRequestMethod.POST);
-    }
-
     public LowLevelBuilder put(final String url, final Consumer<MetaData> handler) {
         return this
                 .callingTheHandler(handler::accept)
                 .forRequestPath(url)
                 .andRequestMethod(HttpRequestMethod.PUT);
+    }
+
+    public LowLevelBuilder delete(final String url, final BiConsumer<HttpRequest, HttpResponse> handler) {
+        return this
+                .callingTheHandler((HttpHandler) handler::accept)
+                .forRequestPath(url)
+                .andRequestMethod(HttpRequestMethod.DELETE);
     }
 
     public LowLevelBuilder delete(final String url, final Consumer<MetaData> handler) {
