@@ -123,4 +123,8 @@ public final class LowLevelBuilder {
     public HttpMateBuilder thatIs() {
         return httpMateBuilder(coreModule);
     }
+
+    public HttpMate build() {
+        return this.thatIs().build();
+    }
 }
