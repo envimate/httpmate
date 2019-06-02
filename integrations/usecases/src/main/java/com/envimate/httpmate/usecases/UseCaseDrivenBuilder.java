@@ -27,6 +27,7 @@ import com.envimate.httpmate.HttpMateConfigurationType;
 import com.envimate.httpmate.events.EventModule;
 import com.envimate.httpmate.events.builder.Using;
 import com.envimate.httpmate.generator.GenerationCondition;
+import com.envimate.httpmate.http.HttpRequestMethod;
 import com.envimate.httpmate.usecases.builder.SerializationAndDeserializationStage;
 import com.envimate.httpmate.usecases.builder.UseCaseStage1;
 import com.envimate.httpmate.usecases.builder.UseCaseStage2;
@@ -82,6 +83,38 @@ public final class UseCaseDrivenBuilder {
                 useCasesModule.addUseCaseToEventMapping(useCaseClass, eventType);
                 return this;
             };
+        }
+
+        @Override
+        public Stage1 get(final String pathTemplate, final Class<?> useCaseClass) {
+            return this
+                    .servingTheUseCase(useCaseClass)
+                    .forRequestPath(pathTemplate)
+                    .andRequestMethod(HttpRequestMethod.GET);
+        }
+
+        @Override
+        public Stage1 post(final String pathTemplate, final Class<?> useCaseClass) {
+            return this
+                    .servingTheUseCase(useCaseClass)
+                    .forRequestPath(pathTemplate)
+                    .andRequestMethod(HttpRequestMethod.POST);
+        }
+
+        @Override
+        public Stage1 put(final String pathTemplate, final Class<?> useCaseClass) {
+            return this
+                    .servingTheUseCase(useCaseClass)
+                    .forRequestPath(pathTemplate)
+                    .andRequestMethod(HttpRequestMethod.PUT);
+        }
+
+        @Override
+        public Stage1 delete(final String pathTemplate, final Class<?> useCaseClass) {
+            return this
+                    .servingTheUseCase(useCaseClass)
+                    .forRequestPath(pathTemplate)
+                    .andRequestMethod(HttpRequestMethod.DELETE);
         }
 
         @Override

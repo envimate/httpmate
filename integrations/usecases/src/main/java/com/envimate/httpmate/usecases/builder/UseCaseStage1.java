@@ -21,7 +21,8 @@
 
 package com.envimate.httpmate.usecases.builder;
 
-@FunctionalInterface
+import com.envimate.httpmate.usecases.UseCaseDrivenBuilder;
+
 public interface UseCaseStage1<T> {
 
     /**
@@ -31,4 +32,40 @@ public interface UseCaseStage1<T> {
      * @return the next step in the fluent builder
      */
     UseCaseStage2<T> servingTheUseCase(Class<?> useCaseClass);
+
+    /**
+     * Configures the UseCaseClass to serve the pathTemplate with HTTP GET method.
+     *
+     * @param pathTemplate The path template to answer to.
+     * @param useCaseClass The useCaseClass answering the request.
+     * @return The next stage of the builder.
+     */
+    UseCaseDrivenBuilder.Stage1 get(String pathTemplate, Class<?> useCaseClass);
+
+    /**
+     * Configures the UseCaseClass to serve the pathTemplate with HTTP POST method.
+     *
+     * @param pathTemplate The path template to answer to.
+     * @param useCaseClass The useCaseClass answering the request.
+     * @return The next stage of the builder.
+     */
+    UseCaseDrivenBuilder.Stage1 post(String pathTemplate, Class<?> useCaseClass);
+
+    /**
+     * Configures the UseCaseClass to serve the pathTemplate with HTTP PUT method.
+     *
+     * @param pathTemplate The path template to answer to.
+     * @param useCaseClass The useCaseClass answering the request.
+     * @return The next stage of the builder.
+     */
+    UseCaseDrivenBuilder.Stage1 put(String pathTemplate, Class<?> useCaseClass);
+
+    /**
+     * Configures the UseCaseClass to serve the pathTemplate with HTTP DELETE method.
+     *
+     * @param pathTemplate The path template to answer to.
+     * @param useCaseClass The useCaseClass answering the request.
+     * @return The next stage of the builder.
+     */
+    UseCaseDrivenBuilder.Stage1 delete(String pathTemplate, Class<?> useCaseClass);
 }
