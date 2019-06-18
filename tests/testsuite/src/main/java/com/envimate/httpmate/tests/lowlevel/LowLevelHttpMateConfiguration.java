@@ -22,7 +22,6 @@
 package com.envimate.httpmate.tests.lowlevel;
 
 import com.envimate.httpmate.HttpMate;
-import com.envimate.httpmate.convenience.resource.ResourceHandler;
 
 import static com.envimate.httpmate.HttpMate.aLowLevelHttpMate;
 import static com.envimate.httpmate.convenience.configurators.Configurators.toLogUsing;
