@@ -22,10 +22,12 @@
 package com.envimate.httpmate.tests.lowlevel;
 
 import com.envimate.httpmate.HttpMate;
+import com.envimate.httpmate.convenience.resource.ResourceHandler;
 
 import static com.envimate.httpmate.HttpMate.aLowLevelHttpMate;
 import static com.envimate.httpmate.convenience.configurators.Configurators.toLogUsing;
 import static com.envimate.httpmate.convenience.debug.DebugConfigurator.toBeInDebugMode;
+import static com.envimate.httpmate.convenience.resource.ResourceHandler.theResource;
 import static com.envimate.httpmate.http.HttpRequestMethod.*;
 import static com.envimate.httpmate.tests.lowlevel.handlers.ContentTypeInResponseHandler.contentTypeInResponseHandler;
 import static com.envimate.httpmate.tests.lowlevel.handlers.EchoBodyHandler.echoBodyHandler;
@@ -43,7 +45,7 @@ public final class LowLevelHttpMateConfiguration {
 
     public static HttpMate theLowLevelHttpMateInstanceUsedForTesting() {
         logger = new StringBuilder();
-        final HttpMate httpMate = aLowLevelHttpMate()
+        return aLowLevelHttpMate()
                 .callingTheHandler(echoBodyHandler())
                 .forRequestPath("/echo").andRequestMethods(GET, POST, PUT, DELETE)
                 .callingTheHandler(echoContentTypeHandler())
@@ -58,10 +60,10 @@ public final class LowLevelHttpMateConfiguration {
                 .forRequestPath("/download").andRequestMethod(GET)
                 .callingTheHandler(exceptionThrowingHandler())
                 .forRequestPath("/exception").andRequestMethod(GET)
+                .get("/resource", theResource("lowlevel/resource"))
                 .thatIs()
                 .configured(toLogUsing((message, metaData) -> logger.append(message)))
                 .configured(toBeInDebugMode())
                 .build();
-        return httpMate;
     }
 }

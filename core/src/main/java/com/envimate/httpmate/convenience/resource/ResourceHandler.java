@@ -19,11 +19,11 @@
  * under the License.
  */
 
-package com.envimate.httpmate.multipart;
+package com.envimate.httpmate.convenience.resource;
 
-import com.envimate.httpmate.chains.Processor;
-import com.envimate.httpmate.chains.MetaData;
-import com.envimate.httpmate.http.ContentType;
+import com.envimate.httpmate.convenience.handler.HttpHandler;
+import com.envimate.httpmate.convenience.handler.HttpRequest;
+import com.envimate.httpmate.convenience.handler.HttpResponse;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
@@ -31,25 +31,24 @@ import lombok.ToString;
 
 import java.io.InputStream;
 
-import static com.envimate.httpmate.HttpMateChainKeys.CONTENT_TYPE;
-import static com.envimate.httpmate.HttpMateChainKeys.BODY_STREAM;
-import static com.envimate.httpmate.multipart.MultipartChainKeys.MULTIPART_ITERATOR_BODY;
-import static com.envimate.httpmate.multipart.MultipartParser.parse;
+import static com.envimate.httpmate.util.Validators.validateNotNullNorEmpty;
+import static java.lang.Thread.currentThread;
 
 @ToString
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-public final class MultipartProcessor implements Processor {
+public final class ResourceHandler implements HttpHandler {
+    private final String resourcePath;
 
-    public static Processor multipartProcessor() {
-        return new MultipartProcessor();
+    public static HttpHandler theResource(final String resourcePath) {
+        validateNotNullNorEmpty(resourcePath, "resourcePath");
+        return new ResourceHandler(resourcePath);
     }
 
     @Override
-    public void apply(final MetaData metaData) {
-        final InputStream body = metaData.get(BODY_STREAM);
-        final ContentType contentType = metaData.get(CONTENT_TYPE);
-        final MultipartIteratorBody multipartIteratorBody = parse(body, contentType);
-        metaData.set(MULTIPART_ITERATOR_BODY, multipartIteratorBody);
+    public void handle(final HttpRequest request, final HttpResponse response) {
+        final ClassLoader contextClassLoader = currentThread().getContextClassLoader();
+        final InputStream resourceAsStream = contextClassLoader.getResourceAsStream(resourcePath);
+        response.setBody(resourceAsStream);
     }
 }

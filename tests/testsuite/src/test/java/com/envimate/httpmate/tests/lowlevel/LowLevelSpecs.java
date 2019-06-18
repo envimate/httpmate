@@ -135,4 +135,12 @@ public final class LowLevelSpecs {
                 .theStatusCodeWas(500)
                 .theResponseBodyContains("");
     }
+
+    @Test
+    public void testResources() {
+        given(theLowLevelHttpMateInstanceUsedForTesting())
+                .when().aRequestToThePath("/resource").viaTheGetMethod().withAnEmptyBody().isIssued()
+                .theStatusCodeWas(200)
+                .theResponseBodyContains("this is a resource");
+    }
 }

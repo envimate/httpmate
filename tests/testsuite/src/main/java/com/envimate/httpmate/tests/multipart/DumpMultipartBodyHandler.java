@@ -21,26 +21,25 @@
 
 package com.envimate.httpmate.tests.multipart;
 
-import com.envimate.httpmate.chains.MetaData;
+import com.envimate.httpmate.convenience.handler.HttpResponse;
 import com.envimate.httpmate.handler.Handler;
 import com.envimate.httpmate.multipart.MultipartIteratorBody;
+import com.envimate.httpmate.multipart.handler.MultipartHandler;
+import com.envimate.httpmate.multipart.handler.MultipartRequest;
 
 import java.util.StringJoiner;
 
-import static com.envimate.httpmate.HttpMateChainKeys.RESPONSE_STRING;
-import static com.envimate.httpmate.multipart.MultipartChainKeys.MULTIPART_ITERATOR_BODY;
-
-public final class DumpMultipartBodyHandler implements Handler {
+public final class DumpMultipartBodyHandler implements MultipartHandler {
 
     public static Handler dumpMultipartBodyHandler() {
         return new DumpMultipartBodyHandler();
     }
 
     @Override
-    public void handle(final MetaData metaData) {
-        final MultipartIteratorBody multipartIteratorBody = metaData.get(MULTIPART_ITERATOR_BODY);
+    public void handle(final MultipartRequest request, final HttpResponse response) {
+        final MultipartIteratorBody multipartIteratorBody = request.partIterator();
         final String dump = dumpMultipart(multipartIteratorBody);
-        metaData.set(RESPONSE_STRING, dump);
+        response.setBody(dump);
     }
 
     private static String dumpMultipart(final MultipartIteratorBody body) {

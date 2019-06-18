@@ -29,9 +29,9 @@ import java.io.InputStream;
 
 import static com.envimate.httpmate.multipart.MultipartIteratorBody.multipartIteratorBody;
 
-final class MultipartHandler {
+final class MultipartParser {
 
-    private MultipartHandler() {
+    private MultipartParser() {
     }
 
     static MultipartIteratorBody parse(final InputStream body, final ContentType contentType) {
