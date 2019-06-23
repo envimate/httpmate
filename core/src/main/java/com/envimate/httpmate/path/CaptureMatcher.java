@@ -21,11 +21,14 @@
 
 package com.envimate.httpmate.path;
 
+import com.envimate.httpmate.path.statemachine.StateMachineMatcher;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
+import java.util.Map;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -34,7 +37,7 @@ import static com.envimate.httpmate.util.Validators.validateNotNullNorEmpty;
 @ToString
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-final class WildcardPathTemplateElement implements PathTemplateElement {
+final class CaptureMatcher implements StateMachineMatcher<String> {
 
     private static final Pattern PATTERN = Pattern.compile("<(.*)>");
     private final String name;
@@ -44,22 +47,18 @@ final class WildcardPathTemplateElement implements PathTemplateElement {
         return matcher.matches();
     }
 
-    static PathTemplateElement fromStringSpecification(final String stringSpecification) {
+    static StateMachineMatcher<String> fromStringSpecification(final String stringSpecification) {
         validateNotNullNorEmpty(stringSpecification, "stringSpecification");
         final Matcher matcher = PATTERN.matcher(stringSpecification);
         if(!matcher.matches()) {
             throw new RuntimeException("Not a wildcard: " + stringSpecification);
         }
         final String name = matcher.group(1);
-        return new WildcardPathTemplateElement(name);
+        return new CaptureMatcher(name);
     }
 
     @Override
-    public boolean matches(final String pathElement) {
-        return true;
-    }
-
-    public String getName() {
-        return this.name;
+    public Optional<Map<String, String>> matchAndReturnCaptures(final String element) {
+        return Optional.of(Map.of(name, element));
     }
 }

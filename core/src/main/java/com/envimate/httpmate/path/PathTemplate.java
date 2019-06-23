@@ -21,14 +21,20 @@
 
 package com.envimate.httpmate.path;
 
+import com.envimate.httpmate.path.statemachine.*;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.envimate.httpmate.path.AnyMatcher.isRecursiveWildcard;
+import static com.envimate.httpmate.path.AnyMatcher.anyMatcher;
+import static com.envimate.httpmate.path.CaptureMatcher.isWildcard;
+import static com.envimate.httpmate.path.statemachine.ElementPosition.start;
+import static com.envimate.httpmate.path.statemachine.StateMachineBuilder.stateMachineBuilder;
+import static com.envimate.httpmate.path.statemachine.Transition.transition;
 import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
@@ -36,64 +42,65 @@ import static java.util.stream.Collectors.toList;
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class PathTemplate {
-
-    private final List<PathTemplateElement> templateElements;
+    private final List<String> elements;
+    private final StateMachine<String> stateMachine;
 
     public static PathTemplate pathTemplate(final String asString) {
-        final String[] elementsAsStrings = splitIntoElements(asString);
-        final List<PathTemplateElement> elements = stream(elementsAsStrings)
-                .map(PathTemplateElement::fromStringSpecification)
+        final List<String> elementsAsStrings = splitIntoElements(asString);
+        final List<StateMachineMatcher<String>> matchers = elementsAsStrings.stream()
+                .map(PathTemplate::elementFromStringSpecification)
                 .collect(toList());
-        return new PathTemplate(elements);
+
+        final StateMachineBuilder<String> stateMachineBuilder = stateMachineBuilder();
+        State currentState = stateMachineBuilder.createState();
+        for(final StateMachineMatcher<String> matcher : matchers) {
+            if(matcher instanceof AnyMatcher) {
+                stateMachineBuilder.addTransition(currentState, transition(matcher, currentState));
+            } else {
+                final State nextState = stateMachineBuilder.createState();
+                stateMachineBuilder.addTransition(currentState, transition(matcher, nextState));
+                currentState = nextState;
+            }
+        }
+        stateMachineBuilder.markAsFinal(currentState);
+        final StateMachine<String> stateMachine = stateMachineBuilder.build();
+
+        return new PathTemplate(elementsAsStrings, stateMachine);
     }
 
     public boolean matches(final Path path) {
-        final String raw = path.raw();
-        final String[] elementsAsStrings = splitIntoElements(raw);
-        final int numberOfElements = elementsAsStrings.length;
-        if(this.templateElements.size() != numberOfElements) {
-            return false;
-        }
-        for(int i = 0; i < numberOfElements; ++i) {
-            final PathTemplateElement pathTemplateElement = this.templateElements.get(i);
-            final String pathElement = elementsAsStrings[i];
-            if(!pathTemplateElement.matches(pathElement)) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    public String toString() {
-        return this.templateElements
-                .stream()
-                .map(PathTemplateElement::toString)
-                .collect(joining("/", "/", ""));
+        return match(path).isSuccessful();
     }
 
     public Map<String, String> extractPathParameters(final Path path) {
-        if(!matches(path)) {
-            throw new RuntimeException("Can only extract path parameters from matching paths.");
-        }
-        final String[] elements = splitIntoElements(path.raw());
-        final Map<String, String> pathParameters = new HashMap<>();
-        final int length = elements.length;
-        for(int i = 0; i < length; i++) {
-            final PathTemplateElement templateElement = this.templateElements.get(i);
-            if(!(templateElement instanceof WildcardPathTemplateElement)) {
-                continue;
-            }
-            final WildcardPathTemplateElement wildcardTemplateElement = (WildcardPathTemplateElement) templateElement;
-            final String name = wildcardTemplateElement.getName();
-            final String value = elements[i];
-            pathParameters.put(name, value);
-        }
-        return pathParameters;
+        return match(path).captures();
     }
 
-    private static String[] splitIntoElements(final String pathAsString) {
+    private MatchingResult match(final Path path) {
+        final String raw = path.raw();
+        final List<String> elementsAsStrings = splitIntoElements(raw);
+        final ElementPosition<String> inputPosition = start(elementsAsStrings);
+        return stateMachine.accept(inputPosition);
+    }
+
+    public String toString() {
+        return this.elements.stream()
+                .collect(joining("/", "/", ""));
+    }
+
+    private static StateMachineMatcher<String> elementFromStringSpecification(final String stringSpecification) {
+        if (isRecursiveWildcard(stringSpecification)) {
+            return anyMatcher();
+        }
+        if (isWildcard(stringSpecification)) {
+            return CaptureMatcher.fromStringSpecification(stringSpecification);
+        }
+        return StaticMatcher.fromStringSpecification(stringSpecification);
+    }
+
+    private static List<String> splitIntoElements(final String pathAsString) {
         return stream(pathAsString.split("/"))
                 .filter(string -> !string.isEmpty())
-                .toArray(String[]::new);
+                .collect(toList());
     }
 }

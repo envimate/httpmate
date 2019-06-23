@@ -19,15 +19,24 @@
  * under the License.
  */
 
-package com.envimate.httpmate.path;
+package com.envimate.httpmate.path.statemachine;
 
-public interface PathTemplateElement {
-    boolean matches(String pathElement);
+import lombok.AccessLevel;
+import lombok.EqualsAndHashCode;
+import lombok.RequiredArgsConstructor;
+import lombok.ToString;
 
-    static PathTemplateElement fromStringSpecification(final String stringSpecification) {
-        if(WildcardPathTemplateElement.isWildcard(stringSpecification)) {
-            return WildcardPathTemplateElement.fromStringSpecification(stringSpecification);
-        }
-        return StaticPathTemplateElement.fromStringSpecification(stringSpecification);
+@ToString
+@EqualsAndHashCode
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
+public final class State {
+    private final int number;
+
+    static State aState(final int number) {
+        return new State(number);
+    }
+
+    int number() {
+        return number;
     }
 }

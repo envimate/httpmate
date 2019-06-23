@@ -19,44 +19,46 @@
  * under the License.
  */
 
-package com.envimate.httpmate.chains.graph;
+package com.envimate.httpmate.path.statemachine;
 
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
-import static com.envimate.httpmate.chains.graph.Color.BLACK;
-import static com.envimate.httpmate.chains.graph.Label.emptyLabel;
-import static com.envimate.httpmate.util.Validators.validateNotNull;
-import static java.lang.String.format;
+import java.util.HashMap;
+import java.util.Map;
 
 @ToString
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-public final class Edge {
-    private final Node from;
-    private final Node to;
-    private final Color color;
-    private final Label label;
+public final class MatchingResult {
+    private final boolean successful;
+    private final Map<String, String> captures;
 
-    public static Edge edge(final Node from,
-                            final Node to) {
-        return edge(from, to, BLACK, emptyLabel());
+    public static MatchingResult matchingResult(final boolean successful) {
+        return new MatchingResult(successful, new HashMap<>());
     }
 
-    public static Edge edge(final Node from,
-                            final Node to,
-                            final Color color,
-                            final Label label) {
-        validateNotNull(from, "from");
-        validateNotNull(to, "to");
-        validateNotNull(color, "color");
-        validateNotNull(label, "label");
-        return new Edge(from, to, color, label);
+    public MatchingResult merge(final Map<String, String> otherCaptures) {
+        final Map<String, String> mergedCaptures = new HashMap<>(captures);
+        mergedCaptures.putAll(otherCaptures);
+        return new MatchingResult(true, mergedCaptures);
     }
 
-    String plot() {
-        return format("%s -> %s [color=\"%s\"; label=%s ];", from.name(), to.name(), color.color(), label.plot()) + "\n";
+    public static MatchingResult success(final Map<String, String> captures) {
+        return new MatchingResult(true, captures);
+    }
+
+    public static MatchingResult fail() {
+        return new MatchingResult(false, new HashMap<>());
+    }
+
+    public boolean isSuccessful() {
+        return successful;
+    }
+
+    public Map<String, String> captures() {
+        return captures;
     }
 }

@@ -49,7 +49,7 @@
     <parent>
         <groupId>com.envimate.httpmate.examples</groupId>
         <artifactId>parent</artifactId>
-        <version>1.0.21</version>
+        <version>1.0.22</version>
     </parent>
 
     <artifactId>hello-world</artifactId>
@@ -58,7 +58,7 @@
         <checkstyle.suppressions.location>
             ${project.basedir}/src/test/checkstyle/checkstyle-suppressions.xml
         </checkstyle.suppressions.location>
-        <httpmate.version>1.0.21</httpmate.version>
+        <httpmate.version>1.0.22</httpmate.version>
     </properties>
 
     <dependencies>

@@ -26,6 +26,7 @@ import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
+import static com.envimate.httpmate.chains.graph.Color.BLACK;
 import static com.envimate.httpmate.chains.graph.Label.textLabel;
 import static com.envimate.httpmate.util.Validators.validateNotNull;
 import static com.envimate.httpmate.util.Validators.validateNotNullNorEmpty;
@@ -38,6 +39,10 @@ public final class Node {
     private final String name;
     private final Label label;
     private final Color color;
+
+    public static Node node(final String name) {
+        return node(name, BLACK);
+    }
 
     public static Node node(final String name,
                             final Color color) {

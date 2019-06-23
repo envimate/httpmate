@@ -19,44 +19,38 @@
  * under the License.
  */
 
-package com.envimate.httpmate.chains.graph;
+package com.envimate.httpmate.path.statemachine;
 
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
-import static com.envimate.httpmate.chains.graph.Color.BLACK;
-import static com.envimate.httpmate.chains.graph.Label.emptyLabel;
-import static com.envimate.httpmate.util.Validators.validateNotNull;
-import static java.lang.String.format;
+import java.util.List;
 
 @ToString
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-public final class Edge {
-    private final Node from;
-    private final Node to;
-    private final Color color;
-    private final Label label;
+public final class ElementPosition<T> {
+    private final int index;
+    private final List<T> elements;
 
-    public static Edge edge(final Node from,
-                            final Node to) {
-        return edge(from, to, BLACK, emptyLabel());
+    public static <T> ElementPosition<T> start(final List<T> elements) {
+        return new ElementPosition<>(0, elements);
     }
 
-    public static Edge edge(final Node from,
-                            final Node to,
-                            final Color color,
-                            final Label label) {
-        validateNotNull(from, "from");
-        validateNotNull(to, "to");
-        validateNotNull(color, "color");
-        validateNotNull(label, "label");
-        return new Edge(from, to, color, label);
+    public boolean isEnd() {
+        return elements.size() <= index;
     }
 
-    String plot() {
-        return format("%s -> %s [color=\"%s\"; label=%s ];", from.name(), to.name(), color.color(), label.plot()) + "\n";
+    public ElementPosition<T> next() {
+        return new ElementPosition<>(index + 1, elements);
+    }
+
+    public T get() {
+        if (isEnd()) {
+            throw new IndexOutOfBoundsException();
+        }
+        return elements.get(index);
     }
 }

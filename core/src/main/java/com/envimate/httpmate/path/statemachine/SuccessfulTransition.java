@@ -19,31 +19,37 @@
  * under the License.
  */
 
-package com.envimate.httpmate.path;
+package com.envimate.httpmate.path.statemachine;
 
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
+import lombok.ToString;
 
-import static com.envimate.httpmate.util.Validators.validateNotNullNorEmpty;
+import java.util.HashMap;
+import java.util.Map;
 
+@ToString
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-final class StaticPathTemplateElement implements PathTemplateElement {
-    private final String value;
+final class SuccessfulTransition {
+    private final State nextState;
+    private final Map<String, String> captures;
 
-    static PathTemplateElement fromStringSpecification(final String stringSpecification) {
-        validateNotNullNorEmpty(stringSpecification, "stringSpecification");
-        return new StaticPathTemplateElement(stringSpecification);
+    static SuccessfulTransition successfulTransition(final State nextState) {
+        return new SuccessfulTransition(nextState, new HashMap<>());
     }
 
-    @Override
-    public boolean matches(final String pathElement) {
-        return this.value.equals(pathElement);
+    static SuccessfulTransition successfulTransition(final State nextState,
+                                                     final Map<String, String> captures) {
+        return new SuccessfulTransition(nextState, captures);
     }
 
-    @Override
-    public String toString() {
-        return this.value;
+    State nextState() {
+        return nextState;
+    }
+
+    Map<String, String> captures() {
+        return captures;
     }
 }
