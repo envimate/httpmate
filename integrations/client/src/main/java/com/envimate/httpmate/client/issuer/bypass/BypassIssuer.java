@@ -59,7 +59,7 @@ public final class BypassIssuer implements Issuer {
         metaData.set(RAW_QUERY_PARAMETERS, request.queryParameters());
         metaData.set(RAW_METHOD, request.method());
         metaData.set(RAW_PATH, fixedPath);
-        metaData.set(BODY_STREAM, request.body());
+        request.body().ifPresent(inputStream -> metaData.set(BODY_STREAM, inputStream));
         metaData.set(IS_HTTP_REQUEST, true);
 
         final SynchronizationWrapper<MetaData> wrapper = new SynchronizationWrapper<>();

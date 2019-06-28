@@ -29,6 +29,7 @@ import lombok.RequiredArgsConstructor;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import static com.envimate.httpmate.client.HeaderKey.headerKey;
 import static com.envimate.httpmate.client.HeaderValue.headerValue;
@@ -69,20 +70,30 @@ public final class HttpClientRequest<T> {
         return httpClientRequestBuilderImplementation(method);
     }
 
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     static <T> HttpClientRequest<T> httpClientRequest(final String pathWithEncodedQueryParameters,
-                                                      final String method,
-                                                      final Map<HeaderKey, HeaderValue> headers,
-                                                      final Map<QueryParameterKey, QueryParameterValue> explicitQueryParameters,
-                                                      final Body body,
-                                                      final Class<T> targetType) {
+                                                              final String method,
+                                                              final Map<HeaderKey, HeaderValue> headers,
+                                                              final Map<QueryParameterKey, QueryParameterValue> explicitQueryParameters,
+                                                              final Optional<Body> bodyOptional,
+                                                              final Class<T> targetType) {
         final Query query = parse(pathWithEncodedQueryParameters);
         final Map<QueryParameterKey, QueryParameterValue> allQueryParameters = new HashMap<>();
         allQueryParameters.putAll(query.encodedQueryParameters());
         allQueryParameters.putAll(explicitQueryParameters);
         final String pathWithoutEncodedQueryParameters = query.path();
         final Map<HeaderKey, HeaderValue> fixedHeaders = new HashMap<>(headers);
-        body.contentType().ifPresent(contentType -> fixedHeaders.put(headerKey(CONTENT_TYPE), headerValue(contentType)));
-        final InputStream bodyStream = body.inputStream();
+        final InputStream bodyStream;
+        if (bodyOptional.isPresent()) {
+            final Body body = bodyOptional.get();
+            body.contentType().ifPresent(contentType ->
+                    fixedHeaders.put(headerKey(CONTENT_TYPE), headerValue(contentType))
+            );
+            bodyStream = body.inputStream();
+        } else {
+            bodyStream = null;
+        }
+
         return new HttpClientRequest<>(pathWithoutEncodedQueryParameters,
                 method, fixedHeaders, allQueryParameters, bodyStream, targetType);
     }
@@ -107,8 +118,8 @@ public final class HttpClientRequest<T> {
         return stringMap;
     }
 
-    public InputStream body() {
-        return this.body;
+    public Optional<InputStream> body() {
+        return Optional.ofNullable(this.body);
     }
 
     Class<T> targetType() {

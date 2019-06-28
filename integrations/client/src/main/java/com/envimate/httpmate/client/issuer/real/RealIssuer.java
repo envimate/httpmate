@@ -74,9 +74,10 @@ public final class RealIssuer implements Issuer {
         final String method = request.method();
         final HttpEntityEnclosingRequest lowLevelRequest = new BasicHttpEntityEnclosingRequest(method, url);
         request.headers().forEach(lowLevelRequest::addHeader);
-        final InputStream requestBody = request.body();
-        final InputStreamEntity entity = new InputStreamEntity(requestBody);
-        lowLevelRequest.setEntity(entity);
+        request.body().ifPresent(requestBody -> {
+            final InputStreamEntity entity = new InputStreamEntity(requestBody);
+            lowLevelRequest.setEntity(entity);
+        });
         try (Connection connection = connectionFactory.getConnectionTo(endpoint)) {
             final HttpProcessor httpProcessor = create()
                     .add(new RequestContent())
