@@ -71,12 +71,14 @@ public final class HttpClientRequest<T> {
     }
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-    static <T> HttpClientRequest<T> httpClientRequest(final String pathWithEncodedQueryParameters,
-                                                              final String method,
-                                                              final Map<HeaderKey, HeaderValue> headers,
-                                                              final Map<QueryParameterKey, QueryParameterValue> explicitQueryParameters,
-                                                              final Optional<Body> bodyOptional,
-                                                              final Class<T> targetType) {
+    static <T> HttpClientRequest<T> httpClientRequest(
+            final String pathWithEncodedQueryParameters,
+            final String method,
+            final Map<HeaderKey, HeaderValue> headers,
+            final Map<QueryParameterKey, QueryParameterValue> explicitQueryParameters,
+            final Optional<Body> bodyOptional,
+            final Class<T> targetType
+    ) {
         final Query query = parse(pathWithEncodedQueryParameters);
         final Map<QueryParameterKey, QueryParameterValue> allQueryParameters = new HashMap<>();
         allQueryParameters.putAll(query.encodedQueryParameters());
