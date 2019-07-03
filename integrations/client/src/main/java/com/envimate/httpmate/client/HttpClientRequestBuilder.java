@@ -27,6 +27,7 @@ import lombok.RequiredArgsConstructor;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import static com.envimate.httpmate.client.HeaderKey.headerKey;
 import static com.envimate.httpmate.client.HeaderValue.headerValue;
@@ -53,6 +54,12 @@ public final class HttpClientRequestBuilder implements PathStage, BodyStage, Hea
     }
 
     @Override
+    public HeadersAndQueryParametersAndMappingStage withoutABody() {
+        this.body = null;
+        return this;
+    }
+
+    @Override
     public HeadersAndQueryParametersAndMappingStage withTheBody(final Body body) {
         this.body = body;
         return this;
@@ -74,6 +81,6 @@ public final class HttpClientRequestBuilder implements PathStage, BodyStage, Hea
 
     @Override
     public <T> HttpClientRequest<T> mappedTo(final Class<T> targetType) {
-        return httpClientRequest(path, method, headers, explicitQueryParameters, body, targetType);
+        return httpClientRequest(path, method, headers, explicitQueryParameters, Optional.ofNullable(body), targetType);
     }
 }

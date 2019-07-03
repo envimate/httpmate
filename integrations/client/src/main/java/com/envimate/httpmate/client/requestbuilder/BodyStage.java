@@ -30,9 +30,7 @@ import static com.envimate.httpmate.client.requestbuilder.multipart.MultipartBod
 import static com.envimate.httpmate.util.Streams.stringToInputStream;
 
 public interface BodyStage {
-    default HeadersAndQueryParametersAndMappingStage withoutABody() {
-        return withTheBody("");
-    }
+    HeadersAndQueryParametersAndMappingStage withoutABody();
 
     default HeadersAndQueryParametersAndMappingStage withAMultipartBodyWithTheParts(final Part... parts) {
         return withTheBody(createMultipartBody(parts));
