@@ -60,7 +60,9 @@ public final class Configurators {
         return toHandleHttpRequestsTo(route, DELETE, handler);
     }
 
-    public static Configurator toHandleHttpRequestsTo(final String route, final HttpRequestMethod method, final HttpHandler handler) {
+    public static Configurator toHandleHttpRequestsTo(final String route,
+                                                      final HttpRequestMethod method,
+                                                      final HttpHandler handler) {
         validateNotNull(route, "route");
         validateNotNull(method, "method");
         validateNotNull(handler, "handler");
