@@ -28,9 +28,8 @@ import com.envimate.httpmate.chains.DependencyRegistry;
 import com.envimate.httpmate.events.EventModule;
 import com.envimate.httpmate.http.ContentType;
 import com.envimate.httpmate.usecases.usecase.SerializerAndDeserializer;
-import com.envimate.mapmate.deserialization.Deserializer;
+import com.envimate.mapmate.builder.MapMate;
 import com.envimate.mapmate.marshalling.MarshallingType;
-import com.envimate.mapmate.serialization.Serializer;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
@@ -47,39 +46,36 @@ import static com.envimate.httpmate.util.Validators.validateNotNull;
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class MapMateSerializerAndDeserializer implements SerializerAndDeserializer {
-    private final Deserializer deserializer;
-    private final Serializer serializer;
+    private final MapMate mapMate;
     private final ChainModule bodyMapParsingModule;
     private final ContentType defaultContentType;
     private final Map<ContentType, MarshallingType> marshallingTypes;
 
-    public static MapMateIntegrationBuilder mapMate() {
-        return MapMateIntegrationBuilder.mapMate();
+    public static MapMateIntegrationBuilder mapMateIntegration(final MapMate mapMate) {
+        return MapMateIntegrationBuilder.mapMateIntegration(mapMate);
     }
 
     static MapMateSerializerAndDeserializer mapMateSerializerAndDeserializer(
-            final Deserializer deserializer,
-            final Serializer serializer,
+            final MapMate mapMate,
             final ChainModule bodyMapParsingModule,
             final ContentType defaultContentType,
             final Map<ContentType, MarshallingType> marshallingTypes) {
-        validateNotNull(deserializer, "deserializer");
-        validateNotNull(serializer, "serializer");
+        validateNotNull(mapMate, "mapMate");
         validateNotNull(bodyMapParsingModule, "bodyMapParsingModule");
         validateNotNull(defaultContentType, "defaultContentType");
         validateNotNull(marshallingTypes, "marshallingTypes");
         return new MapMateSerializerAndDeserializer(
-                deserializer, serializer, bodyMapParsingModule, defaultContentType, marshallingTypes);
+                mapMate, bodyMapParsingModule, defaultContentType, marshallingTypes);
     }
 
     @Override
     public <T> T deserialize(final Class<T> type, final Map<String, Object> map) {
-        return deserializer.deserializeFromMap(map, type);
+        return mapMate.deserializer().deserializeFromMap(map, type);
     }
 
     @Override
     public Map<String, Object> serialize(final Object event) {
-        return serializer.serializeToMap(event);
+        return mapMate.serializer().serializeToMap(event);
     }
 
     @SuppressWarnings("unchecked")
@@ -98,7 +94,7 @@ public final class MapMateSerializerAndDeserializer implements SerializerAndDese
             metaData.get(RESPONSE_HEADERS).put(CONTENT_TYPE, responseContentType.internalValueForMapping());
             final MarshallingType marshallingType = marshallingTypes.get(responseContentType);
             final Map<String, Object> eventMap = (Map<String, Object>) event;
-            metaData.set(RESPONSE_STRING, serializer.serializeFromMap(eventMap, marshallingType));
+            metaData.set(RESPONSE_STRING, mapMate.serializer().serializeFromMap(eventMap, marshallingType));
         });
     }
 

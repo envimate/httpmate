@@ -56,6 +56,7 @@ import com.envimate.httpmate.tests.usecases.twoparameters.Parameter2;
 import com.envimate.httpmate.tests.usecases.twoparameters.TwoParametersUseCase;
 import com.envimate.httpmate.tests.usecases.unmappedexception.UnmappedExceptionUseCase;
 import com.envimate.httpmate.tests.usecases.vooooid.VoidUseCase;
+import com.envimate.mapmate.builder.MapMate;
 import com.envimate.mapmate.deserialization.Deserializer;
 import com.envimate.mapmate.serialization.Serializer;
 import com.google.gson.Gson;
@@ -76,9 +77,9 @@ import static com.envimate.httpmate.http.Http.StatusCodes.METHOD_NOT_ALLOWED;
 import static com.envimate.httpmate.http.Http.StatusCodes.OK;
 import static com.envimate.httpmate.http.HttpRequestMethod.*;
 import static com.envimate.httpmate.logger.Loggers.stderrLogger;
-import static com.envimate.httpmate.mapmate.MapMateSerializerAndDeserializer.mapMate;
-import static com.envimate.httpmate.security.Configurators.toAuthenticateRequests;
-import static com.envimate.httpmate.security.Configurators.toAuthorizeRequests;
+import static com.envimate.httpmate.mapmate.MapMateSerializerAndDeserializer.mapMateIntegration;
+import static com.envimate.httpmate.security.SecurityConfigurators.toAuthenticateRequests;
+import static com.envimate.httpmate.security.SecurityConfigurators.toAuthorizeRequests;
 import static com.envimate.httpmate.tests.Util.extractUsername;
 import static com.envimate.httpmate.usecases.UseCaseDrivenBuilder.USE_CASE_DRIVEN;
 import static com.envimate.mapmate.deserialization.Deserializer.aDeserializer;
@@ -108,6 +109,8 @@ public final class HttpMateTestConfigurations {
             .thatAre().serializedByItsPublicFields()
             .withJsonMarshaller(new Gson()::toJson)
             .build();
+
+    private static final MapMate MAP_MATE = MapMate.mapMate(SERIALIZER, DESERIALIZER);
 
     private HttpMateTestConfigurations() {
     }
@@ -156,10 +159,7 @@ public final class HttpMateTestConfigurations {
                 .serializingResponseObjectsThat(Objects::isNull).using(object -> null)
                 .serializingResponseObjectsOfType(String.class).using(string -> of("response", string))
                 .serializingResponseObjectsOfType(ToStringWrapper.class).using(wrapper -> of("response", wrapper.toString()))
-                .mappingRequestsAndResponsesUsing(mapMate()
-                        .usingTheSerializer(SERIALIZER)
-                        .andTheDeserializer(DESERIALIZER))
-
+                .mappingRequestsAndResponsesUsing(mapMateIntegration(MAP_MATE).build())
                 .configured(toMapExceptions()
                         .ofType(NoHandlerFoundException.class)
                         .toResponsesUsing((exception, metaData) -> {

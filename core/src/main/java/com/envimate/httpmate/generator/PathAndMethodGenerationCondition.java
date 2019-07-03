@@ -53,7 +53,7 @@ public final class PathAndMethodGenerationCondition implements GenerationConditi
 
     public static PathAndMethodGenerationCondition pathAndMethodEventTypeGenerationCondition(
             final PathTemplate pathTemplate,
-            final HttpRequestMethod[] methods) {
+            final HttpRequestMethod... methods) {
         validateNotNull(pathTemplate, "pathTemplate");
         validateArrayNeitherNullNorEmptyNorContainsNull(methods, "methods");
         stream(methods).forEach(method -> {

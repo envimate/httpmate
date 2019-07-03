@@ -19,24 +19,23 @@
  * under the License.
  */
 
-package com.envimate.httpmate.security;
+package com.envimate.httpmate.websockets.handler;
 
-import com.envimate.httpmate.chains.Processor;
+import com.envimate.httpmate.generator.GenerationCondition;
+import com.envimate.httpmate.websockets.WebSocketTag;
 
-public final class Configurators {
+import static com.envimate.httpmate.websockets.WebSocketTag.webSocketTag;
+import static com.envimate.httpmate.websockets.WebsocketChainKeys.WEBSOCKET_TAG;
 
-    private Configurators() {
+public final class WebSocketCondition {
+
+    private WebSocketCondition() {
     }
 
-    public static InPhase<Authenticator> toAuthenticateRequests() {
-        return phase -> processor -> securityModule -> securityModule.addAuthenticator(phase, processor);
-    }
-
-    public static InPhase<Authorizer> toAuthorizeRequests() {
-        return phase -> processor -> securityModule -> securityModule.addAuthorizer(phase, processor);
-    }
-
-    public static InPhase<Processor> toFilterRequests() {
-        return phase -> processor -> securityModule -> securityModule.addFilter(phase, processor);
+    public static GenerationCondition webSocketMessageIsTaggedWith(final String tag) {
+        final WebSocketTag expectedTag = webSocketTag(tag);
+        return metaData -> metaData.getOptional(WEBSOCKET_TAG)
+                .map(expectedTag::equals)
+                .orElse(false);
     }
 }

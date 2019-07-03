@@ -20,16 +20,13 @@ Let's see some low-level example:
 
 ```
 final HttpMate httpMate = HttpMate.aLowLevelHttpMate()
-        .callingTheHandler(new HttpHandler() {
+        .get("/api/hello", new HttpHandler() {
             @Override
             public void handle(final HttpRequest request, final HttpResponse httpResponse) {
                 httpResponse.setBody("Hello World!");
                 httpResponse.setStatus(200);
             }
         })
-        .forRequestPath("/api/hello")
-        .andRequestMethod(HttpRequestMethod.GET)
-        .thatIs()
         .build();
 ```
 
@@ -64,15 +61,12 @@ Now we can expose this UseCase using HttpMate:
 
 ```
 final HttpMate useCaseDrivenHttpMate = HttpMate.anHttpMateConfiguredAs(UseCaseDrivenBuilder.USE_CASE_DRIVEN)
-        .servingTheUseCase(SendEmail.class)
-        .forRequestPath("/api/sendEmail")
-        .andRequestMethod(HttpRequestMethod.POST)
+        .post("/api/sendEmail", SendEmail.class)
         .mappingRequestsAndResponsesUsing(
-                mapMate()
+                mapMateIntegration(MAP_MATE)
                         .mappingAllStandardContentTypes()
                         .assumingTheDefaultContentType(ContentType.json())
-                        .bySerializingUsing(SERIALIZER)
-                        .andDeserializingUsing(DESERIALIZER))
+                        .build())
         .configured(Configurators.toCreateUseCaseInstancesUsing(INJECTOR::getInstance))
         .build();
 ```
@@ -82,23 +76,20 @@ the email contents from the request body?
 
 ```
 final HttpMate useCaseDrivenHttpMate = HttpMate.anHttpMateConfiguredAs(UseCaseDrivenBuilder.USE_CASE_DRIVEN)
-        .servingTheUseCase(SendEmail.class)
-        .forRequestPath("/api/sendEmail/<receiver>/<subject>")
-        .andRequestMethod(HttpRequestMethod.POST)
+        .post("/api/sendEmail/<receiver>/<subject>", SendEmail.class)
         .mappingRequestsAndResponsesUsing(
-                mapMate()
+                mapMateIntegration(MAP_MATE)
                         .mappingAllStandardContentTypes()
                         .assumingTheDefaultContentType(ContentType.json())
-                        .bySerializingUsing(SERIALIZER)
-                        .andDeserializingUsing(DESERIALIZER))
+                        .build())
         .configured(Configurators.toCreateUseCaseInstancesUsing(INJECTOR::getInstance))
         .configured(Configurator.configuratorForType(EventModule.class, eventModule -> {
             eventModule.setDefaultRequestToEventMapper(RequestToEventMapper.byDirectlyMappingAllData());
         }))
-        .configured(com.envimate.httpmate.security.Configurators.toAuthenticateRequests().afterBodyProcessing().using(new Authenticator() {
+        .configured(com.envimate.httpmate.security.Configurators.toAuthenticateRequests().afterBodyProcessing().using(new HttpAuthenticator() {
             @Override
-            public Optional<?> authenticateAs(final MetaData metaData) {
-                final Optional<String> jwtToken = metaData.get(HttpMateChainKeys.HEADERS).getHeader("Authorization");
+            public Optional<?> authenticateAs(final HttpRequest request) {
+                final Optional<String> jwtToken = request.headers().getHeader("Authorization");
                 final Optional<String> userEmail = TOKEN_SERVICE.decrypt(jwtToken);
                 userEmail.ifPresent(email -> {
                     metaData.get(BODY_MAP).put("sender", email);
@@ -149,7 +140,7 @@ HttpMate offers following features:
 
 _The goal of refactoring is to actively counteract the natural increase in the degree of chaos_ 
 
-We did not find any framework that would allow us to develop a web application and claim in good conscience that it's 
+We did not find any framework that would allow us to develop a web application and claim in good conscience that its 
 business logic does not depend on the underlying HTTP server, persistence layer or (de)serialization mechanism (also
 referred to as "infrastructure code" in DDD).
 
@@ -161,7 +152,7 @@ referred to as "infrastructure code" in DDD).
 <dependency>
     <groupId>com.envimate.httpmate</groupId>
     <artifactId>core</artifactId>
-    <version>1.0.19</version>
+    <version>${httmate.version}</version>
 </dependency>
 ```
 
@@ -171,16 +162,13 @@ Configure HttpMate with an HttpHandler and expose as a PureJavaEndpoint
 public class Application {
     public static void main(String[] args) {
         final HttpMate httpMate = HttpMate.aLowLevelHttpMate()
-                .callingTheHandler(new HttpHandler() {
+                .get("/api/hello", new HttpHandler() {
                     @Override
                     public void handle(final HttpRequest request, final HttpResponse httpResponse) {
                         httpResponse.setBody("Hello World!");
                         httpResponse.setStatus(200);
                     }
                 })
-                .forRequestPath("/api/hello")
-                .andRequestMethod(HttpRequestMethod.GET)
-                .thatIs()
                 .build();
 
         PureJavaEndpoint.pureJavaEndpointFor(httpMate).listeningOnThePort(1337);
@@ -215,66 +203,3 @@ And replace the `PureJavaEndpoint` line with:
 ```
 
 Restart the application and enjoy the benefits of Jetty.
-
-## Servlet
-
-...
-
-## Detailed Examples
-
-In the following sections we will explore different features of HttpMate and show detailed examples.
-You can also check out the examples submodule as well as the tests of HttpMate.
-
-### Low level HttpMate
-
-`HttpMate.aLowLevelHttpMate()` is a step builder to configure HttpMate when dealing with requests directly.
-
-Step1. Configure the handler
-In it's most generic form, handler must implement the `com.envimate.httpmate.handler.Handler` interface, which gives you access to a MetaData object containing all details of the request 
-and means to communicate the response.
-
-For details about the MetaData object refer to a section [What is MetaData?](#What-is-MetaData?)
-
-Step2. Configure the request path
-
-Step3. Configure the request method(s) this handler is answering to
-
-Step4. Apply additional Configurators
- 
-
-#### What is MetaData?
-
-MetaData allows access to http request details and provides means of communicating the response back.
-
-`com.envimate.httpmate.HttpMateChainKeys` class provides a list of keys that are accessible in the MetaData object.
-e.g. the `BODY_STRING` key will give you access to the body of the request represented as a String, `HEADERS` will give
-you access to get the headers, etc. 
-
-Here's an example of how it will look like with MetaData to get the name of the user from the query parameters vs the 
-convenience HttpRequest object
-
-```
-final HttpMate httpMate = HttpMate.aLowLevelHttpMate()
-        .callingTheHandler(new HttpHandler() {
-            @Override
-            public void handle(final HttpRequest request, final HttpResponse httpResponse) {
-                final Optional<String> name = request.queryParameters().getQueryParameter("name");
-                httpResponse.setBody("Hello " + name.orElse("World!"));
-                httpResponse.setStatus(200);
-            }
-        })
-        .forRequestPath("/api/hello")
-        .andRequestMethod(HttpRequestMethod.GET)
-        .callingTheHandler(new Handler() {
-            @Override
-            public void handle(final MetaData metaData) {
-                final Optional<String> name = metaData.get(QUERY_PARAMETERS).getQueryParameter("name");
-                metaData.set(RESPONSE_STRING, "Hello " + name.orElse("World!"));
-                metaData.set(RESPONSE_STATUS, 200);
-            }
-        })
-        .forRequestPath("/api/helloDirect")
-        .andRequestMethod(HttpRequestMethod.GET)
-        .thatIs()
-        .build();
-```

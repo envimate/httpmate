@@ -23,11 +23,10 @@ package com.envimate.httpmate.mapmate;
 
 import com.envimate.httpmate.chains.ChainModule;
 import com.envimate.httpmate.http.ContentType;
-import com.envimate.httpmate.mapmate.builder.DeserializerStage;
 import com.envimate.httpmate.mapmate.builder.MarshallerTypeStage;
 import com.envimate.httpmate.unpacking.BodyMapParsingModule;
+import com.envimate.mapmate.builder.MapMate;
 import com.envimate.mapmate.marshalling.MarshallingType;
-import com.envimate.mapmate.serialization.Serializer;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
@@ -54,9 +53,11 @@ public final class MapMateIntegrationBuilder {
     );
     private final Map<ContentType, MarshallingType> contentTypeMappings = new HashMap<>();
     private ContentType defaultContentType = ContentType.json();
+    private final MapMate mapMate;
 
-    static MapMateIntegrationBuilder mapMate() {
-        return new MapMateIntegrationBuilder();
+    static MapMateIntegrationBuilder mapMateIntegration(final MapMate mapMate) {
+        validateNotNull(mapMate, "mapMate");
+        return new MapMateIntegrationBuilder(mapMate);
     }
 
     public MarshallerTypeStage<MapMateIntegrationBuilder> matchingTheContentType(final ContentType contentType) {
@@ -74,9 +75,8 @@ public final class MapMateIntegrationBuilder {
         return this;
     }
 
-    public DeserializerStage<MapMateSerializerAndDeserializer> usingTheSerializer(final Serializer serializer) {
-        return deserializer -> {
-            final Set<MarshallingType> supportedMarshallingTypes = deserializer.supportedMarshallingTypes();
+    public MapMateSerializerAndDeserializer build() {
+            final Set<MarshallingType> supportedMarshallingTypes = mapMate.deserializer().supportedMarshallingTypes();
             for (final MarshallingType supportedMarshallingType : supportedMarshallingTypes) {
                 if (!contentTypeMappings.values().contains(supportedMarshallingType)) {
                     if (DEFAULT_CONTENT_TYPE_MAPPINGS.containsKey(supportedMarshallingType)) {
@@ -92,11 +92,10 @@ public final class MapMateIntegrationBuilder {
                     .collect(toMap(Map.Entry::getKey, entry -> {
                         final MarshallingType marshallingType = entry.getValue();
                         return (Function<String, Map<String, Object>>) input
-                                -> deserializer.deserializeToMap(input, marshallingType);
+                                -> mapMate.deserializer().deserializeToMap(input, marshallingType);
                     }));
             final ChainModule bodyMapParsingModule = BodyMapParsingModule.bodyMapParsingModule(defaultContentType, bodyParsers);
             return mapMateSerializerAndDeserializer(
-                    deserializer, serializer, bodyMapParsingModule, defaultContentType, contentTypeMappings);
-        };
+                    mapMate, bodyMapParsingModule, defaultContentType, contentTypeMappings);
     }
 }
