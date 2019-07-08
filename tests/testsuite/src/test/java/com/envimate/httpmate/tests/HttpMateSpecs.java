@@ -307,4 +307,13 @@ public final class HttpMateSpecs {
                 .theResponseContentTypeWas("application/json")
                 .theResponseBodyWas("");
     }
+
+    @Test
+    public void testContentTypeCanContainParameters() {
+        given(theHttpMateInstanceUsedForTesting())
+                .when().aRequestToThePath("/void").viaTheGetMethod().withAnEmptyBody().withContentType("application/json; charset=iso-8859-1").isIssued()
+                .theStatusCodeWas(200)
+                .theResponseContentTypeWas("application/json")
+                .theResponseBodyWas("");
+    }
 }

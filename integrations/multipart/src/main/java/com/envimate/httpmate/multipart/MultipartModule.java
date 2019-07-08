@@ -21,6 +21,7 @@
 
 package com.envimate.httpmate.multipart;
 
+import com.envimate.httpmate.HttpMateChainKeys;
 import com.envimate.httpmate.chains.ChainExtender;
 import com.envimate.httpmate.chains.ChainModule;
 import com.envimate.httpmate.chains.ChainName;
@@ -32,7 +33,6 @@ import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
-import static com.envimate.httpmate.HttpMateChainKeys.CONTENT_TYPE;
 import static com.envimate.httpmate.HttpMateChains.*;
 import static com.envimate.httpmate.chains.ChainName.chainName;
 import static com.envimate.httpmate.chains.Configurator.toUseModules;
@@ -46,9 +46,9 @@ import static java.lang.String.format;
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class MultipartModule implements ChainModule {
     private static final ChainName PROCESS_BODY_MULTIPART = chainName("PROCESS_BODY_MULTIPART");
-    private static final ContentType CONTENT_TYPE_PREFIX = fromString("multipart/form-data");
+    private static final ContentType CONTENT_TYPE = fromString("multipart/form-data");
     private static final String RULE_DESCRIPTION = format("%s=%s", Http.Headers.CONTENT_TYPE,
-            CONTENT_TYPE_PREFIX.internalValueForMapping());
+            CONTENT_TYPE.internalValueForMapping());
 
     public static Configurator toExposeMultipartBodiesUsingMultipartIteratorBody() {
         return toUseModules(new MultipartModule());
@@ -59,7 +59,7 @@ public final class MultipartModule implements ChainModule {
         extender.createChain(PROCESS_BODY_MULTIPART, jumpTo(DETERMINE_HANDLER), jumpTo(EXCEPTION_OCCURRED));
         extender.addProcessor(PROCESS_BODY_MULTIPART, multipartProcessor());
 
-        extender.routeIf(PROCESS_BODY, jumpTo(PROCESS_BODY_MULTIPART), CONTENT_TYPE,
-                contentType -> contentType.startsWith(CONTENT_TYPE_PREFIX), RULE_DESCRIPTION);
+        extender.routeIf(PROCESS_BODY, jumpTo(PROCESS_BODY_MULTIPART), HttpMateChainKeys.CONTENT_TYPE,
+                contentType -> contentType.equals(CONTENT_TYPE), RULE_DESCRIPTION);
     }
 }

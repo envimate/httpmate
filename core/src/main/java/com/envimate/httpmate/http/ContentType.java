@@ -26,30 +26,43 @@ import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static com.envimate.httpmate.util.Validators.validateNotNull;
+import static java.lang.String.format;
 import static java.util.Objects.isNull;
+import static java.util.Optional.ofNullable;
 import static lombok.AccessLevel.PRIVATE;
 
 @ToString
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = PRIVATE)
 public final class ContentType {
+    private static final Pattern PATTERN = Pattern.compile("(?<type>[^;]*)(;(?<comment>.*))?");
+
     private static final String JSON = "application/json";
     private static final String XML = "application/xml";
     private static final String YAML = "application/yaml";
 
-    private final String value;
+    private final String type;
+    @EqualsAndHashCode.Exclude
+    private final String comment;
 
     public static ContentType fromString(final Optional<String> value) {
-        return value
-                .map(String::toLowerCase)
-                .map(ContentType::new)
-                .orElseGet(ContentType::empty);
+        return value.map(raw -> {
+            final Matcher matcher = PATTERN.matcher(raw);
+            if (!matcher.matches()) {
+                throw new IllegalArgumentException(format("Content-type '%s' must match '%s'", raw, PATTERN.pattern()));
+            }
+            final String type = matcher.group("type").toLowerCase();
+            final String comment = ofNullable(matcher.group("comment")).orElse("");
+            return new ContentType(type, comment);
+        }).orElseGet(ContentType::empty);
     }
 
     private static ContentType empty() {
-        return new ContentType(null);
+        return new ContentType(null, null);
     }
 
     public static ContentType fromString(final String contentType) {
@@ -70,20 +83,18 @@ public final class ContentType {
     }
 
     public boolean isEmpty() {
-        return isNull(value);
+        return isNull(type);
     }
 
-    public boolean startsWith(final ContentType other) {
-        if (value == null) {
-            return false;
-        }
-        if (other.value == null) {
-            return false;
-        }
-        return value.startsWith(other.value);
+    public String comment() {
+        return comment;
+    }
+
+    public String valueWithComment() {
+        return String.format("%s;%s", type, comment);
     }
 
     public String internalValueForMapping() {
-        return value;
+        return type;
     }
 }

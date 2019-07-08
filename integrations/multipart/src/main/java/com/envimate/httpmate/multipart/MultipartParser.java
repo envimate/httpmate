@@ -21,8 +21,8 @@
 
 package com.envimate.httpmate.multipart;
 
-import com.envimate.httpmate.multipart.internal.FileUpload;
 import com.envimate.httpmate.http.ContentType;
+import com.envimate.httpmate.multipart.internal.FileUpload;
 import org.apache.commons.fileupload.FileItemIterator;
 
 import java.io.InputStream;
@@ -35,7 +35,7 @@ final class MultipartParser {
     }
 
     static MultipartIteratorBody parse(final InputStream body, final ContentType contentType) {
-        final String value = contentType.internalValueForMapping();
+        final String value = contentType.valueWithComment();
         final FileItemIterator fileItemIterator = FileUpload.parse(body, value);
         return multipartIteratorBody(fileItemIterator);
     }

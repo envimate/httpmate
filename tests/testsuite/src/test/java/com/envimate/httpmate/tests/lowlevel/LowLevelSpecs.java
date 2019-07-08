@@ -28,6 +28,8 @@ import org.junit.runners.Parameterized;
 
 import java.util.Collection;
 
+import static com.envimate.httpmate.HttpMate.aLowLevelHttpMate;
+import static com.envimate.httpmate.convenience.configurators.Configurators.toCustomizeResponsesUsing;
 import static com.envimate.httpmate.tests.givenwhenthen.Given.given;
 import static com.envimate.httpmate.tests.givenwhenthen.deploy.DeployerManager.activeDeployers;
 import static com.envimate.httpmate.tests.givenwhenthen.deploy.DeployerManager.setCurrentDeployerAndClient;
@@ -142,5 +144,15 @@ public final class LowLevelSpecs {
                 .when().aRequestToThePath("/resource").viaTheGetMethod().withAnEmptyBody().isIssued()
                 .theStatusCodeWas(200)
                 .theResponseBodyContains("this is a resource");
+    }
+
+    @Test
+    public void testEmptyTemplate() {
+        given(aLowLevelHttpMate().get("/test", (request, response) -> response.setBody("OK"))
+                .thatIs().configured(toCustomizeResponsesUsing(metaData -> {
+                })).build())
+                .when().aRequestToThePath("/test").viaTheGetMethod().withAnEmptyBody().isIssued()
+                .theStatusCodeWas(200)
+                .theResponseBodyWas("OK");
     }
 }
