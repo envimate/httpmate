@@ -203,3 +203,6 @@ And replace the `PureJavaEndpoint` line with:
 ```
 
 Restart the application and enjoy the benefits of Jetty.
+
+## Documentation
+You can find an extensive documentation [here](docs/UserGuide.md).

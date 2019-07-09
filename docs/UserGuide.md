@@ -47,7 +47,7 @@ HttpMate will now direct POST requests on `/makeReservation` to the `makeReserva
 #### Object mapping
 Until this point, it is unclear how HttpMate manages to get the `Reservation` parameter needed to call
 `makeReservation`.  In order to achieve this, you need to give HttpMate a way to map
-the body of incoming requests to method parameters. The recommended way to do this is using MapMate.
+the body of incoming requests to method parameters. The recommended way to do this is using [MapMate](https://github.com/envimate/mapmate).
 Once you have configured a MapMate instance to deserialize objects of type `Reservation`, the complete HttpMate configuration will look like this:
 ```java
 useCaseDrivenBuilder()

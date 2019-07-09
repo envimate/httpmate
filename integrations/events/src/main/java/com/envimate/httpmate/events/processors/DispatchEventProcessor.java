@@ -36,7 +36,6 @@ import lombok.ToString;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
-import static com.envimate.httpmate.HttpMateChainKeys.*;
 import static com.envimate.httpmate.events.EventModule.*;
 import static com.envimate.httpmate.events.processors.EventDispatchingException.eventDispatchingException;
 import static com.envimate.messageMate.messageFunction.MessageFunctionBuilder.aMessageFunction;
@@ -65,7 +64,6 @@ public final class DispatchEventProcessor implements Processor {
             if (raw.getErrorPayload() != null) {
                 final Map<String, Object> errorPayload = (Map<String, Object>) raw.getErrorPayload();
                 final Throwable exception = (Throwable) errorPayload.get("Exception");
-                //metaData.set(EXCEPTION, exception);
                 throw eventDispatchingException(exception);
             } else {
                 final Map<String, Object> response = raw.getPayload();
