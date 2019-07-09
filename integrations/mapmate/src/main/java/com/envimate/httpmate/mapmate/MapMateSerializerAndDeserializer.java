@@ -83,7 +83,7 @@ public final class MapMateSerializerAndDeserializer implements SerializerAndDese
     public void configure(final DependencyRegistry dependencyRegistry) {
         SerializerAndDeserializer.super.configure(dependencyRegistry);
         final EventModule eventModule = dependencyRegistry.getDependency(EventModule.class);
-        eventModule.setResponseMapper((event, metaData) -> {
+        eventModule.setDefaultEventToResponseMapper((event, metaData) -> {
             final ContentType contentType = metaData.get(HttpMateChainKeys.CONTENT_TYPE);
             final ContentType responseContentType;
             if (!contentType.isEmpty()) {
@@ -94,7 +94,8 @@ public final class MapMateSerializerAndDeserializer implements SerializerAndDese
             metaData.get(RESPONSE_HEADERS).put(CONTENT_TYPE, responseContentType.internalValueForMapping());
             final MarshallingType marshallingType = marshallingTypes.get(responseContentType);
             final Map<String, Object> eventMap = (Map<String, Object>) event;
-            metaData.set(RESPONSE_STRING, mapMate.serializer().serializeFromMap(eventMap, marshallingType));
+            final String serialized = mapMate.serializer().serializeFromMap(eventMap, marshallingType);
+            metaData.set(RESPONSE_STRING, serialized);
         });
     }
 

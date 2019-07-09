@@ -72,7 +72,7 @@ public final class EventDrivenBuilder {
 
         @Override
         public HttpMateBuilder mappingResponsesUsing(final EventToResponseMapper mapper) {
-            eventModule.setResponseMapper(mapper);
+            eventModule.setDefaultEventToResponseMapper(mapper);
             return httpMateBuilder(coreModule, eventModule);
         }
     }

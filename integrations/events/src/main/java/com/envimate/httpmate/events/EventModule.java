@@ -70,7 +70,7 @@ public final class EventModule implements ChainModule {
     private MessageBus messageBus;
     private final List<Generator<EventType>> eventTypeGenerators = new LinkedList<>();
     private final FilterMapBuilder<MetaData, RequestToEventMapper> requestToEventMappers = filterMapBuilder();
-    private EventToResponseMapper responseMapper;
+    private final FilterMapBuilder<MetaData, EventToResponseMapper> eventToResponseMappers = filterMapBuilder();
     private final Map<EventType, ExternalEventMapping> externalEventMappings = new HashMap<>();
 
     public static EventModule eventModule() {
@@ -90,14 +90,21 @@ public final class EventModule implements ChainModule {
         requestToEventMappers.put(filter, mapper);
     }
 
-    public void setResponseMapper(final EventToResponseMapper responseMapper) {
-        validateNotNull(responseMapper, "responseMapper");
-        this.responseMapper = responseMapper;
-    }
-
     public void setDefaultRequestToEventMapper(final RequestToEventMapper requestToEventMapper) {
         validateNotNull(requestToEventMapper, "requestToEventMapper");
         requestToEventMappers.setDefaultValue(requestToEventMapper);
+    }
+
+    public void addEventToResponseMapper(final Predicate<MetaData> filter,
+                                         final EventToResponseMapper mapper) {
+        validateNotNull(filter, "filter");
+        validateNotNull(mapper, "mapper");
+        eventToResponseMappers.put(filter, mapper);
+    }
+
+    public void setDefaultEventToResponseMapper(final EventToResponseMapper responseMapper) {
+        validateNotNull(responseMapper, "responseMapper");
+        this.eventToResponseMappers.setDefaultValue(responseMapper);
     }
 
     public void addEventMapping(final EventType eventType,
@@ -133,7 +140,7 @@ public final class EventModule implements ChainModule {
         extender.addProcessor(SUBMIT_EVENT, dispatchEventProcessor(messageBus));
 
         extender.createChain(MAP_EVENT_TO_RESPONSE, jumpTo(POST_PROCESS), jumpTo(EXCEPTION_OCCURRED));
-        extender.addProcessor(MAP_EVENT_TO_RESPONSE, serializationProcessor(responseMapper));
+        extender.addProcessor(MAP_EVENT_TO_RESPONSE, serializationProcessor(eventToResponseMappers.build()));
 
         extender.addProcessor(PREPARE_EXCEPTION_RESPONSE, unwrapDispatchingExceptionProcessor());
 

@@ -24,6 +24,7 @@ package com.envimate.httpmate.events.processors;
 import com.envimate.httpmate.chains.MetaData;
 import com.envimate.httpmate.chains.Processor;
 import com.envimate.httpmate.events.mapper.EventToResponseMapper;
+import com.envimate.httpmate.filtermap.FilterMap;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
@@ -39,15 +40,16 @@ import static com.envimate.httpmate.util.Validators.validateNotNull;
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class SerializationProcessor implements Processor {
-    private final EventToResponseMapper eventToResponseMapper;
+    private final FilterMap<MetaData, EventToResponseMapper> eventToResponseMappers;
 
-    public static Processor serializationProcessor(final EventToResponseMapper eventToResponseMapper) {
-        validateNotNull(eventToResponseMapper, "eventToResponseMapper");
-        return new SerializationProcessor(eventToResponseMapper);
+    public static Processor serializationProcessor(final FilterMap<MetaData, EventToResponseMapper> eventToResponseMappers) {
+        validateNotNull(eventToResponseMappers, "eventToResponseMappers");
+        return new SerializationProcessor(eventToResponseMappers);
     }
 
     @Override
     public void apply(final MetaData metaData) {
+        final EventToResponseMapper eventToResponseMapper = eventToResponseMappers.get(metaData);
         final Optional<Map<String, Object>> eventReturnValue = metaData.get(EVENT_RETURN_VALUE);
         eventReturnValue.ifPresent(value -> eventToResponseMapper.map(value, metaData));
     }
