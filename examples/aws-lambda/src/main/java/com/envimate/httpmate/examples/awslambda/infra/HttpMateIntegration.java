@@ -22,14 +22,40 @@
 package com.envimate.httpmate.examples.awslambda.infra;
 
 import com.amazonaws.services.lambda.runtime.Context;
-import com.amazonaws.services.lambda.runtime.RequestHandler;
+import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
+import com.envimate.httpmate.LowLevelBuilder;
+import com.envimate.httpmate.awslambda.AwsLambdaEndpoint;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
-public class HttpMateIntegration implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+
+import static com.envimate.httpmate.HttpMate.anHttpMateConfiguredAs;
+
+@SuppressWarnings("unchecked")
+public class HttpMateIntegration implements RequestStreamHandler {
+    private static final AwsLambdaEndpoint ENDPOINT;
+    private static final ObjectMapper objectMapper;
+    static {
+        objectMapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        ENDPOINT = AwsLambdaEndpoint.awsLambdaEndpointFor(anHttpMateConfiguredAs(LowLevelBuilder.LOW_LEVEL).get("/prod/hello", (request, response) -> {
+            System.out.println("Got request "+request);
+            response.setStatus(200);
+            response.setBody("lalala");
+        }).build());
+    }
 
     @Override
-    public APIGatewayProxyResponseEvent handleRequest(final APIGatewayProxyRequestEvent event, final Context context) {
-        throw new UnsupportedOperationException();
+    public void handleRequest(final InputStream input, final OutputStream output, final Context context) throws IOException {
+        final APIGatewayProxyRequestEvent event = objectMapper.readValue(input, APIGatewayProxyRequestEvent.class);
+
+        final APIGatewayProxyResponseEvent result = ENDPOINT.delegate(event, context);
+        objectMapper.writeValue(output, result);
+        output.close();
+        input.close();
     }
 }
