@@ -27,7 +27,7 @@
     <parent>
         <groupId>com.envimate.httpmate</groupId>
         <artifactId>integrations-parent</artifactId>
-        <version>4</version>
+        <version>1.0.24</version>
     </parent>
 
     <groupId>com.envimate.httpmate.integrations</groupId>
