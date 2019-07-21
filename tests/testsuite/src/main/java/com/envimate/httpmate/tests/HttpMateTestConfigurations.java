@@ -200,9 +200,6 @@ public final class HttpMateTestConfigurations {
                     return metaData.getOptional(AUTHENTICATION_INFORMATION).map("admin"::equals).orElse(false);
                 }).orElse(true)))
                 .build();
-
-        System.out.println(httpMate.dumpChains());
-
         return httpMate;
     }
 }

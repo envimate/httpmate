@@ -21,8 +21,15 @@
 
 package com.envimate.httpmate.usecases.builder;
 
+import com.envimate.httpmate.generator.GenerationCondition;
+
+import static com.envimate.httpmate.generator.PathAndMethodGenerationCondition.pathAndMethodEventTypeGenerationCondition;
+import static com.envimate.httpmate.path.PathTemplate.pathTemplate;
+
 @FunctionalInterface
 public interface UseCaseStage2<T> {
+
+    T on(GenerationCondition generationCondition);
 
     /**
      * Configures the http path on which the use case that was configured in
@@ -48,5 +55,11 @@ public interface UseCaseStage2<T> {
      * @param pathTemplate the path on which the use case will be served
      * @return the next step in the fluent builder
      */
-    UseCaseStage3<T> forRequestPath(String pathTemplate);
+    default UseCaseStage3<T> forRequestPath(final String pathTemplate) {
+        return requestMethods -> {
+            final GenerationCondition eventTypeGenerationCondition =
+                    pathAndMethodEventTypeGenerationCondition(pathTemplate(pathTemplate), requestMethods);
+            return on(eventTypeGenerationCondition);
+        };
+    }
 }

@@ -21,7 +21,6 @@
 
 package com.envimate.httpmate.responsetemplate;
 
-import com.envimate.httpmate.HttpMateChainKeys;
 import com.envimate.httpmate.chains.MetaData;
 import com.envimate.httpmate.chains.Processor;
 import com.envimate.httpmate.http.Http;
@@ -31,6 +30,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
 import java.util.HashMap;
+
+import static com.envimate.httpmate.HttpMateChainKeys.RESPONSE_HEADERS;
+import static com.envimate.httpmate.HttpMateChainKeys.RESPONSE_STATUS;
 
 @ToString
 @EqualsAndHashCode
@@ -43,7 +45,9 @@ public final class InitResponseProcessor implements Processor {
 
     @Override
     public void apply(final MetaData metaData) {
-        metaData.set(HttpMateChainKeys.RESPONSE_STATUS, Http.StatusCodes.OK);
-        metaData.set(HttpMateChainKeys.RESPONSE_HEADERS, new HashMap<>());
+        metaData.set(RESPONSE_STATUS, Http.StatusCodes.OK);
+        if (!metaData.contains(RESPONSE_HEADERS)) {
+            metaData.set(RESPONSE_HEADERS, new HashMap<>());
+        }
     }
 }

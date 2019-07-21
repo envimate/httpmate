@@ -26,7 +26,6 @@ import com.envimate.httpmate.HttpMateBuilder;
 import com.envimate.httpmate.HttpMateConfigurationType;
 import com.envimate.httpmate.events.EventModule;
 import com.envimate.httpmate.events.builder.Using;
-import com.envimate.httpmate.generator.GenerationCondition;
 import com.envimate.httpmate.http.HttpRequestMethod;
 import com.envimate.httpmate.usecases.builder.SerializationAndDeserializationStage;
 import com.envimate.httpmate.usecases.builder.UseCaseStage1;
@@ -46,8 +45,6 @@ import java.util.function.Predicate;
 import static com.envimate.httpmate.CoreModule.coreModule;
 import static com.envimate.httpmate.HttpMateBuilder.httpMateBuilder;
 import static com.envimate.httpmate.events.EventModule.eventModule;
-import static com.envimate.httpmate.generator.PathAndMethodGenerationCondition.pathAndMethodEventTypeGenerationCondition;
-import static com.envimate.httpmate.path.PathTemplate.pathTemplate;
 import static com.envimate.httpmate.usecases.UseCasesModule.useCasesModule;
 import static com.envimate.httpmate.util.Validators.validateNotNull;
 import static com.envimate.messageMate.internal.pipe.configuration.AsynchronousConfiguration.constantPoolSizeAsynchronousPipeConfiguration;
@@ -75,11 +72,9 @@ public final class UseCaseDrivenBuilder {
 
         @Override
         public UseCaseStage2<Stage1> servingTheUseCase(final Class<?> useCaseClass) {
-            return pathTemplate -> requestMethods -> {
+            return generationCondition -> {
                 final EventType eventType = eventTypeFromString(useCaseClass.getName());
-                final GenerationCondition eventTypeGenerationCondition =
-                        pathAndMethodEventTypeGenerationCondition(pathTemplate(pathTemplate), requestMethods);
-                eventModule.addEventMapping(eventType, eventTypeGenerationCondition);
+                eventModule.addEventMapping(eventType, generationCondition);
                 useCasesModule.addUseCaseToEventMapping(useCaseClass, eventType);
                 return this;
             };

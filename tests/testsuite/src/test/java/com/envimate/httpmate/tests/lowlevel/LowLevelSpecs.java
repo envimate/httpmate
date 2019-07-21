@@ -21,6 +21,7 @@
 
 package com.envimate.httpmate.tests.lowlevel;
 
+import com.envimate.httpmate.exceptions.HttpExceptionMapper;
 import com.envimate.httpmate.tests.givenwhenthen.DeployerAndClient;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -30,6 +31,7 @@ import java.util.Collection;
 
 import static com.envimate.httpmate.HttpMate.aLowLevelHttpMate;
 import static com.envimate.httpmate.convenience.configurators.Configurators.toCustomizeResponsesUsing;
+import static com.envimate.httpmate.convenience.configurators.exceptions.ExceptionMappingConfigurator.toMapExceptions;
 import static com.envimate.httpmate.tests.givenwhenthen.Given.given;
 import static com.envimate.httpmate.tests.givenwhenthen.deploy.DeployerManager.activeDeployers;
 import static com.envimate.httpmate.tests.givenwhenthen.deploy.DeployerManager.setCurrentDeployerAndClient;
@@ -154,5 +156,20 @@ public final class LowLevelSpecs {
                 .when().aRequestToThePath("/test").viaTheGetMethod().withAnEmptyBody().isIssued()
                 .theStatusCodeWas(200)
                 .theResponseBodyWas("OK");
+    }
+
+    @Test
+    public void testCheckedExceptionsCanBeMapped() {
+        given(
+                aLowLevelHttpMate().get("/test", (request, response) -> {
+                    throw (RuntimeException) new Exception();
+                }).thatIs()
+                        .configured(toMapExceptions()
+                                .ofType(Exception.class)
+                                .toResponsesUsing((HttpExceptionMapper<Exception>) (exception, response) -> response.setStatus(501))
+                                .ofAllRemainingTypesUsing((HttpExceptionMapper<Throwable>) (exception, response) -> response.setStatus(500)))
+                        .build())
+                .when().aRequestToThePath("/test").viaTheGetMethod().withAnEmptyBody().isIssued()
+                .theStatusCodeWas(501);
     }
 }
