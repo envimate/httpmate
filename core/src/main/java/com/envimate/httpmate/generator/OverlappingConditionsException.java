@@ -21,13 +21,18 @@
 
 package com.envimate.httpmate.generator;
 
-import com.envimate.httpmate.chains.MetaData;
+import static java.lang.String.format;
 
-public interface GenerationCondition {
+public final class OverlappingConditionsException extends RuntimeException {
 
-    default boolean isSubsetOf(final GenerationCondition other) {
-        return false;
+    private OverlappingConditionsException(final String message) {
+        super(message);
     }
 
-    boolean generate(MetaData metaData);
+    static OverlappingConditionsException overlappingConditionsException(final Generator<?> overlapping,
+                                                                         final Generator<?> overlapped) {
+        final String message = format(
+                "Condition '%s' is a subset of '%s' and would therefore never trigger", overlapped, overlapping);
+        return new OverlappingConditionsException(message);
+    }
 }

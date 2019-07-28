@@ -22,13 +22,14 @@
 package com.envimate.httpmate.convenience.handler;
 
 import com.envimate.httpmate.chains.MetaData;
-import com.envimate.httpmate.path.Path;
 import com.envimate.httpmate.http.Headers;
 import com.envimate.httpmate.http.PathParameters;
 import com.envimate.httpmate.http.QueryParameters;
+import com.envimate.httpmate.path.Path;
 import lombok.*;
 
 import java.io.InputStream;
+import java.util.Map;
 import java.util.Optional;
 
 import static com.envimate.httpmate.HttpMateChainKeys.*;
@@ -68,5 +69,13 @@ public final class HttpRequest {
 
     public InputStream bodyStream() {
         return metaData.get(BODY_STREAM);
+    }
+
+    public Optional<Object> authenticationInformation() {
+        return metaData.getOptional(AUTHENTICATION_INFORMATION);
+    }
+
+    public Optional<Map<String, Object>> bodyAsMap() {
+        return metaData.getOptional(BODY_MAP);
     }
 }

@@ -30,6 +30,7 @@ import lombok.ToString;
 import java.util.List;
 import java.util.Optional;
 
+import static com.envimate.httpmate.generator.OverlappingConditionsException.overlappingConditionsException;
 import static com.envimate.httpmate.util.Validators.validateNotNull;
 
 @ToString
@@ -40,7 +41,20 @@ public final class Generators<T> {
 
     public static <T> Generators<T> generators(final List<Generator<T>> generators) {
         validateNotNull(generators, "generators");
+        validateForConflicts(generators);
         return new Generators<>(generators);
+    }
+
+    private static <T> void validateForConflicts(final List<Generator<T>> generators) {
+        for (int i = 0; i < generators.size(); ++i) {
+            final Generator<T> generatorA = generators.get(i);
+            for (int j = i + 1; j < generators.size(); ++j) {
+                final Generator<T> generatorB = generators.get(j);
+                if (generatorA.isSubsetOf(generatorB)) {
+                    throw overlappingConditionsException(generatorA, generatorB);
+                }
+            }
+        }
     }
 
     public Optional<T> generate(final MetaData metaData) {

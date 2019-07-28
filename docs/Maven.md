@@ -32,7 +32,6 @@ Every HttpMate configuration needs to include the core module:
     <artifactId>core</artifactId>
     <version>${httpmate.version}</version>
 </dependency>
-
 ```
 It contains the [LowLevel builder](UserGuide.md#Low-level) and the [PureJavaEndpoint](UserGuide.md#Pure Java).
 

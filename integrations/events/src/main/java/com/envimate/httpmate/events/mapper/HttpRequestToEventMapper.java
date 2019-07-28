@@ -19,15 +19,21 @@
  * under the License.
  */
 
-package com.envimate.httpmate.generator;
+package com.envimate.httpmate.events.mapper;
 
 import com.envimate.httpmate.chains.MetaData;
+import com.envimate.httpmate.convenience.handler.HttpRequest;
 
-public interface GenerationCondition {
+import java.util.Map;
 
-    default boolean isSubsetOf(final GenerationCondition other) {
-        return false;
+import static com.envimate.httpmate.convenience.handler.HttpRequest.httpRequest;
+
+public interface HttpRequestToEventMapper extends RequestToEventMapper {
+
+    @Override
+    default Map<String, Object> map(final MetaData metaData) {
+        return map(httpRequest(metaData));
     }
 
-    boolean generate(MetaData metaData);
+    Map<String, Object> map(HttpRequest request);
 }

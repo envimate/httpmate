@@ -22,9 +22,9 @@
 package com.envimate.httpmate.generator;
 
 import com.envimate.httpmate.chains.MetaData;
+import com.envimate.httpmate.http.HttpRequestMethod;
 import com.envimate.httpmate.path.Path;
 import com.envimate.httpmate.path.PathTemplate;
-import com.envimate.httpmate.http.HttpRequestMethod;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
@@ -62,6 +62,12 @@ public final class PathAndMethodGenerationCondition implements GenerationConditi
             }
         });
         return new PathAndMethodGenerationCondition(pathTemplate, methods);
+    }
+
+    @Override
+    public boolean isSubsetOf(final GenerationCondition other) {
+        validateNotNull(other, "other");
+        return equals(other);
     }
 
     @Override

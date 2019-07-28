@@ -67,7 +67,7 @@ public final class EventModule implements ChainModule {
     public static final MetaDataKey<Map<String, Object>> EVENT = metaDataKey("EVENT");
     public static final MetaDataKey<Optional<Map<String, Object>>> EVENT_RETURN_VALUE = metaDataKey("EVENT_RETURN_VALUE");
 
-    private MessageBus messageBus;
+    private volatile MessageBus messageBus;
     private final List<Generator<EventType>> eventTypeGenerators = new LinkedList<>();
     private final FilterMapBuilder<MetaData, RequestToEventMapper> requestToEventMappers = filterMapBuilder();
     private final FilterMapBuilder<MetaData, EventToResponseMapper> eventToResponseMappers = filterMapBuilder();
@@ -160,15 +160,13 @@ public final class EventModule implements ChainModule {
     @SuppressWarnings("unchecked")
     private void registerEventHandlers(final MessageBus messageBus,
                                        final ChainRegistry chainRegistry) {
-        externalEventMappings.forEach((type, mapping) -> {
-            messageBus.subscribe(type, event -> {
-                final MetaData metaData = emptyMetaData();
-                metaData.set(EVENT_RETURN_VALUE, of((Map<String, Object>) event));
-                metaData.set(EVENT_TYPE, type);
-                metaData.set(IS_EXTERNAL_EVENT, true);
-                chainRegistry.putIntoChain(INIT, metaData, m -> {
-                });
+        externalEventMappings.forEach((type, mapping) -> messageBus.subscribe(type, event -> {
+            final MetaData metaData = emptyMetaData();
+            metaData.set(EVENT_RETURN_VALUE, of((Map<String, Object>) event));
+            metaData.set(EVENT_TYPE, type);
+            metaData.set(IS_EXTERNAL_EVENT, true);
+            chainRegistry.putIntoChain(INIT, metaData, m -> {
             });
-        });
+        }));
     }
 }

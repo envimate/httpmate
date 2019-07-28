@@ -46,6 +46,11 @@ public final class Generator<T> {
         return new Generator<>(value, condition);
     }
 
+    boolean isSubsetOf(final Generator<T> other) {
+        validateNotNull(other, "other");
+        return condition.isSubsetOf(other.condition);
+    }
+
     Optional<T> generate(final MetaData metaData) {
         if(condition.generate(metaData)) {
             return of(value);
