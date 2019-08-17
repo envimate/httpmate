@@ -23,6 +23,8 @@ package com.envimate.httpmate.events.mapper;
 
 import com.envimate.httpmate.chains.MetaData;
 
+import java.util.Map;
+
 public interface EventToResponseMapper {
-    void map(Object event, MetaData metaData);
+    void map(Map<String, Object> event, MetaData metaData);
 }
