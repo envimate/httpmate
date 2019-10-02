@@ -54,11 +54,11 @@ import static com.envimate.httpmate.HttpMate.anHttpMateConfiguredAs;
 import static com.envimate.httpmate.HttpMateChainKeys.*;
 import static com.envimate.httpmate.convenience.configurators.Configurators.toLogUsing;
 import static com.envimate.httpmate.events.EventDrivenBuilder.EVENT_DRIVEN;
-import static com.envimate.httpmate.http.ContentType.json;
+import static com.envimate.httpmate.http.headers.ContentType.json;
 import static com.envimate.httpmate.logger.Loggers.stderrLogger;
 import static com.envimate.httpmate.security.SecurityConfigurators.toAuthenticateRequests;
 import static com.envimate.httpmate.security.SecurityConfigurators.toAuthorizeRequests;
-import static com.envimate.httpmate.unpacking.BodyMapParsingModule.toParseBodiesBy;
+import static com.envimate.httpmate.marshalling.MarshallingModule.toMarshallBodiesBy;
 import static com.envimate.httpmate.websockets.WebSocketsConfigurator.toUseWebSockets;
 import static com.envimate.httpmate.websocketsevents.Conditions.closingAllWebSocketsThat;
 import static com.envimate.httpmate.websocketsevents.Conditions.webSocketIsTaggedWith;
@@ -114,14 +114,23 @@ public final class ArtificialConfiguration {
 
         useCaseAdapter.attachAndEnhance(messageBus);
 
+        /*
+        UseCaseDrivenBuilder.useCaseDrivenBuilder()
+                .servingTheUseCase(String.class).on(Conditions.webSocketIsTaggedWith("WEBSOCKET"))
+                .get()
+                .mappingRequestsAndResponsesUsing()
+                .configured()
+                .build();
+         */
+
         final HttpMate httpMate = anHttpMateConfiguredAs(EVENT_DRIVEN).attachedTo(messageBus)
                 .triggeringTheEvent("NormalUseCase").forRequestPath("/normal").andRequestMethod(HttpRequestMethod.GET)
                 .triggeringTheEvent("BothUseCase").forRequestPath("/both").andRequestMethod(HttpRequestMethod.GET)
                 .triggeringTheEvent("CloseUseCase").when(webSocketIsTaggedWith("CLOSE"))
                 .triggeringTheEvent("CountUseCase").when(webSocketIsTaggedWith("COUNT"))
-                .triggeringTheEvent("UseCaseA").when(metaData -> metaData.get(BODY_MAP).getOrDefault("useCase", "").equals("A"))
-                .triggeringTheEvent("UseCaseB").when(metaData -> metaData.get(BODY_MAP).getOrDefault("useCase", "").equals("B"))
-                .triggeringTheEvent("UseCaseC").when(metaData -> metaData.get(BODY_MAP).getOrDefault("useCase", "").equals("C"))
+                .triggeringTheEvent("UseCaseA").when(metaData -> metaData.get(REQUEST_BODY_MAP).getOrDefault("useCase", "").equals("A"))
+                .triggeringTheEvent("UseCaseB").when(metaData -> metaData.get(REQUEST_BODY_MAP).getOrDefault("useCase", "").equals("B"))
+                .triggeringTheEvent("UseCaseC").when(metaData -> metaData.get(REQUEST_BODY_MAP).getOrDefault("useCase", "").equals("C"))
                 .triggeringTheEvent("QueryFooUseCase").when(webSocketIsTaggedWith("QUERY_FOO"))
                 .triggeringTheEvent("ExceptionUseCaseParameter").when(webSocketIsTaggedWith("EXCEPTION"))
                 .triggeringTheEvent("EchoParameter").when(webSocketIsTaggedWith("ECHO"))
@@ -129,9 +138,9 @@ public final class ArtificialConfiguration {
                 .triggeringTheEvent("QueryParameter").when(webSocketIsTaggedWith("QUERY"))
                 .triggeringTheEvent("HeaderParameter").when(webSocketIsTaggedWith("HEADER"))
                 .handlingTheEvent("CloseEvent").by(closingAllWebSocketsThat((metaData, event) -> true))
-                .mappingResponsesUsing((event, metaData) -> metaData.set(RESPONSE_STRING, event.toString()))
+                .mappingResponsesUsing((event, metaData) -> metaData.set(RESPONSE_BODY_STRING, event.toString()))
                 .configured(toAuthenticateRequests().beforeBodyProcessing().using(metaData -> metaData.get(QUERY_PARAMETERS).getQueryParameter("username")))
-                .configured(toAuthenticateRequests().beforeBodyProcessing().using(metaData -> metaData.get(HEADERS).getHeader("username")))
+                .configured(toAuthenticateRequests().beforeBodyProcessing().using(metaData -> metaData.get(REQUEST_HEADERS).getHeader("username")))
                 .configured(toAuthorizeRequests().beforeBodyProcessing().using(metaData -> {
                     final Path path = metaData.get(PATH);
                     if (path.matches("/authorized")) {
@@ -154,8 +163,8 @@ public final class ArtificialConfiguration {
                         .acceptingWebSocketsToThePath("/query").taggedBy("QUERY")
                         .acceptingWebSocketsToThePath("/header").taggedBy("HEADER")
                         .acceptingWebSocketsToThePath("/exception").taggedBy("EXCEPTION"))
-                .configured(toParseBodiesBy()
-                        .parsingContentType(json()).with(body -> new Gson().fromJson(body, Map.class))
+                .configured(toMarshallBodiesBy()
+                        .unmarshallingContentTypeInRequests(json()).with(body -> new Gson().fromJson(body, Map.class))
                         .usingTheDefaultContentType(json()))
                 .build();
 

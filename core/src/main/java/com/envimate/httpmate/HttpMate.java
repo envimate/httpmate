@@ -22,6 +22,7 @@
 package com.envimate.httpmate;
 
 import com.envimate.httpmate.chains.*;
+import com.envimate.httpmate.closing.ClosingActions;
 import com.envimate.httpmate.convenience.endpoints.PureJavaEndpoint;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +31,8 @@ import java.io.IOException;
 import java.util.Optional;
 
 import static com.envimate.httpmate.LowLevelBuilder.LOW_LEVEL;
+import static com.envimate.httpmate.closing.ClosingActions.CLOSING_ACTIONS;
+import static com.envimate.httpmate.closing.ClosingActions.closingActions;
 import static com.envimate.httpmate.util.Validators.validateNotNull;
 
 /**
@@ -37,7 +40,7 @@ import static com.envimate.httpmate.util.Validators.validateNotNull;
  * {@link PureJavaEndpoint}
  */
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-public final class HttpMate {
+public final class HttpMate implements AutoCloseable {
     private final ChainRegistry chainRegistry;
 
     public static HttpMate httpMate(final ChainRegistry chainRegistry) {
@@ -83,5 +86,11 @@ public final class HttpMate {
     public static <T> T anHttpMateConfiguredAs(final HttpMateConfigurationType<T> type) {
         validateNotNull(type, "type");
         return type.configure();
+    }
+
+    @Override
+    public void close() {
+        final ClosingActions closingActions = chainRegistry.getMetaDatum(CLOSING_ACTIONS);
+        closingActions.closeAll();
     }
 }

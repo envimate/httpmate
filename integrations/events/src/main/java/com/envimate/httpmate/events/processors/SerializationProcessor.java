@@ -33,7 +33,7 @@ import lombok.ToString;
 import java.util.Map;
 import java.util.Optional;
 
-import static com.envimate.httpmate.events.EventModule.EVENT_RETURN_VALUE;
+import static com.envimate.httpmate.events.EventModule.RECEIVED_EVENT;
 import static com.envimate.httpmate.util.Validators.validateNotNull;
 
 @ToString
@@ -50,7 +50,7 @@ public final class SerializationProcessor implements Processor {
     @Override
     public void apply(final MetaData metaData) {
         final EventToResponseMapper eventToResponseMapper = eventToResponseMappers.get(metaData);
-        final Optional<Map<String, Object>> eventReturnValue = metaData.get(EVENT_RETURN_VALUE);
+        final Optional<Map<String, Object>> eventReturnValue = metaData.get(RECEIVED_EVENT);
         eventReturnValue.ifPresent(value -> eventToResponseMapper.map(value, metaData));
     }
 }

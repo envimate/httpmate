@@ -57,16 +57,16 @@ final class SparkRouteWebserviceAdapter implements Route {
         metaData.set(RAW_PATH, path);
         final Map<String, String> headers = request.headers().stream()
                 .collect(toMap(key -> key, request::headers));
-        metaData.set(RAW_HEADERS, headers);
+        metaData.set(RAW_REQUEST_HEADERS, headers);
         final Map<String, String> queryParameters = extractQueryParameters(request);
-        metaData.set(RAW_QUERY_PARAMETERS, queryParameters);
+        metaData.set(RAW_REQUEST_QUERY_PARAMETERS, queryParameters);
         final InputStream body;
         try {
             body = request.raw().getInputStream();
         } catch (final IOException e) {
             throw new RuntimeException(e);
         }
-        metaData.set(BODY_STREAM, body);
+        metaData.set(REQUEST_BODY_STREAM, body);
         metaData.set(IS_HTTP_REQUEST, true);
         this.httpMate.handleRequest(metaData, rawResponse -> {
             final Map<String, String> responseHeaders = metaData.get(RESPONSE_HEADERS);

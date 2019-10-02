@@ -21,7 +21,7 @@
 
 package com.envimate.httpmate.multipart;
 
-import com.envimate.httpmate.http.ContentType;
+import com.envimate.httpmate.http.headers.ContentType;
 import com.envimate.httpmate.multipart.internal.FileUpload;
 import org.apache.commons.fileupload.FileItemIterator;
 

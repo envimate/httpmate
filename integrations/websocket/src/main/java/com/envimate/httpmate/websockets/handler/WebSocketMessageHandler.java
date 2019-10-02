@@ -26,15 +26,15 @@ import com.envimate.httpmate.handler.Handler;
 
 import java.util.Optional;
 
-import static com.envimate.httpmate.HttpMateChainKeys.BODY_STRING;
-import static com.envimate.httpmate.HttpMateChainKeys.RESPONSE_STRING;
+import static com.envimate.httpmate.HttpMateChainKeys.REQUEST_BODY_STRING;
+import static com.envimate.httpmate.HttpMateChainKeys.RESPONSE_BODY_STRING;
 
 public interface WebSocketMessageHandler extends Handler {
 
     @Override
     default void handle(final MetaData metaData) {
-        final String message = metaData.get(BODY_STRING);
-        handle(message).ifPresent(response -> metaData.set(RESPONSE_STRING, response));
+        final String message = metaData.get(REQUEST_BODY_STRING);
+        handle(message).ifPresent(response -> metaData.set(RESPONSE_BODY_STRING, response));
     }
 
     Optional<String> handle(String message);

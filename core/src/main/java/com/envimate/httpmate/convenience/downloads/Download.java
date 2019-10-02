@@ -23,7 +23,7 @@ package com.envimate.httpmate.convenience.downloads;
 
 import com.envimate.httpmate.http.Http;
 import com.envimate.httpmate.convenience.handler.HttpResponse;
-import com.envimate.httpmate.http.ContentType;
+import com.envimate.httpmate.http.headers.ContentType;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 
@@ -32,7 +32,7 @@ import java.io.InputStream;
 import static com.envimate.httpmate.http.Http.Headers.CONTENT_DISPOSITION;
 import static com.envimate.httpmate.http.Http.StatusCodes.OK;
 import static com.envimate.httpmate.convenience.downloads.FileName.fileName;
-import static com.envimate.httpmate.http.ContentType.fromString;
+import static com.envimate.httpmate.http.headers.ContentType.fromString;
 import static com.envimate.httpmate.util.Streams.stringToInputStream;
 import static com.envimate.httpmate.util.Validators.validateNotNull;
 

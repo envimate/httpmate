@@ -164,12 +164,12 @@ public final class HttpMateTestConfigurations {
                         .ofType(NoHandlerFoundException.class)
                         .toResponsesUsing((exception, metaData) -> {
                             metaData.set(RESPONSE_STATUS, METHOD_NOT_ALLOWED);
-                            metaData.set(RESPONSE_STRING, "No use case found.");
+                            metaData.set(RESPONSE_BODY_STRING, "No use case found.");
                         })
                         .ofType(MappedException.class).toResponsesUsing((exception, metaData) -> metaData.set(RESPONSE_STATUS, 201))
                         .ofType(NotAuthorizedException.class).toResponsesUsing((object, metaData) -> {
                             metaData.set(RESPONSE_STATUS, 403);
-                            metaData.set(RESPONSE_STRING, "Go away.");
+                            metaData.set(RESPONSE_BODY_STRING, "Go away.");
                         })
                         .ofAllRemainingTypesUsing(theDefaultExceptionMapper())
                 )
@@ -189,10 +189,10 @@ public final class HttpMateTestConfigurations {
 
                 .configured(toLogUsing(stderrLogger()))
 
-                .configured(toAuthenticateRequests().afterBodyProcessing().using(metaData -> metaData.getOptional(BODY_MAP).map(map -> map.get("username"))))
-                .configured(toAuthenticateRequests().beforeBodyProcessing().using(metaData -> metaData.get(HEADERS).getHeader("username")))
+                .configured(toAuthenticateRequests().afterBodyProcessing().using(metaData -> metaData.getOptional(REQUEST_BODY_MAP).map(map -> map.get("username"))))
+                .configured(toAuthenticateRequests().beforeBodyProcessing().using(metaData -> metaData.get(REQUEST_HEADERS).getHeader("username")))
                 .configured(toAuthenticateRequests().beforeBodyProcessing().using(metaData -> metaData.get(QUERY_PARAMETERS).getQueryParameter("username")))
-                .configured(toAuthenticateRequests().afterBodyProcessing().using(metaData -> metaData.getOptional(BODY_STRING).map(body -> extractUsername(body).orElse(null))))
+                .configured(toAuthenticateRequests().afterBodyProcessing().using(metaData -> metaData.getOptional(REQUEST_BODY_STRING).map(body -> extractUsername(body).orElse(null))))
                 .configured(toAuthorizeRequests().inPhase(MAP_REQUEST_TO_EVENT).using(metaData -> metaData.getOptional(EVENT_TYPE).map(eventType -> {
                     if (!eventType.equals(eventTypeFromString("com.envimate.httpmate.tests.usecases.authorized.AuthorizedUseCase"))) {
                         return true;
@@ -200,6 +200,7 @@ public final class HttpMateTestConfigurations {
                     return metaData.getOptional(AUTHENTICATION_INFORMATION).map("admin"::equals).orElse(false);
                 }).orElse(true)))
                 .build();
+        System.out.println("httpMate.dumpChains() = " + httpMate.dumpChains());
         return httpMate;
     }
 }

@@ -22,13 +22,24 @@
 package com.envimate.httpmate.events;
 
 import com.envimate.httpmate.chains.ChainName;
+import com.envimate.httpmate.chains.MetaData;
 import com.envimate.httpmate.chains.Processor;
 
+import java.util.Map;
 import java.util.Optional;
 
+import static com.envimate.httpmate.events.EventModule.EVENT;
 import static java.util.Optional.empty;
 
 public interface ExternalEventMapping extends Processor {
+
+    void handle(Map<String, Object> event);
+
+    @Override
+    default void apply(final MetaData metaData) {
+        final Map<String, Object> event = metaData.get(EVENT);
+        handle(event);
+    }
 
     default Optional<ChainName> jumpTarget() {
         return empty();

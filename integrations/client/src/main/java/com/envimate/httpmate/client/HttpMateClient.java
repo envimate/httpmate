@@ -22,13 +22,13 @@
 package com.envimate.httpmate.client;
 
 import com.envimate.httpmate.HttpMate;
-import com.envimate.httpmate.client.clientbuilder.BasePathStage;
 import com.envimate.httpmate.client.clientbuilder.PortStage;
 import com.envimate.httpmate.client.issuer.Issuer;
+import com.envimate.httpmate.filtermap.FilterMap;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 
-import static com.envimate.httpmate.client.BasePath.basePath;
+import static com.envimate.httpmate.client.HttpMateClientBuilder.clientBuilder;
 import static com.envimate.httpmate.client.issuer.bypass.BypassIssuer.bypassIssuer;
 import static com.envimate.httpmate.client.issuer.real.RealIssuer.realIssuer;
 import static com.envimate.httpmate.client.issuer.real.RealIssuer.realIssuerWithConnectionReuse;
@@ -39,42 +39,50 @@ import static com.envimate.httpmate.util.Validators.validateNotNullNorEmpty;
 public final class HttpMateClient {
     private final Issuer issuer;
     private final BasePath basePath;
-    private final ClientResponseMapper responseMapper;
+    private final FilterMap<Class<?>, ClientResponseMapper<?>> responseMappers;
 
-    public static BasePathStage aHttpMateClientBypassingRequestsDirectlyTo(final HttpMate httpMate) {
+    static HttpMateClient httpMateClient(final Issuer issuer,
+                                         final BasePath basePath,
+                                         final FilterMap<Class<?>, ClientResponseMapper<?>> responseMappers) {
+        validateNotNull(issuer, "issuer");
+        validateNotNull(basePath, "basePath");
+        validateNotNull(responseMappers, "responseMappers");
+        return new HttpMateClient(issuer, basePath, responseMappers);
+    }
+
+    public static HttpMateClientBuilder aHttpMateClientBypassingRequestsDirectlyTo(final HttpMate httpMate) {
         validateNotNull(httpMate, "httpMate");
-        return basePath -> responseMapper -> {
-            validateNotNull(basePath, "basePath");
-            validateNotNull(responseMapper, "responseMapper");
-            final Issuer issuer = bypassIssuer(httpMate);
-            return new HttpMateClient(issuer, basePath(basePath), responseMapper);
-        };
+        final Issuer issuer = bypassIssuer(httpMate);
+        return clientBuilder(basePath -> issuer);
     }
 
     public static PortStage aHttpMateClientForTheHost(final String host) {
         validateNotNullNorEmpty(host, "host");
-        return port -> protocol -> basePath -> responseMapper -> {
+        return port -> protocol -> {
             validateNotNull(protocol, "protocol");
-            validateNotNull(basePath, "basePath");
-            validateNotNull(responseMapper, "responseMapper");
-            final Issuer issuer = realIssuer(protocol, host, port, basePath(basePath));
-            return new HttpMateClient(issuer, basePath(basePath), responseMapper);
+            return clientBuilder(basePath -> realIssuer(protocol, host, port, basePath));
         };
     }
 
     public static PortStage aHttpMateClientThatReusesConnectionsForTheHost(final String host) {
         validateNotNullNorEmpty(host, "host");
-        return port -> protocol -> basePath -> responseMapper -> {
+        return port -> protocol -> {
             validateNotNull(protocol, "protocol");
-            validateNotNull(basePath, "basePath");
-            validateNotNull(responseMapper, "responseMapper");
-            final Issuer issuer = realIssuerWithConnectionReuse(protocol, host, port, basePath(basePath));
-            return new HttpMateClient(issuer, basePath(basePath), responseMapper);
+            return clientBuilder(basePath -> realIssuerWithConnectionReuse(protocol, host, port, basePath));
         };
     }
 
+    public <T> T issue(final HttpClientRequestBuilder<T> requestBuilder) {
+        return issue(requestBuilder.build());
+    }
+
+    @SuppressWarnings("unchecked")
     public <T> T issue(final HttpClientRequest<T> request) {
         validateNotNull(request, "request");
-        return this.issuer.issue(request, basePath, response -> responseMapper.map(response, request.targetType()));
+        return issuer.issue(request, basePath, response -> {
+            final Class<T> targetType = request.targetType();
+            final ClientResponseMapper<T> responseMapper = (ClientResponseMapper<T>) responseMappers.get(targetType);
+            return responseMapper.map(response, targetType);
+        });
     }
 }

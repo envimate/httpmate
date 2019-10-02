@@ -28,7 +28,7 @@
     <parent>
         <groupId>com.envimate.httpmate</groupId>
         <artifactId>integrations-parent</artifactId>
-        <version>1.0.24</version>
+        <version>1.0.25</version>
     </parent>
 
     <groupId>com.envimate.httpmate.integrations</groupId>
@@ -55,6 +55,17 @@
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpmime</artifactId>
             <version>4.5.9</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.junit.platform</groupId>
+            <artifactId>junit-platform-launcher</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.platform</groupId>
+            <artifactId>junit-platform-runner</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 </project>

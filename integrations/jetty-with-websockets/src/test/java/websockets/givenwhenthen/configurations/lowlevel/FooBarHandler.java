@@ -29,8 +29,8 @@ import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
-import static com.envimate.httpmate.HttpMateChainKeys.HEADERS;
-import static com.envimate.httpmate.HttpMateChainKeys.RESPONSE_STRING;
+import static com.envimate.httpmate.HttpMateChainKeys.REQUEST_HEADERS;
+import static com.envimate.httpmate.HttpMateChainKeys.RESPONSE_BODY_STRING;
 
 @ToString
 @EqualsAndHashCode
@@ -43,8 +43,8 @@ public final class FooBarHandler implements Handler {
 
     @Override
     public void handle(final MetaData metaData) {
-        final Headers headers = metaData.get(HEADERS);
+        final Headers headers = metaData.get(REQUEST_HEADERS);
         final String foo = headers.getHeader("foo").orElseThrow();
-        metaData.set(RESPONSE_STRING, foo);
+        metaData.set(RESPONSE_BODY_STRING, foo);
     }
 }

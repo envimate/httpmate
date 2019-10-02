@@ -21,10 +21,7 @@
 
 package com.envimate.httpmate;
 
-import com.envimate.httpmate.chains.ChainModule;
-import com.envimate.httpmate.chains.ChainRegistry;
-import com.envimate.httpmate.chains.ChainRegistryBuilder;
-import com.envimate.httpmate.chains.Configurator;
+import com.envimate.httpmate.chains.*;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
@@ -48,6 +45,12 @@ public final class HttpMateBuilder {
     public static HttpMateBuilder httpMateBuilder(final ChainModule... initialModules) {
         validateNotNull(initialModules, "initialModules");
         return new HttpMateBuilder(new LinkedList<>(asList(initialModules)), new LinkedList<>());
+    }
+
+    public HttpMateBuilder configured(final ConfiguratorBuilder configuratorBuilder) {
+        validateNotNull(configuratorBuilder, "configuratorBuilder");
+        final Configurator configurator = configuratorBuilder.build();
+        return configured(configurator);
     }
 
     public HttpMateBuilder configured(final Configurator configurator) {

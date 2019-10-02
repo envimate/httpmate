@@ -24,6 +24,9 @@ package com.envimate.httpmate.jetty;
 import com.envimate.httpmate.HttpMate;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import org.eclipse.jetty.server.ConnectionFactory;
+import org.eclipse.jetty.server.Connector;
+import org.eclipse.jetty.server.HttpConnectionFactory;
 import org.eclipse.jetty.server.Server;
 
 import static com.envimate.httpmate.jetty.JettyEndpointHandler.jettyEndpointHandler;
@@ -37,6 +40,8 @@ public final class JettyEndpoint implements AutoCloseable {
             final Server server;
             try {
                 server = new Server(port);
+                final HttpConnectionFactory connectionFactory = extractConnectionFactory(server);
+                connectionFactory.getHttpConfiguration().setFormEncodedMethods();
                 server.setHandler(jettyEndpointHandler(httpMate));
                 server.start();
             } catch (final Exception e) {
@@ -53,5 +58,18 @@ public final class JettyEndpoint implements AutoCloseable {
         } catch (final Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private static HttpConnectionFactory extractConnectionFactory(final Server server) {
+        final Connector[] connectors = server.getConnectors();
+        if (connectors.length != 1) {
+            throw new UnsupportedOperationException("Jetty does not behave as expected");
+        }
+        final Connector connector = connectors[0];
+        final ConnectionFactory connectionFactory = connector.getDefaultConnectionFactory();
+        if (!(connectionFactory instanceof HttpConnectionFactory)) {
+            throw new UnsupportedOperationException("Jetty does not behave as expected");
+        }
+        return (HttpConnectionFactory) connectionFactory;
     }
 }

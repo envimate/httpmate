@@ -42,9 +42,9 @@ public final class LoggerHandler implements Handler {
 
     @Override
     public void handle(final MetaData metaData) {
-        final String message = metaData.get(BODY_STRING);
+        final String message = metaData.get(REQUEST_BODY_STRING);
         final Logger logger = metaData.get(LOGGER);
         logger.log(message, metaData);
-        metaData.set(RESPONSE_STRING, "success");
+        metaData.set(RESPONSE_BODY_STRING, "success");
     }
 }

@@ -59,10 +59,16 @@ public final class ChainExtender {
         chainRegistry.createChain(name, defaultAction, exceptionAction, moduleIdentifier);
     }
 
-    public void addProcessor(final ChainName chainName,
-                             final Processor processor) {
+    public void prependProcessor(final ChainName chainName,
+                                 final Processor processor) {
         final RegisteredProcessor registeredProcessor = registeredProcessor(moduleIdentifier, processor);
-        chainRegistry.addProcessorToChain(chainName, registeredProcessor);
+        chainRegistry.prependProcessorToChain(chainName, registeredProcessor);
+    }
+
+    public void appendProcessor(final ChainName chainName,
+                                final Processor processor) {
+        final RegisteredProcessor registeredProcessor = registeredProcessor(moduleIdentifier, processor);
+        chainRegistry.appendProcessorToChain(chainName, registeredProcessor);
     }
 
     public <T> void routeIfEquals(final ChainName name,
@@ -108,5 +114,9 @@ public final class ChainExtender {
 
     public <T> Optional<T> getOptionalMetaDatum(final MetaDataKey<T> key) {
         return metaData.getOptional(key);
+    }
+
+    public <T> void addMetaDatum(final MetaDataKey<T> key, final T value) {
+        metaData.set(key, value);
     }
 }

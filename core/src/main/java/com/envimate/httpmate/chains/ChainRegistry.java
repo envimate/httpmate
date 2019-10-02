@@ -102,6 +102,12 @@ public class ChainRegistry {
         return metaData.getOptional(key);
     }
 
+    public <T> void addMetaDatum(final MetaDataKey<T> key, final T value) {
+        validateNotNull(key, "key");
+        validateNotNull(value, "value");
+        metaData.set(key, value);
+    }
+
     void createChain(final ChainName name,
                      final Action defaultAction,
                      final Action exceptionAction,
@@ -117,12 +123,20 @@ public class ChainRegistry {
         namedChains.put(name, chain);
     }
 
-    void addProcessorToChain(final ChainName chainName,
-                             final RegisteredProcessor processor) {
+    void prependProcessorToChain(final ChainName chainName,
+                                 final RegisteredProcessor processor) {
         validateNotNull(chainName, "chainName");
         validateNotNull(processor, "processor");
         final Chain chain = getChainFor(chainName);
-        chain.addProcessor(processor);
+        chain.prependProcessor(processor);
+    }
+
+    void appendProcessorToChain(final ChainName chainName,
+                                final RegisteredProcessor processor) {
+        validateNotNull(chainName, "chainName");
+        validateNotNull(processor, "processor");
+        final Chain chain = getChainFor(chainName);
+        chain.appendProcessor(processor);
     }
 
     void addRoutingRouleToChain(final ChainName chainName,

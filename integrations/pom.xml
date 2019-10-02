@@ -28,7 +28,7 @@
     <parent>
         <groupId>com.envimate</groupId>
         <artifactId>httpmate-parent</artifactId>
-        <version>1.0.24</version>
+        <version>1.0.25</version>
     </parent>
 
     <packaging>pom</packaging>
@@ -52,5 +52,6 @@
         <module>events</module>
         <module>usecases</module>
         <module>websockets-events</module>
+        <module>websockets-usecases</module>
     </modules>
 </project>

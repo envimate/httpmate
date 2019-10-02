@@ -22,14 +22,18 @@
 package com.envimate.httpmate.convenience.handler;
 
 import com.envimate.httpmate.chains.MetaData;
+import com.envimate.httpmate.http.headers.ContentType;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
 import java.io.InputStream;
+import java.util.Map;
 
 import static com.envimate.httpmate.HttpMateChainKeys.*;
+import static com.envimate.httpmate.http.Http.Headers.CONTENT_TYPE;
+import static com.envimate.httpmate.http.headers.ContentType.fromString;
 import static com.envimate.httpmate.util.Validators.validateNotNull;
 
 @ToString
@@ -47,12 +51,25 @@ public final class HttpResponse {
         metaData.get(RESPONSE_HEADERS).put(key, value);
     }
 
+    public void setContentType(final String contentType) {
+        setContentType(fromString(contentType));
+    }
+
+    public void setContentType(final ContentType contentType) {
+        validateNotNull(contentType, "contentType");
+        addHeader(CONTENT_TYPE, contentType.valueWithComment());
+    }
+
     public void setStatus(final int status) {
         metaData.set(RESPONSE_STATUS, status);
     }
 
+    public void setBody(final Map<String, Object> map) {
+        metaData.set(RESPONSE_BODY_MAP, map);
+    }
+
     public void setBody(final String body) {
-        metaData.set(RESPONSE_STRING, body);
+        metaData.set(RESPONSE_BODY_STRING, body);
     }
 
     public void setBody(final InputStream inputStream) {

@@ -23,10 +23,10 @@ package com.envimate.httpmate.tests.lowlevel.handlers;
 
 import com.envimate.httpmate.chains.MetaData;
 import com.envimate.httpmate.handler.Handler;
-import com.envimate.httpmate.http.ContentType;
+import com.envimate.httpmate.http.headers.ContentType;
 
-import static com.envimate.httpmate.HttpMateChainKeys.CONTENT_TYPE;
-import static com.envimate.httpmate.HttpMateChainKeys.RESPONSE_STRING;
+import static com.envimate.httpmate.HttpMateChainKeys.REQUEST_CONTENT_TYPE;
+import static com.envimate.httpmate.HttpMateChainKeys.RESPONSE_BODY_STRING;
 
 public final class EchoContentTypeHandler implements Handler {
 
@@ -36,7 +36,7 @@ public final class EchoContentTypeHandler implements Handler {
 
     @Override
     public void handle(final MetaData metaData) {
-        final ContentType contentType = metaData.get(CONTENT_TYPE);
-        metaData.set(RESPONSE_STRING, contentType.internalValueForMapping());
+        final ContentType contentType = metaData.get(REQUEST_CONTENT_TYPE);
+        metaData.set(RESPONSE_BODY_STRING, contentType.internalValueForMapping());
     }
 }

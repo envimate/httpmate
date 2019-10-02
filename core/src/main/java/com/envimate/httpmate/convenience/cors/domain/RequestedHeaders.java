@@ -30,7 +30,7 @@ import lombok.ToString;
 import java.util.List;
 import java.util.Optional;
 
-import static com.envimate.httpmate.HttpMateChainKeys.HEADERS;
+import static com.envimate.httpmate.HttpMateChainKeys.REQUEST_HEADERS;
 import static com.envimate.httpmate.convenience.cors.Cors.ACCESS_CONTROL_REQUEST_HEADERS;
 import static com.envimate.httpmate.util.Validators.validateNotNull;
 import static com.envimate.httpmate.util.Validators.validateNotNullNorEmpty;
@@ -48,7 +48,7 @@ public final class RequestedHeaders {
 
     public static RequestedHeaders load(final MetaData metaData) {
         validateNotNull(metaData, "metaData");
-        final String commaSeparatedHeaders = metaData.get(HEADERS).getHeader(ACCESS_CONTROL_REQUEST_HEADERS).orElse("");
+        final String commaSeparatedHeaders = metaData.get(REQUEST_HEADERS).getHeader(ACCESS_CONTROL_REQUEST_HEADERS).orElse("");
         validateNotNullNorEmpty(commaSeparatedHeaders, "commaSeparatedHeaders");
         final List<RequestedHeader> headers = stream(commaSeparatedHeaders.split(","))
                 .map(RequestedHeader::requestedHeader)

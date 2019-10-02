@@ -23,6 +23,7 @@ package com.envimate.httpmate;
 
 import com.envimate.httpmate.chains.MetaDataKey;
 import com.envimate.httpmate.handler.Handler;
+import com.envimate.httpmate.http.headers.ContentType;
 import com.envimate.httpmate.logger.Logger;
 import com.envimate.httpmate.path.Path;
 import com.envimate.httpmate.http.*;
@@ -46,22 +47,28 @@ public final class HttpMateChainKeys {
 
     public static final MetaDataKey<Boolean> IS_HTTP_REQUEST = metaDataKey("IS_HTTP_REQUEST");
 
-    public static final MetaDataKey<Map<String, String>> RAW_HEADERS = metaDataKey("RAW_HEADERS");
-    public static final MetaDataKey<Map<String, String>> RAW_QUERY_PARAMETERS = metaDataKey("RAW_QUERY_PARAMETERS");
+    public static final MetaDataKey<Map<String, String>> RAW_REQUEST_HEADERS = metaDataKey("RAW_REQUEST_HEADERS");
+    public static final MetaDataKey<Map<String, String>> RAW_REQUEST_QUERY_PARAMETERS =
+            metaDataKey("RAW_REQUEST_QUERY_PARAMETERS");
     public static final MetaDataKey<String> RAW_METHOD = metaDataKey("RAW_METHOD");
     public static final MetaDataKey<String> RAW_PATH = metaDataKey("RAW_PATH");
     public static final MetaDataKey<Path> PATH = metaDataKey("PATH");
     public static final MetaDataKey<PathParameters> PATH_PARAMETERS = metaDataKey("PATH_PARAMETERS");
     public static final MetaDataKey<QueryParameters> QUERY_PARAMETERS = metaDataKey("QUERY_PARAMETERS");
     public static final MetaDataKey<HttpRequestMethod> METHOD = metaDataKey("METHOD");
-    public static final MetaDataKey<InputStream> BODY_STREAM = metaDataKey("BODY_STREAM");
-    public static final MetaDataKey<String> BODY_STRING = metaDataKey("BODY_STRING");
-    public static final MetaDataKey<Map<String, Object>> BODY_MAP = metaDataKey("BODY_MAP");
-    public static final MetaDataKey<Headers> HEADERS = metaDataKey("HEADERS");
-    public static final MetaDataKey<ContentType> CONTENT_TYPE = metaDataKey("CONTENT_TYPE");
 
-    public static final MetaDataKey<String> RESPONSE_STRING = metaDataKey("RESPONSE_STRING");
+    public static final MetaDataKey<InputStream> REQUEST_BODY_STREAM = metaDataKey("REQUEST_BODY_STREAM");
+    public static final MetaDataKey<String> REQUEST_BODY_STRING = metaDataKey("REQUEST_BODY_STRING");
+    public static final MetaDataKey<Map<String, Object>> REQUEST_BODY_MAP = metaDataKey("REQUEST_BODY_MAP");
+
+    public static final MetaDataKey<ContentType> REQUEST_CONTENT_TYPE = metaDataKey("REQUEST_CONTENT_TYPE");
+    public static final MetaDataKey<Headers> REQUEST_HEADERS = metaDataKey("REQUEST_HEADERS");
+
+    public static final MetaDataKey<Map<String, Object>> RESPONSE_BODY_MAP = metaDataKey("RESPONSE_BODY_MAP");
+    public static final MetaDataKey<String> RESPONSE_BODY_STRING = metaDataKey("RESPONSE_BODY_STRING");
     public static final MetaDataKey<InputStream> RESPONSE_STREAM = metaDataKey("RESPONSE_STREAM");
-    public static final MetaDataKey<Integer> RESPONSE_STATUS = metaDataKey("RESPONSE_STATUS");
+
+    public static final MetaDataKey<ContentType> RESPONSE_CONTENT_TYPE = metaDataKey("RESPONSE_CONTENT_TYPE");
     public static final MetaDataKey<Map<String, String>> RESPONSE_HEADERS = metaDataKey("RESPONSE_HEADERS");
+    public static final MetaDataKey<Integer> RESPONSE_STATUS = metaDataKey("RESPONSE_STATUS");
 }

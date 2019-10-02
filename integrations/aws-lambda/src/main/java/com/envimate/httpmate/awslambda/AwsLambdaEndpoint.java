@@ -69,11 +69,11 @@ public final class AwsLambdaEndpoint {
         final Map<String, String> queryParameters = ofNullable(event.getQueryStringParameters()).orElseGet(HashMap::new);
 
         final MetaData metaData = emptyMetaData();
-        metaData.set(RAW_HEADERS, headers);
-        metaData.set(RAW_QUERY_PARAMETERS, queryParameters);
+        metaData.set(RAW_REQUEST_HEADERS, headers);
+        metaData.set(RAW_REQUEST_QUERY_PARAMETERS, queryParameters);
         metaData.set(RAW_METHOD, httpRequestMethod);
         metaData.set(RAW_PATH, path);
-        metaData.set(BODY_STREAM, bodyStream);
+        metaData.set(REQUEST_BODY_STREAM, bodyStream);
         metaData.set(CONTEXT_KEY, context);
         metaData.set(IS_HTTP_REQUEST, true);
 

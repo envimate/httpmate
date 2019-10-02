@@ -23,11 +23,13 @@ package com.envimate.httpmate.usecases;
 
 import com.envimate.httpmate.chains.ChainExtender;
 import com.envimate.httpmate.chains.ChainModule;
+import com.envimate.httpmate.chains.MetaDataKey;
 import com.envimate.httpmate.usecases.usecase.SerializerAndDeserializer;
 import com.envimate.messageMate.mapping.Demapifier;
 import com.envimate.messageMate.mapping.Mapifier;
 import com.envimate.messageMate.messageBus.MessageBus;
 import com.envimate.messageMate.processingContext.EventType;
+import com.envimate.messageMate.serializedMessageBus.SerializedMessageBus;
 import com.envimate.messageMate.useCases.building.DeserializationStep1Builder;
 import com.envimate.messageMate.useCases.building.ResponseSerializationStep1Builder;
 import com.envimate.messageMate.useCases.building.Step1Builder;
@@ -47,6 +49,7 @@ import java.util.function.BiPredicate;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
+import static com.envimate.httpmate.chains.MetaDataKey.metaDataKey;
 import static com.envimate.httpmate.events.EventModule.MESSAGE_BUS;
 import static com.envimate.httpmate.util.Validators.validateNotNull;
 import static com.envimate.messageMate.useCases.useCaseAdapter.UseCaseInvocationBuilder.anUseCaseAdapter;
@@ -56,14 +59,13 @@ import static java.util.Optional.ofNullable;
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class UseCasesModule implements ChainModule {
+    public static final MetaDataKey<SerializedMessageBus> SERIALIZED_MESSAGE_BUS = metaDataKey("SERIALIZED_MESSAGE_BUS");
+
     private UseCaseInstantiator useCaseInstantiator;
     private final Map<Class<?>, EventType> useCaseToEventMappings = new HashMap<>();
     private final List<Consumer<DeserializationStep1Builder>> deserializers = new LinkedList<>();
     private final List<Consumer<ResponseSerializationStep1Builder>> serializers = new LinkedList<>();
     private SerializerAndDeserializer serializerAndDeserializer;
-
-    private Demapifier<Object> defaultRequestMapper;
-    private Mapifier<Object> defaultResponseMapper;
 
     public static UseCasesModule useCasesModule() {
         return new UseCasesModule();
@@ -90,11 +92,6 @@ public final class UseCasesModule implements ChainModule {
                 .using((Demapifier<Object>) requestMapper));
     }
 
-    public void setDefaultRequestMapper(final Demapifier<Object> requestMapper) {
-        validateNotNull(requestMapper, "requestMapper");
-        this.defaultRequestMapper = requestMapper;
-    }
-
     public void addResponseSerializer(final Predicate<Object> filter,
                                       final Mapifier<Object> responseMapper) {
         validateNotNull(filter, "filter");
@@ -104,18 +101,12 @@ public final class UseCasesModule implements ChainModule {
                 .using(responseMapper));
     }
 
-    public void setDefaultResponseSerializer(final Mapifier<Object> defaultResponseMapper) {
-        this.defaultResponseMapper = defaultResponseMapper;
-    }
-
     void setSerializerAndDeserializer(final SerializerAndDeserializer serializerAndDeserializer) {
         this.serializerAndDeserializer = serializerAndDeserializer;
     }
 
     @Override
     public void register(final ChainExtender extender) {
-        serializerAndDeserializer.register(extender);
-
         final Step1Builder useCaseAdapterBuilder = anUseCaseAdapter();
 
         useCaseToEventMappings.forEach((useCase, eventType) -> {
@@ -133,16 +124,18 @@ public final class UseCasesModule implements ChainModule {
         deserializers.forEach(deserializer -> deserializer.accept(useCaseAdapterDeserializationStep1Builder));
         final ResponseSerializationStep1Builder useCaseAdapterResponseSerializationStep1Builder =
                 useCaseAdapterDeserializationStep1Builder
-                        .deserializeObjectsPerDefault(defaultRequestMapper);
+                        .deserializeObjectsPerDefault((targetType, map) ->
+                                serializerAndDeserializer.deserialize(targetType, map));
 
         serializers.forEach(serializer -> serializer.accept(useCaseAdapterResponseSerializationStep1Builder));
         final UseCaseAdapter useCaseAdapter = useCaseAdapterResponseSerializationStep1Builder
-                .serializingObjectsByDefaultUsing(defaultResponseMapper)
+                .serializingObjectsByDefaultUsing(object -> serializerAndDeserializer.serialize(object))
                 .puttingExceptionObjectNamedAsExceptionIntoResponseMapByDefault()
                 .buildAsStandaloneAdapter();
 
         final MessageBus messageBus = extender.getMetaDatum(MESSAGE_BUS);
 
-        useCaseAdapter.attachAndEnhance(messageBus);
+        final SerializedMessageBus serializedMessageBus = useCaseAdapter.attachAndEnhance(messageBus);
+        extender.addMetaDatum(SERIALIZED_MESSAGE_BUS, serializedMessageBus);
     }
 }

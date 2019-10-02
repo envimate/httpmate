@@ -36,9 +36,9 @@ public interface RequestToEventMapper {
             final Map<String, Object> eventMap = new HashMap<>();
             eventMap.putAll(metaData.get(QUERY_PARAMETERS).asStringMap());
             eventMap.putAll(metaData.get(PATH_PARAMETERS).asStringMap());
-            eventMap.putAll(metaData.get(HEADERS).asStringMap());
+            eventMap.putAll(metaData.get(REQUEST_HEADERS).asStringMap());
             metaData.getOptional(AUTHENTICATION_INFORMATION).ifPresent(info -> eventMap.put("AUTHENTICATION_INFORMATION", info));
-            metaData.getOptional(BODY_MAP).ifPresent(eventMap::putAll);
+            metaData.getOptional(REQUEST_BODY_MAP).ifPresent(eventMap::putAll);
             return eventMap;
         };
     }
@@ -46,7 +46,7 @@ public interface RequestToEventMapper {
     static RequestToEventMapper usingOnlyTheBody() {
         return metaData -> {
             final Map<String, Object> eventMap = new HashMap<>();
-            metaData.getOptional(BODY_MAP).ifPresent(eventMap::putAll);
+            metaData.getOptional(REQUEST_BODY_MAP).ifPresent(eventMap::putAll);
             return eventMap;
         };
     }

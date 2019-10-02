@@ -77,14 +77,14 @@ public final class WebSocketModule implements ChainModule {
     public void register(final ChainExtender extender) {
         final WebSocketRegistry registry = extender.getMetaDatum(WEBSOCKET_REGISTRY);
         createSkeleton(extender);
-        extender.addProcessor(INIT, webSocketInitializationProcessor(registry));
-        extender.addProcessor(WEBSOCKET_ESTABLISHMENT, createWebSocketProcessor(registry));
-        extender.addProcessor(DETERMINE_WEBSOCKET_TYPE, determineWebSocketTypeProcessor(webSocketMappings));
-        extender.addProcessor(WEBSOCKET_OPEN, activateWebSocketProcessor(registry));
-        extender.addProcessor(SEND_TO_WEBSOCKETS, sendToWebSocketsProcessor());
-        extender.addProcessor(WEBSOCKET_CLOSED, removeWebSocketFromRegistryProcessor(registry));
-        extender.addProcessor(WEBSOCKET_CLOSE, closeWebSocketProcessor(registry));
-        extender.addProcessor(WEBSOCKET_MESSAGE, handleNewWebSocketMessageProcessor(registry));
+        extender.appendProcessor(INIT, webSocketInitializationProcessor(registry));
+        extender.appendProcessor(WEBSOCKET_ESTABLISHMENT, createWebSocketProcessor(registry));
+        extender.appendProcessor(DETERMINE_WEBSOCKET_TYPE, determineWebSocketTypeProcessor(webSocketMappings));
+        extender.appendProcessor(WEBSOCKET_OPEN, activateWebSocketProcessor(registry));
+        extender.appendProcessor(SEND_TO_WEBSOCKETS, sendToWebSocketsProcessor());
+        extender.appendProcessor(WEBSOCKET_CLOSED, removeWebSocketFromRegistryProcessor(registry));
+        extender.appendProcessor(WEBSOCKET_CLOSE, closeWebSocketProcessor(registry));
+        extender.appendProcessor(WEBSOCKET_MESSAGE, handleNewWebSocketMessageProcessor(registry));
     }
 
     private static void createSkeleton(final ChainExtender extender) {

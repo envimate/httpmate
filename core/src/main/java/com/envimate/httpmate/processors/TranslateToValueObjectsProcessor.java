@@ -24,7 +24,7 @@ package com.envimate.httpmate.processors;
 import com.envimate.httpmate.chains.MetaData;
 import com.envimate.httpmate.chains.Processor;
 import com.envimate.httpmate.http.Http;
-import com.envimate.httpmate.http.ContentType;
+import com.envimate.httpmate.http.headers.ContentType;
 import com.envimate.httpmate.http.Headers;
 import com.envimate.httpmate.http.QueryParameters;
 import lombok.AccessLevel;
@@ -36,7 +36,7 @@ import java.util.Map;
 
 import static com.envimate.httpmate.HttpMateChainKeys.*;
 import static com.envimate.httpmate.path.Path.path;
-import static com.envimate.httpmate.http.ContentType.fromString;
+import static com.envimate.httpmate.http.headers.ContentType.fromString;
 import static com.envimate.httpmate.http.Headers.headers;
 import static com.envimate.httpmate.http.HttpRequestMethod.parse;
 import static com.envimate.httpmate.http.QueryParameters.queryParameters;
@@ -52,13 +52,13 @@ public final class TranslateToValueObjectsProcessor implements Processor {
 
     @Override
     public void apply(final MetaData metaData) {
-        final Map<String, String> rawHeaders = metaData.get(RAW_HEADERS);
+        final Map<String, String> rawHeaders = metaData.get(RAW_REQUEST_HEADERS);
         final Headers headers = headers(rawHeaders);
-        metaData.set(HEADERS, headers);
+        metaData.set(REQUEST_HEADERS, headers);
         final ContentType contentType = fromString(headers.getHeader(Http.Headers.CONTENT_TYPE));
-        metaData.set(CONTENT_TYPE, contentType);
+        metaData.set(REQUEST_CONTENT_TYPE, contentType);
 
-        final Map<String, String> rawQueryParameters = metaData.get(RAW_QUERY_PARAMETERS);
+        final Map<String, String> rawQueryParameters = metaData.get(RAW_REQUEST_QUERY_PARAMETERS);
         final QueryParameters queryParameters = queryParameters(rawQueryParameters);
         metaData.set(QUERY_PARAMETERS, queryParameters);
 

@@ -41,6 +41,7 @@ public final class HttpMateChains {
     public static final ChainName VALIDATION = chainName("VALIDATION");
     public static final ChainName PREPARE_RESPONSE = chainName("PREPARE_RESPONSE");
     public static final ChainName INVOKE_HANDLER = chainName("INVOKE_HANDLER");
+    public static final ChainName POST_INVOKE = chainName("POST_INVOKE");
 
     public static final ChainName EXCEPTION_OCCURRED = chainName("EXCEPTION_OCCURRED");
     public static final ChainName PREPARE_EXCEPTION_RESPONSE = chainName("PREPARE_EXCEPTION_RESPONSE");

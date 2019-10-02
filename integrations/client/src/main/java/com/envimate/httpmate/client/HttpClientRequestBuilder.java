@@ -21,10 +21,12 @@
 
 package com.envimate.httpmate.client;
 
-import com.envimate.httpmate.client.requestbuilder.*;
+import com.envimate.httpmate.client.body.Body;
+import com.envimate.httpmate.client.body.multipart.Part;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -34,53 +36,72 @@ import static com.envimate.httpmate.client.HeaderValue.headerValue;
 import static com.envimate.httpmate.client.HttpClientRequest.httpClientRequest;
 import static com.envimate.httpmate.client.QueryParameterKey.queryParameterKey;
 import static com.envimate.httpmate.client.QueryParameterValue.queryParameterValue;
+import static com.envimate.httpmate.client.body.Body.bodyWithoutContentType;
+import static com.envimate.httpmate.client.body.multipart.MultipartBodyCreator.createMultipartBody;
+import static com.envimate.httpmate.util.Streams.stringToInputStream;
+import static com.envimate.httpmate.util.Validators.validateNotNullNorEmpty;
 
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-public final class HttpClientRequestBuilder implements PathStage, BodyStage, HeadersAndQueryParametersAndMappingStage {
+public final class HttpClientRequestBuilder<T> {
     private final String method;
-    private String path;
+    private final String path;
     private Body body;
     private final Map<HeaderKey, HeaderValue> headers = new HashMap<>();
     private final Map<QueryParameterKey, QueryParameterValue> explicitQueryParameters = new HashMap<>();
+    private Class<T> targetType;
 
-    public static PathStage httpClientRequestBuilderImplementation(final String method) {
-        return new HttpClientRequestBuilder(method);
+    static HttpClientRequestBuilder<SimpleHttpResponseObject> httpClientRequestBuilderImplementation(
+            final String method, final String path) {
+        validateNotNullNorEmpty(method, "method");
+        validateNotNullNorEmpty(path, "path");
+        final HttpClientRequestBuilder<?> httpClientRequestBuilder = new HttpClientRequestBuilder<>(method, path);
+        return httpClientRequestBuilder.mappedTo(SimpleHttpResponseObject.class);
     }
 
-    @Override
-    public BodyStage toThePath(final String path) {
-        this.path = path;
-        return this;
+    public HttpClientRequestBuilder<T> withAMultipartBodyWithTheParts(final Part... parts) {
+        return withTheBody(createMultipartBody(parts));
     }
 
-    @Override
-    public HeadersAndQueryParametersAndMappingStage withoutABody() {
-        this.body = null;
-        return this;
+    public HttpClientRequestBuilder<T> withTheBody(final String body) {
+        return withTheBody(stringToInputStream(body));
     }
 
-    @Override
-    public HeadersAndQueryParametersAndMappingStage withTheBody(final Body body) {
+    public HttpClientRequestBuilder<T> withTheBody(final InputStream body) {
+        return withTheBody(bodyWithoutContentType(() -> body));
+    }
+
+    public HttpClientRequestBuilder<T> withTheBody(final Body body) {
         this.body = body;
         return this;
     }
 
-    @Override
-    public HeadersAndQueryParametersAndMappingStage withHeader(final String key, final String value) {
+    public HttpClientRequestBuilder<T> withContentType(final String contentType) {
+        return withHeader("Content-type", contentType);
+    }
+
+    public HttpClientRequestBuilder<T> withHeader(final String key, final String value) {
         final HeaderKey headerKey = headerKey(key);
         final HeaderValue headerValue = headerValue(value);
         this.headers.put(headerKey, headerValue);
         return this;
     }
 
-    @Override
-    public HeadersAndQueryParametersAndMappingStage withQueryParameter(final String key, final String value) {
+    public HttpClientRequestBuilder<T> withQueryParameter(final String key, final String value) {
         this.explicitQueryParameters.put(queryParameterKey(key), queryParameterValue(value));
         return this;
     }
 
-    @Override
-    public <T> HttpClientRequest<T> mappedTo(final Class<T> targetType) {
+    public HttpClientRequestBuilder<String> mappedToString() {
+        return mappedTo(String.class);
+    }
+
+    @SuppressWarnings("unchecked")
+    public <X> HttpClientRequestBuilder<X> mappedTo(final Class<X> targetType) {
+        this.targetType = (Class<T>) targetType;
+        return (HttpClientRequestBuilder<X>) this;
+    }
+
+    HttpClientRequest<T> build() {
         return httpClientRequest(path, method, headers, explicitQueryParameters, Optional.ofNullable(body), targetType);
     }
 }

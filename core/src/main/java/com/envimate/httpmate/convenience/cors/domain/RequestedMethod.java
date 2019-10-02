@@ -32,7 +32,7 @@ import lombok.ToString;
 import java.util.List;
 import java.util.Objects;
 
-import static com.envimate.httpmate.HttpMateChainKeys.HEADERS;
+import static com.envimate.httpmate.HttpMateChainKeys.REQUEST_HEADERS;
 import static com.envimate.httpmate.http.HttpRequestMethod.*;
 import static com.envimate.httpmate.util.Validators.validateNotNull;
 import static com.envimate.httpmate.util.Validators.validateNotNullNorEmpty;
@@ -47,7 +47,7 @@ public final class RequestedMethod {
 
     public static RequestedMethod load(final MetaData metaData) {
         validateNotNull(metaData, "metaData");
-        final String method = metaData.get(HEADERS).getHeader(Cors.ACCESS_CONTROL_REQUEST_METHOD).orElseThrow();
+        final String method = metaData.get(REQUEST_HEADERS).getHeader(Cors.ACCESS_CONTROL_REQUEST_METHOD).orElseThrow();
         validateNotNullNorEmpty(method, "method");
         return new RequestedMethod(parse(method));
     }

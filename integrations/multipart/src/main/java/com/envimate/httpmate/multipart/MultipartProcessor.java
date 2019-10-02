@@ -23,7 +23,7 @@ package com.envimate.httpmate.multipart;
 
 import com.envimate.httpmate.chains.Processor;
 import com.envimate.httpmate.chains.MetaData;
-import com.envimate.httpmate.http.ContentType;
+import com.envimate.httpmate.http.headers.ContentType;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
@@ -31,8 +31,8 @@ import lombok.ToString;
 
 import java.io.InputStream;
 
-import static com.envimate.httpmate.HttpMateChainKeys.CONTENT_TYPE;
-import static com.envimate.httpmate.HttpMateChainKeys.BODY_STREAM;
+import static com.envimate.httpmate.HttpMateChainKeys.REQUEST_CONTENT_TYPE;
+import static com.envimate.httpmate.HttpMateChainKeys.REQUEST_BODY_STREAM;
 import static com.envimate.httpmate.multipart.MultipartChainKeys.MULTIPART_ITERATOR_BODY;
 import static com.envimate.httpmate.multipart.MultipartParser.parse;
 
@@ -47,8 +47,8 @@ public final class MultipartProcessor implements Processor {
 
     @Override
     public void apply(final MetaData metaData) {
-        final InputStream body = metaData.get(BODY_STREAM);
-        final ContentType contentType = metaData.get(CONTENT_TYPE);
+        final InputStream body = metaData.get(REQUEST_BODY_STREAM);
+        final ContentType contentType = metaData.get(REQUEST_CONTENT_TYPE);
         final MultipartIteratorBody multipartIteratorBody = parse(body, contentType);
         metaData.set(MULTIPART_ITERATOR_BODY, multipartIteratorBody);
     }

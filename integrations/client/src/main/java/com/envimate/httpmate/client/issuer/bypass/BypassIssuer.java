@@ -55,11 +55,11 @@ public final class BypassIssuer implements Issuer {
         final String fixedPath = basePath.concatenateWithStartingAndTrailingSlash(request.path());
 
         final MetaData metaData = emptyMetaData();
-        metaData.set(RAW_HEADERS, request.headers());
-        metaData.set(RAW_QUERY_PARAMETERS, request.queryParameters());
+        metaData.set(RAW_REQUEST_HEADERS, request.headers());
+        metaData.set(RAW_REQUEST_QUERY_PARAMETERS, request.queryParameters());
         metaData.set(RAW_METHOD, request.method());
         metaData.set(RAW_PATH, fixedPath);
-        request.body().ifPresent(inputStream -> metaData.set(BODY_STREAM, inputStream));
+        request.body().ifPresent(inputStream -> metaData.set(REQUEST_BODY_STREAM, inputStream));
         metaData.set(IS_HTTP_REQUEST, true);
 
         final SynchronizationWrapper<MetaData> wrapper = new SynchronizationWrapper<>();

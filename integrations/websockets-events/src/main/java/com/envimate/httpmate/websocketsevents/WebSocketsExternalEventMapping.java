@@ -38,7 +38,7 @@ import java.util.Optional;
 import java.util.function.BiConsumer;
 
 import static com.envimate.httpmate.chains.MetaData.emptyMetaData;
-import static com.envimate.httpmate.events.EventModule.EVENT_RETURN_VALUE;
+import static com.envimate.httpmate.events.EventModule.RECEIVED_EVENT;
 import static com.envimate.httpmate.util.Validators.validateNotNull;
 import static com.envimate.httpmate.websockets.WebsocketChainKeys.WEBSOCKET_REGISTRY;
 import static java.util.Optional.of;
@@ -68,7 +68,7 @@ public final class WebSocketsExternalEventMapping implements ExternalEventMappin
 
     @Override
     public void apply(final MetaData metaData) {
-        final Map<String, Object> event = metaData.get(EVENT_RETURN_VALUE).orElseThrow();
+        final Map<String, Object> event = metaData.get(RECEIVED_EVENT).orElseThrow();
         final WebSocketRegistry registry = metaData.get(WEBSOCKET_REGISTRY);
         final List<WebSocket> webSockets = registry.allActiveWebSockets().stream()
                 .filter(webSocket -> {
@@ -78,5 +78,9 @@ public final class WebSocketsExternalEventMapping implements ExternalEventMappin
                 })
                 .collect(toList());
         consumer.accept(webSockets, metaData);
+    }
+
+    @Override
+    public void handle(final Map<String, Object> event) {
     }
 }

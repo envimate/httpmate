@@ -46,7 +46,7 @@ public final class Application {
                 })
                 .get("/api/helloDirect", metaData -> {
                     final Optional<String> name = metaData.get(QUERY_PARAMETERS).getQueryParameter("name");
-                    metaData.set(RESPONSE_STRING, "Hello " + name.orElse("World!"));
+                    metaData.set(RESPONSE_BODY_STRING, "Hello " + name.orElse("World!"));
                     metaData.set(RESPONSE_STATUS, OK);
                 })
                 .thatIs()

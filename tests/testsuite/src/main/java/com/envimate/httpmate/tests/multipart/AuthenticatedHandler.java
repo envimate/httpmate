@@ -25,7 +25,7 @@ import com.envimate.httpmate.chains.MetaData;
 import com.envimate.httpmate.handler.Handler;
 
 import static com.envimate.httpmate.HttpMateChainKeys.AUTHENTICATION_INFORMATION;
-import static com.envimate.httpmate.HttpMateChainKeys.RESPONSE_STRING;
+import static com.envimate.httpmate.HttpMateChainKeys.RESPONSE_BODY_STRING;
 import static java.lang.String.format;
 
 public final class AuthenticatedHandler implements Handler {
@@ -37,6 +37,6 @@ public final class AuthenticatedHandler implements Handler {
     @Override
     public void handle(final MetaData metaData) {
         final String username = metaData.getAs(AUTHENTICATION_INFORMATION, String.class);
-        metaData.set(RESPONSE_STRING, format("Authenticated as: %s", username));
+        metaData.set(RESPONSE_BODY_STRING, format("Authenticated as: %s", username));
     }
 }

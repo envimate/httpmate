@@ -22,6 +22,7 @@
 package com.envimate.httpmate.events;
 
 import com.envimate.httpmate.chains.*;
+import com.envimate.httpmate.closing.ClosingActions;
 import com.envimate.httpmate.events.mapper.EventToResponseMapper;
 import com.envimate.httpmate.events.mapper.RequestToEventMapper;
 import com.envimate.httpmate.filtermap.FilterMapBuilder;
@@ -43,7 +44,9 @@ import static com.envimate.httpmate.chains.MetaData.emptyMetaData;
 import static com.envimate.httpmate.chains.MetaDataKey.metaDataKey;
 import static com.envimate.httpmate.chains.rules.Drop.drop;
 import static com.envimate.httpmate.chains.rules.Jump.jumpTo;
+import static com.envimate.httpmate.closing.ClosingActions.CLOSING_ACTIONS;
 import static com.envimate.httpmate.events.EventsChains.*;
+import static com.envimate.httpmate.events.mapper.EventToResponseMapper.byUsingTheReceivedEventAsBody;
 import static com.envimate.httpmate.events.mapper.RequestToEventMapper.byDirectlyMappingAllData;
 import static com.envimate.httpmate.events.processors.DetermineEventProcessor.determineEventProcessor;
 import static com.envimate.httpmate.events.processors.DispatchEventProcessor.dispatchEventProcessor;
@@ -65,9 +68,10 @@ public final class EventModule implements ChainModule {
     public static final MetaDataKey<Boolean> IS_EXTERNAL_EVENT = metaDataKey("IS_EXTERNAL_EVENT");
     public static final MetaDataKey<EventType> EVENT_TYPE = metaDataKey("EVENT_TYPE");
     public static final MetaDataKey<Map<String, Object>> EVENT = metaDataKey("EVENT");
-    public static final MetaDataKey<Optional<Map<String, Object>>> EVENT_RETURN_VALUE = metaDataKey("EVENT_RETURN_VALUE");
+    public static final MetaDataKey<Optional<Map<String, Object>>> RECEIVED_EVENT = metaDataKey("RECEIVED_EVENT");
 
     private volatile MessageBus messageBus;
+    private volatile boolean closeMessageBusOnClose = true;
     private final List<Generator<EventType>> eventTypeGenerators = new LinkedList<>();
     private final FilterMapBuilder<MetaData, RequestToEventMapper> requestToEventMappers = filterMapBuilder();
     private final FilterMapBuilder<MetaData, EventToResponseMapper> eventToResponseMappers = filterMapBuilder();
@@ -76,11 +80,16 @@ public final class EventModule implements ChainModule {
     public static EventModule eventModule() {
         final EventModule eventModule = new EventModule();
         eventModule.setDefaultRequestToEventMapper(byDirectlyMappingAllData());
+        eventModule.setDefaultEventToResponseMapper(byUsingTheReceivedEventAsBody());
         return eventModule;
     }
 
     public void setMessageBus(final MessageBus messageBus) {
         this.messageBus = messageBus;
+    }
+
+    public void setCloseMessageBusOnClose(final boolean closeMessageBusOnClose) {
+        this.closeMessageBusOnClose = closeMessageBusOnClose;
     }
 
     public void addRequestToEventMapper(final Predicate<MetaData> filter,
@@ -129,23 +138,23 @@ public final class EventModule implements ChainModule {
 
     @Override
     public void register(final ChainExtender extender) {
-        extender.addProcessor(DETERMINE_HANDLER, determineEventProcessor(generators(eventTypeGenerators)));
+        extender.appendProcessor(DETERMINE_HANDLER, determineEventProcessor(generators(eventTypeGenerators)));
 
         extender.routeIfSet(PREPARE_RESPONSE, jumpTo(MAP_REQUEST_TO_EVENT), EVENT_TYPE);
 
         extender.createChain(MAP_REQUEST_TO_EVENT, jumpTo(SUBMIT_EVENT), jumpTo(EXCEPTION_OCCURRED));
-        extender.addProcessor(MAP_REQUEST_TO_EVENT, mapToEventProcessor(requestToEventMappers.build()));
+        extender.appendProcessor(MAP_REQUEST_TO_EVENT, mapToEventProcessor(requestToEventMappers.build()));
 
         extender.createChain(SUBMIT_EVENT, jumpTo(MAP_EVENT_TO_RESPONSE), jumpTo(EXCEPTION_OCCURRED));
-        extender.addProcessor(SUBMIT_EVENT, dispatchEventProcessor(messageBus));
+        extender.appendProcessor(SUBMIT_EVENT, dispatchEventProcessor(messageBus));
 
-        extender.createChain(MAP_EVENT_TO_RESPONSE, jumpTo(POST_PROCESS), jumpTo(EXCEPTION_OCCURRED));
-        extender.addProcessor(MAP_EVENT_TO_RESPONSE, serializationProcessor(eventToResponseMappers.build()));
+        extender.createChain(MAP_EVENT_TO_RESPONSE, jumpTo(POST_INVOKE), jumpTo(EXCEPTION_OCCURRED));
+        extender.appendProcessor(MAP_EVENT_TO_RESPONSE, serializationProcessor(eventToResponseMappers.build()));
 
-        extender.addProcessor(PREPARE_EXCEPTION_RESPONSE, unwrapDispatchingExceptionProcessor());
+        extender.appendProcessor(PREPARE_EXCEPTION_RESPONSE, unwrapDispatchingExceptionProcessor());
 
         extender.createChain(EXTERNAL_EVENT, drop(), jumpTo(EXCEPTION_OCCURRED));
-        extender.addProcessor(EXTERNAL_EVENT, handleExternalEventProcessor(externalEventMappings));
+        extender.appendProcessor(EXTERNAL_EVENT, handleExternalEventProcessor(externalEventMappings));
 
         extender.routeIfFlagIsSet(INIT, jumpTo(EXTERNAL_EVENT), IS_EXTERNAL_EVENT);
 
@@ -155,6 +164,11 @@ public final class EventModule implements ChainModule {
 
         final ChainRegistry chainRegistry = extender.getMetaDatum(CHAIN_REGISTRY);
         registerEventHandlers(messageBus, chainRegistry);
+
+        if(closeMessageBusOnClose) {
+            final ClosingActions closingActions = chainRegistry.getMetaDatum(CLOSING_ACTIONS);
+            closingActions.addClosingAction(() -> messageBus.close());
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -162,7 +176,7 @@ public final class EventModule implements ChainModule {
                                        final ChainRegistry chainRegistry) {
         externalEventMappings.forEach((type, mapping) -> messageBus.subscribe(type, event -> {
             final MetaData metaData = emptyMetaData();
-            metaData.set(EVENT_RETURN_VALUE, of((Map<String, Object>) event));
+            metaData.set(RECEIVED_EVENT, of((Map<String, Object>) event));
             metaData.set(EVENT_TYPE, type);
             metaData.set(IS_EXTERNAL_EVENT, true);
             chainRegistry.putIntoChain(INIT, metaData, m -> {

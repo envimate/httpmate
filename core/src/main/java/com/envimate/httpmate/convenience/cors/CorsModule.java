@@ -55,7 +55,7 @@ public final class CorsModule implements ChainModule {
     public void register(final ChainExtender extender) {
         extender.createChain(CORS_CHAIN, jumpTo(POST_PROCESS), jumpTo(EXCEPTION_OCCURRED));
 
-        extender.addProcessor(CORS_CHAIN, preflightRequestProcessor(resourceSharingPolicy));
+        extender.appendProcessor(CORS_CHAIN, preflightRequestProcessor(resourceSharingPolicy));
 
         /*
         extender.addProcessor(CORS_CHAIN, metaData -> {
@@ -73,7 +73,7 @@ public final class CorsModule implements ChainModule {
 
         extender.routeIfEquals(PRE_PROCESS, jumpTo(CORS_CHAIN), METHOD, OPTIONS);
 
-        extender.addProcessor(PREPARE_RESPONSE, simpleCrossOriginRequestProcessor(resourceSharingPolicy));
+        extender.appendProcessor(PREPARE_RESPONSE, simpleCrossOriginRequestProcessor(resourceSharingPolicy));
 
         /*
         extender.addProcessor(PREPARE_RESPONSE, metaData -> {

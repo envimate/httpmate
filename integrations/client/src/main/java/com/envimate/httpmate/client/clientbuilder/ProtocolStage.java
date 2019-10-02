@@ -21,17 +21,18 @@
 
 package com.envimate.httpmate.client.clientbuilder;
 
+import com.envimate.httpmate.client.HttpMateClientBuilder;
 import com.envimate.httpmate.client.issuer.real.Protocol;
 
 public interface ProtocolStage {
 
-    default BasePathStage viaHttp() {
+    default HttpMateClientBuilder viaHttp() {
         return viaTheProtocol(Protocol.HTTP);
     }
 
-    default BasePathStage viaHttps() {
+    default HttpMateClientBuilder viaHttps() {
         return viaTheProtocol(Protocol.HTTPS);
     }
 
-    BasePathStage viaTheProtocol(Protocol protocol);
+    HttpMateClientBuilder viaTheProtocol(Protocol protocol);
 }

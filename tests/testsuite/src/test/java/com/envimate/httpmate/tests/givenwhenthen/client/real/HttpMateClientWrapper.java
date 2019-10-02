@@ -21,12 +21,11 @@
 
 package com.envimate.httpmate.tests.givenwhenthen.client.real;
 
+import com.envimate.httpmate.client.HttpClientRequestBuilder;
 import com.envimate.httpmate.client.HttpMateClient;
 import com.envimate.httpmate.client.SimpleHttpResponseObject;
+import com.envimate.httpmate.client.body.multipart.Part;
 import com.envimate.httpmate.client.issuer.real.Protocol;
-import com.envimate.httpmate.client.requestbuilder.BodyStage;
-import com.envimate.httpmate.client.requestbuilder.HeadersAndQueryParametersAndMappingStage;
-import com.envimate.httpmate.client.requestbuilder.multipart.Part;
 import com.envimate.httpmate.tests.givenwhenthen.builders.MultipartElement;
 import com.envimate.httpmate.tests.givenwhenthen.client.HttpClientResponse;
 import com.envimate.httpmate.tests.givenwhenthen.client.HttpClientWrapper;
@@ -36,12 +35,12 @@ import lombok.RequiredArgsConstructor;
 
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
+import java.util.function.Consumer;
 
-import static com.envimate.httpmate.client.HttpClientRequest.aRequestOfTheMethod;
+import static com.envimate.httpmate.client.HttpClientRequest.aRequest;
 import static com.envimate.httpmate.client.HttpMateClient.aHttpMateClientBypassingRequestsDirectlyTo;
+import static com.envimate.httpmate.client.body.multipart.Part.aPartWithTheControlName;
 import static com.envimate.httpmate.client.issuer.real.Protocol.valueOf;
-import static com.envimate.httpmate.client.requestbuilder.multipart.Part.aPartWithTheControlName;
 import static com.envimate.httpmate.tests.givenwhenthen.client.HttpClientResponse.httpClientResponse;
 
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
@@ -54,8 +53,8 @@ public final class HttpMateClientWrapper implements HttpClientWrapper {
         final HttpMateClient client = HttpMateClient.aHttpMateClientThatReusesConnectionsForTheHost(deployment.hostname())
                 .withThePort(deployment.port())
                 .viaTheProtocol(protocol)
-                .withTheBasePath(deployment.basePath())
-                .mappingToSimpleResponseObjects();
+                .withBasePath(deployment.basePath())
+                .build();
         return new HttpMateClientWrapper(client);
     }
 
@@ -64,15 +63,14 @@ public final class HttpMateClientWrapper implements HttpClientWrapper {
         final HttpMateClient client = HttpMateClient.aHttpMateClientForTheHost(deployment.hostname())
                 .withThePort(deployment.port())
                 .viaTheProtocol(protocol)
-                .withTheBasePath(deployment.basePath())
-                .mappingToSimpleResponseObjects();
+                .withBasePath(deployment.basePath())
+                .build();
         return new HttpMateClientWrapper(client);
     }
 
     static HttpClientWrapper bypassingHttpMateClientWrapper(final Deployment deployment) {
         final HttpMateClient client = aHttpMateClientBypassingRequestsDirectlyTo(deployment.httpMate())
-                .withoutABasePath()
-                .mappingToSimpleResponseObjects();
+                .build();
         return new HttpMateClientWrapper(client);
     }
 
@@ -80,7 +78,8 @@ public final class HttpMateClientWrapper implements HttpClientWrapper {
     public HttpClientResponse issueRequestWithoutBody(final String path,
                                                       final String method,
                                                       final Map<String, String> headers) {
-        return issueRequest(path, method, headers, BodyStage::withoutABody);
+        return issueRequest(path, method, headers, builder -> {
+        });
     }
 
     @Override
@@ -96,24 +95,24 @@ public final class HttpMateClientWrapper implements HttpClientWrapper {
                                                             final String method,
                                                             final Map<String, String> headers,
                                                             final List<MultipartElement> parts) {
-        return issueRequest(path, method, headers, bodyStage -> {
+        return issueRequest(path, method, headers, builder -> {
             final Part[] partsArray = parts.stream()
                     .map(part -> aPartWithTheControlName(part.controlName())
                             .withTheFileName(part.fileName().orElse(null))
                             .withTheContent(part.content()))
                     .toArray(Part[]::new);
-            return bodyStage.withAMultipartBodyWithTheParts(partsArray);
+            builder.withAMultipartBodyWithTheParts(partsArray);
         });
     }
 
     private HttpClientResponse issueRequest(final String path,
                                             final String method,
                                             final Map<String, String> headers,
-                                            final Function<BodyStage, HeadersAndQueryParametersAndMappingStage> bodyAppender) {
-        final BodyStage bodyStage = aRequestOfTheMethod(method).toThePath(path);
-        final HeadersAndQueryParametersAndMappingStage requestBuilder = bodyAppender.apply(bodyStage);
+                                            final Consumer<HttpClientRequestBuilder<SimpleHttpResponseObject>> bodyAppender) {
+        final HttpClientRequestBuilder<SimpleHttpResponseObject> requestBuilder = aRequest(method, path);
+        bodyAppender.accept(requestBuilder);
         headers.forEach(requestBuilder::withHeader);
-        final SimpleHttpResponseObject response = this.client.issue(requestBuilder.mappedTo(SimpleHttpResponseObject.class));
+        final SimpleHttpResponseObject response = this.client.issue(requestBuilder);
         return httpClientResponse(response.getStatusCode(), response.getHeaders(), response.getBody());
     }
 }

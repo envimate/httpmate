@@ -48,7 +48,7 @@ public final class ServletHandling {
                               final HttpServletResponse response) throws IOException {
         final MetaData metaData = extractMetaDataFromHttpServletRequest(request);
         final InputStream body = request.getInputStream();
-        metaData.set(BODY_STREAM, body);
+        metaData.set(REQUEST_BODY_STREAM, body);
         metaData.set(IS_HTTP_REQUEST, true);
 
         httpMate.handleRequest(metaData, httpResponse -> {
@@ -69,8 +69,8 @@ public final class ServletHandling {
         final Map<String, String> queryParameters = extractQueryParameters(request);
 
         final MetaData metaData = emptyMetaData();
-        metaData.set(RAW_HEADERS, headers);
-        metaData.set(RAW_QUERY_PARAMETERS, queryParameters);
+        metaData.set(RAW_REQUEST_HEADERS, headers);
+        metaData.set(RAW_REQUEST_QUERY_PARAMETERS, queryParameters);
         metaData.set(RAW_METHOD, method);
         metaData.set(RAW_PATH, path);
         return metaData;

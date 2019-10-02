@@ -27,13 +27,13 @@
     <parent>
         <groupId>com.envimate</groupId>
         <artifactId>envimate-opensource-parent</artifactId>
-        <version>1.0.21</version>
+        <version>1.0.23</version>
     </parent>
 
     <packaging>pom</packaging>
 
     <artifactId>httpmate-parent</artifactId>
-    <version>1.0.24</version>
+    <version>1.0.25</version>
 
     <name>HttpMate</name>
 

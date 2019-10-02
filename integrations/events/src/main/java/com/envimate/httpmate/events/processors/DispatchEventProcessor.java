@@ -67,7 +67,7 @@ public final class DispatchEventProcessor implements Processor {
                 throw eventDispatchingException(exception);
             } else {
                 final Map<String, Object> response = raw.getPayload();
-                metaData.set(EVENT_RETURN_VALUE, ofNullable(response));
+                metaData.set(RECEIVED_EVENT, ofNullable(response));
             }
         } catch (final InterruptedException e) {
             request.cancel(true);

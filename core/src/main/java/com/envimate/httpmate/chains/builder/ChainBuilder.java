@@ -86,6 +86,6 @@ public final class ChainBuilder {
                                     final Action exceptionAction,
                                     final List<? extends Processor> processors) {
         chainExtender.createChain(chainName, action, exceptionAction);
-        processors.forEach(processor -> chainExtender.addProcessor(chainName, processor));
+        processors.forEach(processor -> chainExtender.appendProcessor(chainName, processor));
     }
 }

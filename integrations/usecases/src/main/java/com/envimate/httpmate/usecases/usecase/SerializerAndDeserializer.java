@@ -24,7 +24,6 @@ package com.envimate.httpmate.usecases.usecase;
 import com.envimate.httpmate.chains.ChainExtender;
 import com.envimate.httpmate.chains.ChainModule;
 import com.envimate.httpmate.chains.DependencyRegistry;
-import com.envimate.httpmate.usecases.UseCasesModule;
 import com.envimate.messageMate.mapping.Demapifier;
 import com.envimate.messageMate.mapping.Mapifier;
 
@@ -44,9 +43,6 @@ public interface SerializerAndDeserializer extends Demapifier<Object>, Mapifier<
 
     @Override
     default void configure(final DependencyRegistry dependencyRegistry) {
-        final UseCasesModule useCasesModule = dependencyRegistry.getDependency(UseCasesModule.class);
-        useCasesModule.setDefaultRequestMapper(this);
-        useCasesModule.setDefaultResponseSerializer(this);
     }
 
     @Override

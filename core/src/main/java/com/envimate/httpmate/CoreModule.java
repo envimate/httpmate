@@ -23,6 +23,8 @@ package com.envimate.httpmate;
 
 import com.envimate.httpmate.chains.ChainExtender;
 import com.envimate.httpmate.chains.ChainModule;
+import com.envimate.httpmate.closing.ClosingAction;
+import com.envimate.httpmate.closing.ClosingActions;
 import com.envimate.httpmate.exceptions.ExceptionMapper;
 import com.envimate.httpmate.exceptions.ExceptionSerializer;
 import com.envimate.httpmate.filtermap.FilterMapBuilder;
@@ -44,6 +46,8 @@ import static com.envimate.httpmate.HttpMateChains.*;
 import static com.envimate.httpmate.chains.builder.ChainBuilder.extendAChainWith;
 import static com.envimate.httpmate.chains.rules.Consume.consume;
 import static com.envimate.httpmate.chains.rules.Jump.jumpTo;
+import static com.envimate.httpmate.closing.ClosingActions.CLOSING_ACTIONS;
+import static com.envimate.httpmate.closing.ClosingActions.closingActions;
 import static com.envimate.httpmate.exceptions.DefaultExceptionMapper.theDefaultExceptionMapper;
 import static com.envimate.httpmate.exceptions.ExceptionSerializer.exceptionSerializer;
 import static com.envimate.httpmate.filtermap.FilterMapBuilder.filterMapBuilder;
@@ -69,6 +73,7 @@ public final class CoreModule implements ChainModule {
     private ResponseTemplate responseTemplate = ResponseTemplate.EMPTY_RESPONSE_TEMPLATE;
     private final FilterMapBuilder<Throwable, ExceptionMapper<Throwable>> exceptionMappers = filterMapBuilder();
     private Logger logger = stdoutAndStderrLogger();
+    private final ClosingActions closingActions = closingActions();
 
     public static CoreModule coreModule() {
         final CoreModule coreModule = new CoreModule();
@@ -86,6 +91,11 @@ public final class CoreModule implements ChainModule {
     public void setLogger(final Logger logger) {
         validateNotNull(logger, "logger");
         this.logger = logger;
+    }
+
+    public void addClosingAction(final ClosingAction closingAction) {
+        validateNotNull(closingAction, "closingAction");
+        closingActions.addClosingAction(closingAction);
     }
 
     public void setResponseTemplate(final ResponseTemplate responseTemplate) {
@@ -117,6 +127,7 @@ public final class CoreModule implements ChainModule {
                 .append(DETERMINE_HANDLER, determineHandlerProcessor(generators(handlers)))
                 .append(PREPARE_RESPONSE, initResponseProcessor(), applyResponseTemplateProcessor(responseTemplate))
                 .append(INVOKE_HANDLER, invokeHandlerProcessor())
+                .append(POST_INVOKE)
                 .withTheExceptionChain(EXCEPTION_OCCURRED)
                 .withTheFinalAction(jumpTo(POST_PROCESS));
 
@@ -128,8 +139,10 @@ public final class CoreModule implements ChainModule {
                 .withTheFinalAction(jumpTo(POST_PROCESS));
 
         extender.createChain(POST_PROCESS, consume(), jumpTo(ERROR));
-        extender.addProcessor(POST_PROCESS, stringBodyToStreamProcessor());
+        extender.appendProcessor(POST_PROCESS, stringBodyToStreamProcessor());
 
         extender.createChain(ERROR, consume(), consume());
+
+        extender.addMetaDatum(CLOSING_ACTIONS, closingActions);
     }
 }

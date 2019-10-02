@@ -32,6 +32,7 @@ import java.util.Optional;
 import static com.envimate.httpmate.util.Validators.validateNotNull;
 import static java.lang.String.format;
 import static java.util.Optional.ofNullable;
+import static java.util.stream.Collectors.joining;
 
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
@@ -85,5 +86,11 @@ public final class MetaData {
     @Override
     public String toString() {
         return map.toString();
+    }
+
+    public String prettyPrint() {
+        return map.entrySet().stream()
+                .map(entry -> format("%s = %s", entry.getKey(), entry.getValue()))
+                .collect(joining("\n"));
     }
 }

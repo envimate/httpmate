@@ -30,8 +30,8 @@ import lombok.ToString;
 
 import java.io.InputStream;
 
-import static com.envimate.httpmate.HttpMateChainKeys.BODY_STREAM;
-import static com.envimate.httpmate.HttpMateChainKeys.BODY_STRING;
+import static com.envimate.httpmate.HttpMateChainKeys.REQUEST_BODY_STREAM;
+import static com.envimate.httpmate.HttpMateChainKeys.REQUEST_BODY_STRING;
 import static com.envimate.httpmate.util.Streams.inputStreamToString;
 
 @ToString
@@ -45,8 +45,8 @@ public final class StreamToStringProcessor implements Processor {
 
     @Override
     public void apply(final MetaData metaData) {
-        final InputStream inputStream = metaData.get(BODY_STREAM);
+        final InputStream inputStream = metaData.get(REQUEST_BODY_STREAM);
         final String bodyString = inputStreamToString(inputStream);
-        metaData.set(BODY_STRING, bodyString);
+        metaData.set(REQUEST_BODY_STRING, bodyString);
     }
 }

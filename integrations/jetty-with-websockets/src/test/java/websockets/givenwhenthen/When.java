@@ -21,8 +21,9 @@
 
 package websockets.givenwhenthen;
 
+import com.envimate.httpmate.client.HttpClientRequestBuilder;
 import com.envimate.httpmate.client.HttpMateClient;
-import com.envimate.httpmate.client.requestbuilder.HeadersAndQueryParametersAndMappingStage;
+import com.envimate.httpmate.client.SimpleHttpResponseObject;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
@@ -39,7 +40,7 @@ import java.util.Map;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
-import static com.envimate.httpmate.client.HttpClientRequest.aGetRequest;
+import static com.envimate.httpmate.client.HttpClientRequest.aGetRequestToThePath;
 import static com.envimate.httpmate.client.HttpMateClient.aHttpMateClientForTheHost;
 import static com.envimate.httpmate.websockets.WebSocketMetrics.NUMBER_OF_ACTIVE_WEB_SOCKETS;
 import static java.lang.String.format;
@@ -115,9 +116,8 @@ public final class When {
             final HttpMateClient httpMateClient = aHttpMateClientForTheHost("localhost")
                     .withThePort(port)
                     .viaHttp()
-                    .withoutABasePath()
-                    .mappingResponseObjectsToStrings();
-            final HeadersAndQueryParametersAndMappingStage builder = aGetRequest().toThePath(path).withoutABody();
+                    .build();
+            final HttpClientRequestBuilder<SimpleHttpResponseObject> builder = aGetRequestToThePath(path);
             headersToMap(headers).forEach(builder::withHeader);
             final String response = httpMateClient.issue(builder.mappedTo(String.class));
             reportBuilder.reportNormalResponseBody(response);

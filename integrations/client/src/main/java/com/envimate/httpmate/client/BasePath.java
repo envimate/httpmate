@@ -46,7 +46,7 @@ public final class BasePath {
     }
 
     public String concatenateWithStartingAndTrailingSlash(final String subPath) {
-        final StringJoiner pathJoiner = new StringJoiner("/", "/", "/");
+        final StringJoiner pathJoiner = new StringJoiner("/", "/", "");
         elements.forEach(pathJoiner::add);
         final List<String> subElements = splitPath(subPath);
         subElements.forEach(pathJoiner::add);

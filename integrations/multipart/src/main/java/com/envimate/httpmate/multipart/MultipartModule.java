@@ -26,7 +26,7 @@ import com.envimate.httpmate.chains.ChainExtender;
 import com.envimate.httpmate.chains.ChainModule;
 import com.envimate.httpmate.chains.ChainName;
 import com.envimate.httpmate.chains.Configurator;
-import com.envimate.httpmate.http.ContentType;
+import com.envimate.httpmate.http.headers.ContentType;
 import com.envimate.httpmate.http.Http;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
@@ -37,7 +37,7 @@ import static com.envimate.httpmate.HttpMateChains.*;
 import static com.envimate.httpmate.chains.ChainName.chainName;
 import static com.envimate.httpmate.chains.Configurator.toUseModules;
 import static com.envimate.httpmate.chains.rules.Jump.jumpTo;
-import static com.envimate.httpmate.http.ContentType.fromString;
+import static com.envimate.httpmate.http.headers.ContentType.fromString;
 import static com.envimate.httpmate.multipart.MultipartProcessor.multipartProcessor;
 import static java.lang.String.format;
 
@@ -57,9 +57,9 @@ public final class MultipartModule implements ChainModule {
     @Override
     public void register(final ChainExtender extender) {
         extender.createChain(PROCESS_BODY_MULTIPART, jumpTo(DETERMINE_HANDLER), jumpTo(EXCEPTION_OCCURRED));
-        extender.addProcessor(PROCESS_BODY_MULTIPART, multipartProcessor());
+        extender.appendProcessor(PROCESS_BODY_MULTIPART, multipartProcessor());
 
-        extender.routeIf(PROCESS_BODY, jumpTo(PROCESS_BODY_MULTIPART), HttpMateChainKeys.CONTENT_TYPE,
+        extender.routeIf(PROCESS_BODY, jumpTo(PROCESS_BODY_MULTIPART), HttpMateChainKeys.REQUEST_CONTENT_TYPE,
                 contentType -> contentType.equals(CONTENT_TYPE), RULE_DESCRIPTION);
     }
 }

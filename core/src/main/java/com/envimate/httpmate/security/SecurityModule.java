@@ -80,10 +80,10 @@ public final class SecurityModule implements ChainModule {
     @Override
     public void register(final ChainExtender extender) {
         authenticators.forEach((chainName, authenticatorsForChain) ->
-                authenticatorsForChain.forEach(authenticator -> extender.addProcessor(chainName, authenticator)));
+                authenticatorsForChain.forEach(authenticator -> extender.appendProcessor(chainName, authenticator)));
         authorizers.forEach((chainName, authorizersForChain) ->
-                authorizersForChain.forEach(authorizer -> extender.addProcessor(chainName, authorizer)));
+                authorizersForChain.forEach(authorizer -> extender.appendProcessor(chainName, authorizer)));
         filters.forEach((chainName, filtersForChain) ->
-                filtersForChain.forEach(filter -> extender.addProcessor(chainName, filter)));
+                filtersForChain.forEach(filter -> extender.appendProcessor(chainName, filter)));
     }
 }

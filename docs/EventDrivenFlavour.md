@@ -1,6 +1,6 @@
 # Event driven
 The use-case driven flavour allows you to architecturally scale your application by giving you a way to configure http handling once and
-then just adding new use-cases without having to add new infrastructure configuration.
+then just add new use-cases without having to add new infrastructure configuration.
 The event-driven flavour will keep these properties, but will additionally allow you to scale technically. It allows you
 to distribute HttpMate over different nodes by dispatching http requests to a MessageBus. Example:
 
@@ -30,11 +30,13 @@ given this body:
   "state": "NY"
 }
 ```
-and the content type `application/json`, HttpMate will issue an event that is equals to a `String` map with
+and the content type `application/json`, HttpMate will issue an event that is equal to a `String` map with
 these entries:
 ```
 "name" = "joe doe"
 "state" = "NY"
 ```
 
-## Subscribing to events 
+## Subscribing to events
+Sometimes you want to react to incoming events. In order to do this,
+  

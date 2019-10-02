@@ -21,11 +21,18 @@
 
 package com.envimate.httpmate.client;
 
+import com.envimate.httpmate.util.describing.MapDumper;
 import lombok.AccessLevel;
+import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
+import lombok.ToString;
 
 import java.util.Map;
 
+import static java.lang.String.valueOf;
+
+@ToString
+@EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class SimpleHttpResponseObject {
     private final int statusCode;
@@ -48,5 +55,12 @@ public final class SimpleHttpResponseObject {
 
     public String getBody() {
         return body;
+    }
+
+    public String describe() {
+        final Map<String, Object> map = Map.of("Status Code", valueOf(statusCode),
+                "Headers", headers,
+                "Body", body);
+        return MapDumper.describe("HTTP Response", map);
     }
 }

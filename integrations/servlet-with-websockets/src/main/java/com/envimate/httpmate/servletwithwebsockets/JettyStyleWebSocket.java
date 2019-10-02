@@ -33,7 +33,7 @@ import org.eclipse.jetty.websocket.api.WebSocketListener;
 
 import java.io.IOException;
 
-import static com.envimate.httpmate.HttpMateChainKeys.BODY_STREAM;
+import static com.envimate.httpmate.HttpMateChainKeys.REQUEST_BODY_STREAM;
 import static com.envimate.httpmate.chains.MetaData.emptyMetaData;
 import static com.envimate.httpmate.util.Streams.stringToInputStream;
 import static com.envimate.httpmate.util.Validators.validateNotNull;
@@ -79,7 +79,7 @@ public final class JettyStyleWebSocket implements WebSocketListener, WebSocketDe
     public void onWebSocketText(final String text) {
         final MetaData metaData = emptyMetaData();
         metaData.set(WEBSOCKET_ID, id);
-        metaData.set(BODY_STREAM, stringToInputStream(text));
+        metaData.set(REQUEST_BODY_STREAM, stringToInputStream(text));
         metaData.set(IS_WEBSOCKET_MESSAGE, true);
         httpMate.handleRequest(metaData, m -> {
         });

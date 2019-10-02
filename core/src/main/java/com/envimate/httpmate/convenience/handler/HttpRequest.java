@@ -60,15 +60,15 @@ public final class HttpRequest {
     }
 
     public Headers headers() {
-        return metaData.get(HEADERS);
+        return metaData.get(REQUEST_HEADERS);
     }
 
     public Optional<String> bodyString() {
-        return metaData.getOptional(BODY_STRING);
+        return metaData.getOptional(REQUEST_BODY_STRING);
     }
 
     public InputStream bodyStream() {
-        return metaData.get(BODY_STREAM);
+        return metaData.get(REQUEST_BODY_STREAM);
     }
 
     public Optional<Object> authenticationInformation() {
@@ -76,6 +76,6 @@ public final class HttpRequest {
     }
 
     public Optional<Map<String, Object>> bodyAsMap() {
-        return metaData.getOptional(BODY_MAP);
+        return metaData.getOptional(REQUEST_BODY_MAP);
     }
 }

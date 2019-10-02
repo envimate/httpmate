@@ -23,6 +23,15 @@ package com.envimate.httpmate.events.mapper;
 
 import com.envimate.httpmate.chains.MetaData;
 
+import java.util.Map;
+
+import static com.envimate.httpmate.HttpMateChainKeys.RESPONSE_BODY_MAP;
+
 public interface EventToResponseMapper {
-    void map(Object event, MetaData metaData);
+
+    static EventToResponseMapper byUsingTheReceivedEventAsBody() {
+        return (event, metaData) -> metaData.set(RESPONSE_BODY_MAP, event);
+    }
+
+    void map(Map<String, Object> event, MetaData metaData);
 }

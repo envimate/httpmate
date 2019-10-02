@@ -21,6 +21,6 @@
 
 package com.envimate.httpmate.client;
 
-public interface ClientResponseMapper {
-    <T> T map(RawClientResponse response, Class<T> targetType);
+public interface ClientResponseMapper<T> {
+    T map(RawClientResponse response, Class<T> targetType);
 }

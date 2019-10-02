@@ -41,12 +41,12 @@ import static com.envimate.httpmate.HttpMate.anHttpMateConfiguredAs;
 import static com.envimate.httpmate.HttpMateChainKeys.*;
 import static com.envimate.httpmate.convenience.configurators.Configurators.toLogUsing;
 import static com.envimate.httpmate.events.EventDrivenBuilder.EVENT_DRIVEN;
-import static com.envimate.httpmate.http.ContentType.json;
+import static com.envimate.httpmate.http.headers.ContentType.json;
 import static com.envimate.httpmate.http.HttpRequestMethod.GET;
 import static com.envimate.httpmate.logger.Loggers.stderrLogger;
 import static com.envimate.httpmate.security.SecurityConfigurators.toAuthenticateRequests;
 import static com.envimate.httpmate.security.SecurityConfigurators.toAuthorizeRequests;
-import static com.envimate.httpmate.unpacking.BodyMapParsingModule.toParseBodiesBy;
+import static com.envimate.httpmate.marshalling.MarshallingModule.toMarshallBodiesBy;
 import static com.envimate.httpmate.websockets.WebSocketsConfigurator.toUseWebSockets;
 import static com.envimate.httpmate.websocketsevents.Conditions.forwardingItToAllWebSocketsThat;
 import static com.envimate.messageMate.internal.pipe.configuration.AsynchronousConfiguration.constantPoolSizeAsynchronousPipeConfiguration;
@@ -75,7 +75,7 @@ public final class ChatConfiguration {
                 .build();
 
         final UserRepository userRepository = userRepository();
-        final Authenticator authenticator = metaData -> metaData.get(HEADERS)
+        final Authenticator authenticator = metaData -> metaData.get(REQUEST_HEADERS)
                 .getHeader("user")
                 .map(Username::username)
                 .map(userRepository::byName);
@@ -106,17 +106,16 @@ public final class ChatConfiguration {
                     return Objects.equals(event.get("recipient"), username);
                 }))
                 .mappingResponsesUsing((event, metaData) -> {
-                    final Map<String, Object> map = (Map<String, Object>) event;
-                    final String content = (String) map.get("content");
-                    metaData.set(RESPONSE_STRING, content);
+                    final String content = (String) event.get("content");
+                    metaData.set(RESPONSE_BODY_STRING, content);
                 })
                 .configured(toAuthenticateRequests().beforeBodyProcessing().using(authenticator))
                 .configured(toAuthorizeRequests().beforeBodyProcessing().using(authorizer))
                 .configured(toLogUsing(stderrLogger()))
                 .configured(toUseWebSockets()
                         .acceptingWebSocketsToThePath("/subscribe").saving(AUTHENTICATION_INFORMATION))
-                .configured(toParseBodiesBy()
-                        .parsingContentType(json()).with(body -> new Gson().fromJson(body, Map.class))
+                .configured(toMarshallBodiesBy()
+                        .unmarshallingContentTypeInRequests(json()).with(body -> new Gson().fromJson(body, Map.class))
                         .usingTheDefaultContentType(json()))
                 .build();
 

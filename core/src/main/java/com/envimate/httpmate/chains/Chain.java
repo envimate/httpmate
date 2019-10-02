@@ -52,7 +52,12 @@ public class Chain {
         return new Chain(defaultAction, exceptionAction, new LinkedList<>(), new LinkedList<>(), name, moduleIdentifier);
     }
 
-    void addProcessor(final RegisteredProcessor processor) {
+    void prependProcessor(final RegisteredProcessor processor) {
+        validateNotNull(processor, "processor");
+        processors.add(0, processor);
+    }
+
+    void appendProcessor(final RegisteredProcessor processor) {
         validateNotNull(processor, "processor");
         processors.add(processor);
     }

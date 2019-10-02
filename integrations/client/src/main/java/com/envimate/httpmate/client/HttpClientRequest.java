@@ -21,8 +21,7 @@
 
 package com.envimate.httpmate.client;
 
-import com.envimate.httpmate.client.requestbuilder.Body;
-import com.envimate.httpmate.client.requestbuilder.PathStage;
+import com.envimate.httpmate.client.body.Body;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 
@@ -46,28 +45,28 @@ public final class HttpClientRequest<T> {
     private final InputStream body;
     private final Class<T> targetType;
 
-    public static PathStage aGetRequest() {
-        return aRequestOfTheMethod("GET");
+    public static HttpClientRequestBuilder<SimpleHttpResponseObject> aGetRequestToThePath(final String path) {
+        return aRequest("GET", path);
     }
 
-    public static PathStage aPostRequest() {
-        return aRequestOfTheMethod("POST");
+    public static HttpClientRequestBuilder<SimpleHttpResponseObject> aPostRequestToThePath(final String path) {
+        return aRequest("POST", path);
     }
 
-    public static PathStage aPutRequest() {
-        return aRequestOfTheMethod("PUT");
+    public static HttpClientRequestBuilder<SimpleHttpResponseObject> aPutRequestToThePath(final String path) {
+        return aRequest("PUT", path);
     }
 
-    public static PathStage aDeleteRequest() {
-        return aRequestOfTheMethod("DELETE");
+    public static HttpClientRequestBuilder<SimpleHttpResponseObject> aDeleteRequestToThePath(final String path) {
+        return aRequest("DELETE", path);
     }
 
-    public static PathStage aOptionsRequest() {
-        return aRequestOfTheMethod("OPTIONS");
+    public static HttpClientRequestBuilder<SimpleHttpResponseObject> anOptionsRequestToThePath(final String path) {
+        return aRequest("OPTIONS", path);
     }
 
-    public static PathStage aRequestOfTheMethod(final String method) {
-        return httpClientRequestBuilderImplementation(method);
+    public static HttpClientRequestBuilder<SimpleHttpResponseObject> aRequest(final String method, final String path) {
+        return httpClientRequestBuilderImplementation(method, path);
     }
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")

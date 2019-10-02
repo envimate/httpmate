@@ -52,8 +52,8 @@ public final class MetaDataEntriesToSave {
                 saving(PATH),
                 saving(PATH_PARAMETERS),
                 saving(QUERY_PARAMETERS),
-                saving(HEADERS),
-                saving(CONTENT_TYPE));
+                saving(REQUEST_HEADERS),
+                saving(REQUEST_CONTENT_TYPE));
         return new MetaDataEntriesToSave(realProviders);
     }
 

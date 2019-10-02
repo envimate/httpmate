@@ -29,7 +29,7 @@ import lombok.ToString;
 
 import java.util.Optional;
 
-import static com.envimate.httpmate.HttpMateChainKeys.HEADERS;
+import static com.envimate.httpmate.HttpMateChainKeys.REQUEST_HEADERS;
 import static com.envimate.httpmate.convenience.cors.Cors.ORIGIN;
 import static com.envimate.httpmate.util.Validators.validateNotNull;
 import static com.envimate.httpmate.util.Validators.validateNotNullNorEmpty;
@@ -42,7 +42,7 @@ public final class Origin {
 
     public static Optional<Origin> load(final MetaData metaData) {
         validateNotNull(metaData, "metaData");
-        return metaData.get(HEADERS).getHeader(ORIGIN).map(Origin::fromString);
+        return metaData.get(REQUEST_HEADERS).getHeader(ORIGIN).map(Origin::fromString);
     }
 
     public static Origin fromString(final String origin) {
