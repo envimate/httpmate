@@ -39,6 +39,7 @@ import java.util.Map;
 
 import static com.envimate.httpmate.marshalling.MarshallingModule.emptyMarshallingModule;
 import static com.envimate.httpmate.util.Validators.validateNotNull;
+import static com.envimate.mapmate.builder.recipes.marshallers.urlencoded.UrlEncodedMarshallerRecipe.urlEncoded;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.Map.of;
@@ -51,10 +52,10 @@ public final class MapMateSerializerAndDeserializer implements SerializerAndDese
             MarshallingType.json(), ContentType.json(),
             MarshallingType.xml(), ContentType.xml(),
             MarshallingType.yaml(), ContentType.yaml(),
-            MarshallingType.urlEncoded(), ContentType.formUrlEncoded()
+            urlEncoded(), ContentType.formUrlEncoded()
     );
     private static final List<MarshallingType> DEFAULT_SUPPORTED_TYPES_FOR_UNMARSHALLING = asList(
-            MarshallingType.json(), MarshallingType.xml(), MarshallingType.yaml(), MarshallingType.urlEncoded());
+            MarshallingType.json(), MarshallingType.xml(), MarshallingType.yaml(), urlEncoded());
     private static final List<MarshallingType> DEFAULT_SUPPORTED_TYPES_FOR_MARSHALLING = asList(
             MarshallingType.json(), MarshallingType.xml(), MarshallingType.yaml());
 
