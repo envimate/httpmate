@@ -41,15 +41,15 @@ import static com.envimate.httpmate.HttpMate.anHttpMateConfiguredAs;
 import static com.envimate.httpmate.HttpMateChainKeys.*;
 import static com.envimate.httpmate.convenience.configurators.Configurators.toLogUsing;
 import static com.envimate.httpmate.events.EventDrivenBuilder.EVENT_DRIVEN;
-import static com.envimate.httpmate.http.headers.ContentType.json;
 import static com.envimate.httpmate.http.HttpRequestMethod.GET;
+import static com.envimate.httpmate.http.headers.ContentType.json;
 import static com.envimate.httpmate.logger.Loggers.stderrLogger;
+import static com.envimate.httpmate.marshalling.MarshallingModule.toMarshallBodiesBy;
 import static com.envimate.httpmate.security.SecurityConfigurators.toAuthenticateRequests;
 import static com.envimate.httpmate.security.SecurityConfigurators.toAuthorizeRequests;
-import static com.envimate.httpmate.marshalling.MarshallingModule.toMarshallBodiesBy;
 import static com.envimate.httpmate.websockets.WebSocketsConfigurator.toUseWebSockets;
 import static com.envimate.httpmate.websocketsevents.Conditions.forwardingItToAllWebSocketsThat;
-import static com.envimate.messageMate.internal.pipe.configuration.AsynchronousConfiguration.constantPoolSizeAsynchronousPipeConfiguration;
+import static com.envimate.messageMate.configuration.AsynchronousConfiguration.constantPoolSizeAsynchronousConfiguration;
 import static com.envimate.messageMate.messageBus.MessageBusBuilder.aMessageBus;
 import static com.envimate.messageMate.messageBus.MessageBusType.ASYNCHRONOUS;
 import static com.envimate.messageMate.useCases.useCaseAdapter.UseCaseInvocationBuilder.anUseCaseAdapter;
@@ -71,7 +71,7 @@ public final class ChatConfiguration {
     public static TestConfiguration theExampleChatServerHttpMateInstance() {
         messageBus = aMessageBus()
                 .forType(ASYNCHRONOUS)
-                .withAsynchronousConfiguration(constantPoolSizeAsynchronousPipeConfiguration(POOL_SIZE))
+                .withAsynchronousConfiguration(constantPoolSizeAsynchronousConfiguration(POOL_SIZE))
                 .build();
 
         final UserRepository userRepository = userRepository();

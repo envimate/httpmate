@@ -100,7 +100,7 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.8</version>
+            <version>1.18.10</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>
@@ -110,7 +110,7 @@
             <dependency>
                 <groupId>org.junit</groupId>
                 <artifactId>junit-bom</artifactId>
-                <version>5.5.0-RC1</version>
+                <version>5.5.2</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>

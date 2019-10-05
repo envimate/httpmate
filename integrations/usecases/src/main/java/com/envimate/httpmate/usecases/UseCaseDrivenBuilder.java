@@ -47,7 +47,7 @@ import static com.envimate.httpmate.HttpMateBuilder.httpMateBuilder;
 import static com.envimate.httpmate.events.EventModule.eventModule;
 import static com.envimate.httpmate.usecases.UseCasesModule.useCasesModule;
 import static com.envimate.httpmate.util.Validators.validateNotNull;
-import static com.envimate.messageMate.internal.pipe.configuration.AsynchronousConfiguration.constantPoolSizeAsynchronousPipeConfiguration;
+import static com.envimate.messageMate.configuration.AsynchronousConfiguration.constantPoolSizeAsynchronousConfiguration;
 import static com.envimate.messageMate.messageBus.MessageBusBuilder.aMessageBus;
 import static com.envimate.messageMate.messageBus.MessageBusType.ASYNCHRONOUS;
 import static com.envimate.messageMate.processingContext.EventType.eventTypeFromString;
@@ -136,8 +136,7 @@ public final class UseCaseDrivenBuilder {
             useCasesModule.setSerializerAndDeserializer(serializerAndDeserializer);
 
             final MessageBus messageBus = aMessageBus().forType(ASYNCHRONOUS)
-                    .withAsynchronousConfiguration(
-                            constantPoolSizeAsynchronousPipeConfiguration(DEFAULT_POOL_SIZE))
+                    .withAsynchronousConfiguration(constantPoolSizeAsynchronousConfiguration(DEFAULT_POOL_SIZE))
                     .build();
             eventModule.setMessageBus(messageBus);
 

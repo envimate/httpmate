@@ -42,7 +42,7 @@ import static com.envimate.httpmate.websockets.WebsocketChainKeys.IS_WEBSOCKET_M
 import static com.envimate.httpmate.websocketsevents.Conditions.forwardingItToAllWebSocketsThat;
 import static com.envimate.mapmate.deserialization.Deserializer.aDeserializer;
 import static com.envimate.mapmate.serialization.Serializer.aSerializer;
-import static com.envimate.messageMate.internal.pipe.configuration.AsynchronousConfiguration.constantPoolSizeAsynchronousPipeConfiguration;
+import static com.envimate.messageMate.configuration.AsynchronousConfiguration.constantPoolSizeAsynchronousConfiguration;
 import static com.envimate.messageMate.messageBus.MessageBusBuilder.aMessageBus;
 import static com.envimate.messageMate.useCases.useCaseAdapter.UseCaseInvocationBuilder.anUseCaseAdapter;
 
@@ -51,7 +51,7 @@ public final class Application {
     private static final int POOL_SIZE = 4;
     public static final MessageBus MESSAGE_BUS = aMessageBus()
             .forType(MessageBusType.ASYNCHRONOUS)
-            .withAsynchronousConfiguration(constantPoolSizeAsynchronousPipeConfiguration(POOL_SIZE))
+            .withAsynchronousConfiguration(constantPoolSizeAsynchronousConfiguration(POOL_SIZE))
             .build();
 
     private Application() {

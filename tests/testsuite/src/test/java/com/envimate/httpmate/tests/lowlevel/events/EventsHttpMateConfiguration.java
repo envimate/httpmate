@@ -32,7 +32,7 @@ import static com.envimate.httpmate.HttpMate.anHttpMateConfiguredAs;
 import static com.envimate.httpmate.HttpMateChainKeys.REQUEST_BODY_STRING;
 import static com.envimate.httpmate.events.EventDrivenBuilder.EVENT_DRIVEN;
 import static com.envimate.httpmate.http.HttpRequestMethod.GET;
-import static com.envimate.messageMate.internal.pipe.configuration.AsynchronousConfiguration.constantPoolSizeAsynchronousPipeConfiguration;
+import static com.envimate.messageMate.configuration.AsynchronousConfiguration.constantPoolSizeAsynchronousConfiguration;
 import static com.envimate.messageMate.messageBus.MessageBusBuilder.aMessageBus;
 import static com.envimate.messageMate.processingContext.EventType.eventTypeFromString;
 
@@ -45,7 +45,7 @@ final class EventsHttpMateConfiguration {
     static HttpMate theEventsHttpMateInstanceUsedForTesting() {
         messageBus = aMessageBus()
                 .forType(MessageBusType.ASYNCHRONOUS)
-                .withAsynchronousConfiguration(constantPoolSizeAsynchronousPipeConfiguration(4))
+                .withAsynchronousConfiguration(constantPoolSizeAsynchronousConfiguration(4))
                 .build();
 
         final HttpMate httpMate = anHttpMateConfiguredAs(EVENT_DRIVEN).attachedTo(messageBus)
