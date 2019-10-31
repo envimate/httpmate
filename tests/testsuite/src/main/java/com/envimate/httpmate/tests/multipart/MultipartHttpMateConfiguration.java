@@ -25,18 +25,16 @@ import com.envimate.httpmate.HttpMate;
 import com.envimate.httpmate.multipart.MultipartIteratorBody;
 import com.envimate.httpmate.multipart.MultipartPart;
 import com.envimate.httpmate.path.Path;
-import com.envimate.httpmate.security.NotAuthorizedException;
+import com.envimate.httpmate.security.authorization.NotAuthorizedException;
 
-import static com.envimate.httpmate.HttpMate.aLowLevelHttpMate;
-import static com.envimate.httpmate.HttpMateChainKeys.*;
-import static com.envimate.httpmate.convenience.configurators.exceptions.ExceptionMappingConfigurator.toMapExceptions;
-import static com.envimate.httpmate.exceptions.DefaultExceptionMapper.theDefaultExceptionMapper;
+import static com.envimate.httpmate.HttpMate.anHttpMate;
+import static com.envimate.httpmate.exceptions.ExceptionConfigurators.toMapExceptionsOfType;
 import static com.envimate.httpmate.http.Http.StatusCodes.FORBIDDEN;
 import static com.envimate.httpmate.http.HttpRequestMethod.*;
 import static com.envimate.httpmate.multipart.MultipartChainKeys.MULTIPART_ITERATOR_BODY;
-import static com.envimate.httpmate.multipart.MultipartModule.toExposeMultipartBodiesUsingMultipartIteratorBody;
-import static com.envimate.httpmate.security.SecurityConfigurators.toAuthenticateRequests;
-import static com.envimate.httpmate.security.SecurityConfigurators.toAuthorizeRequests;
+import static com.envimate.httpmate.multipart.MultipartConfigurators.toExposeMultipartBodiesUsingMultipartIteratorBody;
+import static com.envimate.httpmate.security.SecurityConfigurators.toAuthenticateRequestsUsing;
+import static com.envimate.httpmate.security.SecurityConfigurators.toAuthorizeRequestsUsing;
 import static com.envimate.httpmate.tests.Util.extractUsername;
 import static com.envimate.httpmate.tests.multipart.AuthenticatedHandler.authenticatedHandler;
 import static com.envimate.httpmate.tests.multipart.AuthorizedHandler.authorizedHandler;
@@ -49,37 +47,37 @@ public final class MultipartHttpMateConfiguration {
     }
 
     public static HttpMate theMultipartHttpMateInstanceUsedForTesting() {
-        return aLowLevelHttpMate()
-                .callingTheHandler(dumpMultipartBodyHandler())
+        return anHttpMate()
+                .serving(dumpMultipartBodyHandler())
                 .forRequestPath("/dump").andRequestMethods(GET, POST, PUT, DELETE)
-                .callingTheHandler(authenticatedHandler())
+                .serving(authenticatedHandler())
                 .forRequestPath("/authenticated").andRequestMethods(GET, POST, PUT, DELETE)
-                .callingTheHandler(authorizedHandler())
+                .serving(authorizedHandler())
                 .forRequestPath("/authorized").andRequestMethods(GET, POST, PUT, DELETE)
-                .thatIs()
-                .configured(toAuthenticateRequests().afterBodyProcessing().using(metaData -> {
-                    final Path path = metaData.get(PATH);
+                .configured(toAuthenticateRequestsUsing(request -> {
+                    final Path path = request.path();
                     if (path.matches("/authenticated") || path.matches("/authorized")) {
-                        final MultipartIteratorBody multipartIteratorBody = metaData.get(MULTIPART_ITERATOR_BODY);
+                        final MultipartIteratorBody multipartIteratorBody = request.getMetaData().get(MULTIPART_ITERATOR_BODY);
                         final MultipartPart firstPart = multipartIteratorBody.next("authentication");
                         final String content = firstPart.readContentToString();
                         return extractUsername(content);
                     }
                     return empty();
-                }))
-                .configured(toAuthorizeRequests().afterBodyProcessing().using(metaData -> {
-                    if (metaData.get(PATH).matches("/authorized")) {
-                        return metaData.get(AUTHENTICATION_INFORMATION).equals("admin");
+                }).afterBodyProcessing())
+
+                .configured(toAuthorizeRequestsUsing((authenticationInformation, request) -> {
+                    if (request.path().matches("/authorized")) {
+                        return (boolean) authenticationInformation
+                                .map("admin"::equals)
+                                .orElse(false);
                     } else {
                         return true;
                     }
+                }).afterBodyProcessing())
+                .configured(toMapExceptionsOfType(NotAuthorizedException.class, (exception, response) -> {
+                    response.setStatus(FORBIDDEN);
+                    response.setBody("Access denied!");
                 }))
-                .configured(toMapExceptions()
-                        .ofType(NotAuthorizedException.class).toResponsesUsing((e, metaData) -> {
-                            metaData.set(RESPONSE_STATUS, FORBIDDEN);
-                            metaData.set(RESPONSE_BODY_STRING, "Access denied!");
-                        })
-                        .ofAllRemainingTypesUsing(theDefaultExceptionMapper()))
                 .configured(toExposeMultipartBodiesUsingMultipartIteratorBody())
                 .build();
     }

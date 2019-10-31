@@ -51,6 +51,14 @@ public final class PathTemplateSpecs {
         matchesNot("/*/qwer", "/asdf/asdf/asdf");
         matchesNot("/*/qwer", "/qwer/asdf/asdf");
         matches("/*/a/*/b/*/c", "/x/a/y/b/z/c");
+
+        matches("/|.*|", "/a");
+        matches("/|[abc]|", "/b");
+        matchesNot("/|[abc]|", "/d");
+        matches("/|\\d|", "/1");
+        matches("/|\\d*|", "/1337");
+        matchesNot("/|\\d|", "/a");
+        matches("/|(?<qwer>\\d*)|", "/1337");
     }
 
     @Test
@@ -60,6 +68,10 @@ public final class PathTemplateSpecs {
         parametersExtracted("/*/<var>", "/qwer", of("var", "qwer"));
         parametersExtracted("/*/<var>", "/asdf/qwer", of("var", "qwer"));
         parametersExtracted("/*/<var>/*", "/asdf/qwer", of("var", "asdf"));
+
+        parametersExtracted("/|(?<qwer>\\d*)|", "/1337", of("qwer", "1337"));
+        parametersExtracted("/|(?<qwer>\\d*)(?<asdf>\\w*)|", "/1337yxcv", of("qwer", "1337", "asdf", "yxcv"));
+        parametersExtracted("/|(?<qwer>\\d*)(?<asdf>\\d*)|", "/1337", of("qwer", "1337", "asdf", ""));
     }
 
     private static void parametersExtracted(final String template,

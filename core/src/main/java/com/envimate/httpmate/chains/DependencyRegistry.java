@@ -58,6 +58,10 @@ public final class DependencyRegistry {
         metaData.set(key, value);
     }
 
+    public <T> T getMetaDatum(final MetaDataKey<T> key) {
+        return metaData.get(key);
+    }
+
     public <T> MetricsProvider<T> createMetricsProvider(final MetaDataKey<T> key, final T defaultValue) {
         validateNotNull(key, "key");
         validateNotNull(defaultValue, "defaultValue");

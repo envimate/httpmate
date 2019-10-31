@@ -21,6 +21,7 @@
 
 package websockets.givenwhenthen;
 
+import com.envimate.httpmate.HttpMate;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
@@ -30,9 +31,8 @@ import websockets.givenwhenthen.configurations.TestConfiguration;
 import static com.envimate.httpmate.jettywithwebsockets.JettyEndpointWithWebSocketsSupport.jettyEndpointWithWebSocketsSupportFor;
 import static websockets.givenwhenthen.FreePortPool.freePort;
 import static websockets.givenwhenthen.ReportBuilder.reportBuilder;
-import static websockets.givenwhenthen.configurations.artificial.ArtificialConfiguration.theExampleHttpMateInstanceWithWebSocketsSupport;
+import static websockets.givenwhenthen.configurations.TestConfiguration.testConfiguration;
 import static websockets.givenwhenthen.configurations.artificial.usecases.WaitableObject.resetAllWaitableObjects;
-import static websockets.givenwhenthen.configurations.chat.ChatConfiguration.theExampleChatServerHttpMateInstance;
 
 @ToString
 @EqualsAndHashCode
@@ -40,12 +40,9 @@ import static websockets.givenwhenthen.configurations.chat.ChatConfiguration.the
 public final class Given {
     private final TestConfiguration testConfiguration;
 
-    public static Given givenTheExampleHttpMateInstanceWithWebSocketSupport() {
-        return given(theExampleHttpMateInstanceWithWebSocketsSupport());
-    }
-
-    public static Given givenTheExampleChatServer() {
-        return given(theExampleChatServerHttpMateInstance());
+    public static Given given(final HttpMate httpMate) {
+        final TestConfiguration testConfiguration = testConfiguration(httpMate);
+        return given(testConfiguration);
     }
 
     public static Given given(final TestConfiguration testConfiguration) {

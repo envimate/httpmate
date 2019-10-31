@@ -23,13 +23,13 @@ package com.envimate.httpmate.processors;
 
 import com.envimate.httpmate.chains.MetaData;
 import com.envimate.httpmate.chains.Processor;
-import com.envimate.httpmate.http.Http;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
 import static com.envimate.httpmate.HttpMateChainKeys.*;
+import static com.envimate.httpmate.http.Http.Headers.CONTENT_TYPE;
 import static com.envimate.httpmate.util.Streams.stringToInputStream;
 
 @ToString
@@ -43,8 +43,9 @@ public final class StringBodyToStreamProcessor implements Processor {
 
     @Override
     public void apply(final MetaData metaData) {
-        metaData.getOptional(RESPONSE_CONTENT_TYPE).ifPresent(contentType -> metaData.get(RESPONSE_HEADERS)
-                .put(Http.Headers.CONTENT_TYPE, contentType.internalValueForMapping()));
+        metaData.getOptional(RESPONSE_CONTENT_TYPE)
+                .ifPresent(contentType -> metaData.getOptional(RESPONSE_HEADERS)
+                        .ifPresent(headers -> headers.put(CONTENT_TYPE, contentType.internalValueForMapping())));
         if (!metaData.contains(RESPONSE_STREAM)) {
             metaData.getOptional(RESPONSE_BODY_STRING).ifPresent(stringResponse ->
                     metaData.set(RESPONSE_STREAM, stringToInputStream(stringResponse)));

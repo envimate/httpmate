@@ -23,11 +23,10 @@ package com.envimate.httpmate.tests.lowlevel;
 
 import com.envimate.httpmate.HttpMate;
 
-import static com.envimate.httpmate.HttpMate.aLowLevelHttpMate;
-import static com.envimate.httpmate.convenience.configurators.Configurators.toLogUsing;
-import static com.envimate.httpmate.convenience.debug.DebugConfigurator.toBeInDebugMode;
-import static com.envimate.httpmate.convenience.resource.ResourceHandler.theResource;
+import static com.envimate.httpmate.HttpMate.anHttpMate;
+import static com.envimate.httpmate.debug.DebugConfigurator.toBeInDebugMode;
 import static com.envimate.httpmate.http.HttpRequestMethod.*;
+import static com.envimate.httpmate.logger.LoggerConfigurators.toLogUsing;
 import static com.envimate.httpmate.tests.lowlevel.handlers.ContentTypeInResponseHandler.contentTypeInResponseHandler;
 import static com.envimate.httpmate.tests.lowlevel.handlers.EchoBodyHandler.echoBodyHandler;
 import static com.envimate.httpmate.tests.lowlevel.handlers.EchoContentTypeHandler.echoContentTypeHandler;
@@ -44,23 +43,16 @@ public final class LowLevelHttpMateConfiguration {
 
     public static HttpMate theLowLevelHttpMateInstanceUsedForTesting() {
         logger = new StringBuilder();
-        return aLowLevelHttpMate()
-                .callingTheHandler(echoBodyHandler())
+        return anHttpMate()
+                .serving(echoBodyHandler())
                 .forRequestPath("/echo").andRequestMethods(GET, POST, PUT, DELETE)
-                .callingTheHandler(echoContentTypeHandler())
-                .forRequestPath("echo_contenttype").andRequestMethod(GET)
-                .callingTheHandler(contentTypeInResponseHandler())
-                .forRequestPath("/set_contenttype_in_response").andRequestMethod(GET)
-                .callingTheHandler(headersInResponseHandler())
-                .forRequestPath("/headers_response").andRequestMethod(GET)
-                .callingTheHandler(logHandler())
-                .forRequestPath("/log").andRequestMethod(GET)
-                .callingTheHandler(downloadHandler())
-                .forRequestPath("/download").andRequestMethod(GET)
-                .callingTheHandler(exceptionThrowingHandler())
-                .forRequestPath("/exception").andRequestMethod(GET)
-                .get("/resource", theResource("lowlevel/resource"))
-                .thatIs()
+                .get("echo_contenttype", echoContentTypeHandler())
+                .get("/set_contenttype_in_response", contentTypeInResponseHandler())
+                .get("/headers_response", headersInResponseHandler())
+                .get("/log", logHandler())
+                .get("/download", downloadHandler())
+                .get("/exception", exceptionThrowingHandler())
+                .get("/resource", (request, response) -> response.setJavaResourceAsBody("lowlevel/resource"))
                 .configured(toLogUsing((message, metaData) -> logger.append(message)))
                 .configured(toBeInDebugMode())
                 .build();

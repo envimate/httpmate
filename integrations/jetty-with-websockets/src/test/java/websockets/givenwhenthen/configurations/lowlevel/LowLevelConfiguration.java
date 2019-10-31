@@ -24,9 +24,10 @@ package websockets.givenwhenthen.configurations.lowlevel;
 import com.envimate.httpmate.HttpMate;
 import websockets.givenwhenthen.configurations.TestConfiguration;
 
-import static com.envimate.httpmate.HttpMate.aLowLevelHttpMate;
+import static com.envimate.httpmate.HttpMate.anHttpMate;
 import static com.envimate.httpmate.HttpMateChainKeys.PATH;
-import static com.envimate.httpmate.convenience.configurators.Configurators.toLogUsing;
+import static com.envimate.httpmate.events.EventConfigurators.toEnrichTheIntermediateMapWithAllRequestData;
+import static com.envimate.httpmate.logger.LoggerConfigurators.toLogUsing;
 import static com.envimate.httpmate.websockets.WebSocketsConfigurator.toUseWebSockets;
 import static com.envimate.httpmate.websockets.WebsocketChainKeys.IS_WEBSOCKET_MESSAGE;
 import static websockets.givenwhenthen.configurations.TestConfiguration.testConfiguration;
@@ -42,16 +43,16 @@ public final class LowLevelConfiguration {
 
     public static TestConfiguration theLowLevelHttpMateInstanceWithWebSocketsSupport() {
         logger = new StringBuilder();
-        final HttpMate httpMate = aLowLevelHttpMate()
-                .callingTheHandler(fooBarHandler()).when(metaData -> metaData.get(PATH).matches("/foobar"))
-                .callingTheHandler(loggerHandler()).when(metaData -> metaData.get(PATH).matches("/logger"))
-                .callingTheHandler(echoHandler()).when(metaData -> metaData.getOptional(IS_WEBSOCKET_MESSAGE).orElse(false))
-                .thatIs()
+        final HttpMate httpMate = anHttpMate()
+                .serving(fooBarHandler()).when(metaData -> metaData.get(PATH).matches("/foobar"))
+                .serving(loggerHandler()).when(metaData -> metaData.get(PATH).matches("/logger"))
+                .serving(echoHandler()).when(metaData -> metaData.getOptional(IS_WEBSOCKET_MESSAGE).orElse(false))
                 .configured(toUseWebSockets()
                         .acceptingWebSocketsToThePath("/").taggedBy("ROOT")
                         .acceptingWebSocketsToThePath("/foobar").taggedBy("FOOBAR")
                         .acceptingWebSocketsToThePath("/logger").taggedBy("LOGGER"))
                 .configured(toLogUsing((message, metaData) -> logger.append(message)))
+                .configured(toEnrichTheIntermediateMapWithAllRequestData())
                 .build();
         return testConfiguration(httpMate);
     }

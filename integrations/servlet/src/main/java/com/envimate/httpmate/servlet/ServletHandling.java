@@ -31,12 +31,14 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static com.envimate.httpmate.HttpMateChainKeys.*;
 import static com.envimate.httpmate.chains.MetaData.emptyMetaData;
 import static com.envimate.httpmate.util.Streams.streamInputStreamToOutputStream;
 import static com.envimate.httpmate.util.Streams.stringToInputStream;
+import static java.util.Collections.singletonList;
 
 public final class ServletHandling {
 
@@ -65,7 +67,7 @@ public final class ServletHandling {
     public static MetaData extractMetaDataFromHttpServletRequest(final HttpServletRequest request) {
         final String path = request.getPathInfo();
         final String method = request.getMethod();
-        final Map<String, String> headers = extractHeaders(request);
+        final Map<String, List<String>> headers = extractHeaders(request);
         final Map<String, String> queryParameters = extractQueryParameters(request);
 
         final MetaData metaData = emptyMetaData();
@@ -76,13 +78,13 @@ public final class ServletHandling {
         return metaData;
     }
 
-    private static Map<String, String> extractHeaders(final HttpServletRequest request) {
+    private static Map<String, List<String>> extractHeaders(final HttpServletRequest request) {
         final Enumeration<String> headerNames = request.getHeaderNames();
-        final Map<String, String> headers = new HashMap<>();
+        final Map<String, List<String>> headers = new HashMap<>();
         while (headerNames.hasMoreElements()) {
             final String headerName = headerNames.nextElement();
             final String value = request.getHeader(headerName);
-            headers.put(headerName, value);
+            headers.put(headerName, singletonList(value));
         }
         return headers;
     }

@@ -22,13 +22,20 @@
 package com.envimate.httpmate.examples.helloworld;
 
 import com.envimate.httpmate.HttpMate;
-import com.envimate.httpmate.convenience.configurators.Configurators;
-import com.envimate.httpmate.convenience.endpoints.PureJavaEndpoint;
+import com.envimate.mapmate.builder.MapMate;
+import com.google.gson.Gson;
 
 import java.util.Optional;
 
+import static com.envimate.httpmate.HttpMate.anHttpMate;
 import static com.envimate.httpmate.HttpMateChainKeys.*;
+import static com.envimate.httpmate.cors.CorsConfigurators.toActivateCORSWithAllAllowedOrigins;
 import static com.envimate.httpmate.http.Http.StatusCodes.OK;
+import static com.envimate.httpmate.http.HttpRequestMethod.GET;
+import static com.envimate.httpmate.logger.LoggerConfigurators.toLogUsing;
+import static com.envimate.httpmate.mapmate.MapMateConfigurator.toUseMapMate;
+import static com.envimate.httpmate.purejavaendpoint.PureJavaEndpoint.pureJavaEndpointFor;
+import static com.envimate.mapmate.builder.MapMate.aMapMate;
 
 public final class Application {
 
@@ -38,23 +45,29 @@ public final class Application {
     }
 
     public static void main(final String[] args) {
-        final HttpMate httpMate = HttpMate.aLowLevelHttpMate()
+        final Gson gson = new Gson();
+        final MapMate mapMate = aMapMate(Application.class.getPackageName())
+                .usingJsonMarshaller(gson::toJson, gson::fromJson)
+                .build();
+        final HttpMate httpMate = anHttpMate()
                 .get("/api/hello", (httpRequest, httpResponse) -> {
-                    final Optional<String> name = httpRequest.queryParameters().getQueryParameter("name");
+                    final Optional<String> name = httpRequest.queryParameters().getOptionalQueryParameter("name");
                     httpResponse.setBody("Hello " + name.orElse("World"));
                     httpResponse.setStatus(OK);
                 })
+                .get("/api/helloUseCase", HelloWorldUseCase.class)
                 .get("/api/helloDirect", metaData -> {
-                    final Optional<String> name = metaData.get(QUERY_PARAMETERS).getQueryParameter("name");
-                    metaData.set(RESPONSE_BODY_STRING, "Hello " + name.orElse("World!"));
+                    final Optional<String> name = metaData.get(QUERY_PARAMETERS).getOptionalQueryParameter("name");
+                    metaData.set(REQUEST_BODY_STRING, "Hello " + name.orElse("World!"));
                     metaData.set(RESPONSE_STATUS, OK);
                 })
-                .thatIs()
-                .configured(Configurators.toLogUsing((message, metaData) -> {
-                    System.out.println(message);
-                }))
+                .configured(toActivateCORSWithAllAllowedOrigins()
+                        .withAllowedMethods(GET)
+                        .allowingCredentials())
+                .configured(toUseMapMate(mapMate))
+                .configured(toLogUsing((message, metaData) -> System.out.println(message)))
                 .build();
 
-        PureJavaEndpoint.pureJavaEndpointFor(httpMate).listeningOnThePort(PORT);
+        pureJavaEndpointFor(httpMate).listeningOnThePort(PORT);
     }
 }

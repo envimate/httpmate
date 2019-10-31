@@ -23,23 +23,20 @@ package com.envimate.httpmate.tests.lowlevel.usecase;
 
 import com.envimate.httpmate.tests.givenwhenthen.DeployerAndClient;
 import com.envimate.httpmate.tests.lowlevel.usecase.usecases.FailInInitializerUseCase;
-import com.envimate.httpmate.tests.lowlevel.usecase.usecases.MyUseCaseInitializationException;
-import com.envimate.httpmate.usecases.usecase.SerializerAndDeserializer;
-import org.junit.Ignore;
+import com.envimate.httpmate.tests.lowlevel.usecase.usecases.VoidUseCase;
+import com.envimate.messageMate.useCases.useCaseAdapter.usecaseInstantiating.ZeroArgumentsConstructorUseCaseInstantiatorException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 import java.util.Collection;
-import java.util.Map;
 
-import static com.envimate.httpmate.HttpMateChainKeys.RESPONSE_BODY_STRING;
-import static com.envimate.httpmate.HttpMateChainKeys.RESPONSE_STATUS;
-import static com.envimate.httpmate.convenience.configurators.exceptions.ExceptionMappingConfigurator.toMapExceptions;
+import static com.envimate.httpmate.HttpMate.anHttpMate;
+import static com.envimate.httpmate.exceptions.ExceptionConfigurators.toMapExceptionsByDefaultUsing;
+import static com.envimate.httpmate.exceptions.ExceptionConfigurators.toMapExceptionsOfType;
 import static com.envimate.httpmate.tests.givenwhenthen.Given.given;
 import static com.envimate.httpmate.tests.givenwhenthen.deploy.DeployerManager.activeDeployers;
 import static com.envimate.httpmate.tests.givenwhenthen.deploy.DeployerManager.setCurrentDeployerAndClient;
-import static com.envimate.httpmate.usecases.UseCaseDrivenBuilder.useCaseDrivenBuilder;
 
 @RunWith(Parameterized.class)
 public final class UseCaseSpecs {
@@ -53,33 +50,43 @@ public final class UseCaseSpecs {
         return activeDeployers();
     }
 
-    @Ignore
     @Test
-    public void exceptionInInitializerCanBeCaught() {
-        given(useCaseDrivenBuilder()
-                .get("/", FailInInitializerUseCase.class)
-                .mappingRequestsAndResponsesUsing(new SerializerAndDeserializer() {
-                    @Override
-                    public <T> T deserialize(final Class<T> type, final Map<String, Object> map) {
-                        throw new UnsupportedOperationException();
-                    }
+    public void aUseCaseWithNoParametersAndVoidReturnTypeCanBeInvokedWithoutConfiguringAnySerializers() {
+        given(anHttpMate().get("/", VoidUseCase.class).build())
+                .when().aRequestToThePath("/").viaTheGetMethod().withAnEmptyBody().isIssued()
+                .theStatusCodeWas(200)
+                .theResponseBodyWas("");
+    }
 
-                    @Override
-                    public Map<String, Object> serialize(final Object event) {
-                        throw new UnsupportedOperationException();
-                    }
-                })
-                .configured(toMapExceptions()
-                        .ofType(MyUseCaseInitializationException.class).toResponsesUsing((exception, metaData) -> {
-                            metaData.set(RESPONSE_BODY_STRING, "The correct exception has been thrown");
-                            metaData.set(RESPONSE_STATUS, 505);
-                        }).ofAllRemainingTypesUsing((exception, metaData) -> {
-                            metaData.set(RESPONSE_BODY_STRING, "The incorrect exception has been thrown");
-                            metaData.set(RESPONSE_STATUS, 501);
+    @Test
+    public void exceptionInInitializerCanBeCaughtInSpecializedHandler() {
+        given(
+                anHttpMate()
+                        .get("/", FailInInitializerUseCase.class)
+                        .configured(toMapExceptionsOfType(ZeroArgumentsConstructorUseCaseInstantiatorException.class, (exception, response) -> {
+                            response.setBody("The correct exception has been thrown");
+                            response.setStatus(505);
                         }))
-                .build())
+                        .configured(toMapExceptionsByDefaultUsing((exception, response) -> {
+                            response.setBody("The incorrect exception has been thrown");
+                            response.setStatus(501);
+                        }))
+                        .build()
+        )
                 .when().aRequestToThePath("/").viaTheGetMethod().withAnEmptyBody().isIssued()
                 .theStatusCodeWas(505)
                 .theResponseBodyWas("The correct exception has been thrown");
+    }
+
+    @Test
+    public void exceptionInInitializerCanBeCaughtInDefaultHandler() {
+        given(
+                anHttpMate()
+                        .get("/", FailInInitializerUseCase.class)
+                        .build()
+        )
+                .when().aRequestToThePath("/").viaTheGetMethod().withAnEmptyBody().isIssued()
+                .theStatusCodeWas(500)
+                .theResponseBodyWas("");
     }
 }

@@ -1,3 +1,0 @@
-# Low Level Flavour
-
-## Resources

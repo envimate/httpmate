@@ -22,9 +22,9 @@
 package com.envimate.httpmate.exceptions;
 
 import com.envimate.httpmate.chains.MetaData;
-import com.envimate.httpmate.convenience.handler.HttpResponse;
+import com.envimate.httpmate.handler.http.HttpResponse;
 
-import static com.envimate.httpmate.convenience.handler.HttpResponse.httpResponse;
+import static com.envimate.httpmate.handler.http.HttpResponse.httpResponse;
 
 public interface HttpExceptionMapper<T extends Throwable> extends ExceptionMapper<T> {
 

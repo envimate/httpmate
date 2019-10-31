@@ -61,8 +61,7 @@ public final class Conditions {
 
     public static ExternalEventMapping closingAllWebSocketsThat(final WebSocketForEventFilter filter) {
         validateNotNull(filter, "filter");
-        return webSocketsExternalEventMapping(WEBSOCKET_CLOSE, filter, (webSockets, metaData) -> {
-            metaData.set(WEBSOCKETS_TO_CLOSE, webSockets);
-        });
+        return webSocketsExternalEventMapping(WEBSOCKET_CLOSE, filter,
+                (webSockets, metaData) -> metaData.set(WEBSOCKETS_TO_CLOSE, webSockets));
     }
 }

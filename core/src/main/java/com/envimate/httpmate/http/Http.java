@@ -26,23 +26,38 @@ public final class Http {
     private Http() {
     }
 
-    public static class StatusCodes {
+    public static final class StatusCodes {
         public static final int OK = 200;
+
+        public static final int MULTIPLE_CHOICE = 300;
+        public static final int MOVED_PERMANENTLY = 301;
+        public static final int FOUND = 302;
+        public static final int SEE_OTHER = 303;
+        public static final int NOT_MODIFIED = 303;
+        public static final int TEMPORARY_REDIRECT = 307;
+        public static final int PERMANENT_REDIRECT = 308;
+
         public static final int BAD_REQUEST = 400;
         public static final int UNAUTHORIZED = 401;
         public static final int FORBIDDEN = 403;
         public static final int NOT_FOUND = 404;
         public static final int METHOD_NOT_ALLOWED = 405;
+
         public static final int INTERNAL_SERVER_ERROR = 500;
     }
 
-    public static class Headers {
+    public static final class Headers {
+        public static final String WWW_AUTHENTICATE = "WWW-Authenticate";
+        public static final String AUTHORIZATION = "Authorization";
         public static final String CONTENT_TYPE = "Content-Type";
         public static final String CONTENT_LENGTH = "Content-Length";
         public static final String CONTENT_DISPOSITION = "Content-Disposition";
+        public static final String COOKIE = "Cookie";
+        public static final String SET_COOKIE = "Set-Cookie";
+        public static final String LOCATION = "Location";
     }
 
-    public static class Methods {
+    public static final class Methods {
         public static final String GET = "GET";
         public static final String POST = "POST";
         public static final String PUT = "PUT";

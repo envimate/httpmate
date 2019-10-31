@@ -28,4 +28,8 @@
 		<Class name="com.envimate.httpmate.util.Streams" />
 		<Bug pattern="RCN_REDUNDANT_NULLCHECK_WOULD_HAVE_BEEN_A_NPE" />
 	</Match>
+	<Match>
+		<Class name="com.envimate.httpmate.handler.http.HttpResponse" />
+		<Bug pattern="OBL_UNSATISFIED_OBLIGATION" />
+	</Match>
 </FindBugsFilter>

@@ -30,15 +30,17 @@ import java.util.List;
 
 import static com.envimate.httpmate.tests.givenwhenthen.DeployerAndClient.deployerAndClient;
 import static com.envimate.httpmate.tests.givenwhenthen.deploy.jetty.JettyDeployer.jettyDeployer;
+import static com.envimate.httpmate.tests.givenwhenthen.deploy.purejava.PureJavaDeployer.pureJavaDeployer;
+import static com.envimate.httpmate.tests.givenwhenthen.deploy.servlet.ServletDeployer.servletDeployer;
 import static java.util.Arrays.asList;
 
 public final class DeployerManager {
     //private static final Collection<Deployer> ACTIVE_DEPLOYERS =
     // asList(bypassedDeployer(), jettyDeployer(), sparkDeployer(), pureJavaDeployer(), servletDeployer(), awsDeployer());
-    //private static final Collection<Deployer> ACTIVE_DEPLOYERS =
-    //        asList(jettyDeployer(), sparkDeployer(), pureJavaDeployer(), servletDeployer());
+    private static final Collection<Deployer> ACTIVE_DEPLOYERS =
+            asList(jettyDeployer(), pureJavaDeployer(), servletDeployer());
     //private static final Collection<Deployer> ACTIVE_DEPLOYERS = asList(pureJavaDeployer());
-    private static final Collection<Deployer> ACTIVE_DEPLOYERS = asList(jettyDeployer());
+    //private static final Collection<Deployer> ACTIVE_DEPLOYERS = asList(jettyDeployer());
     private static DeployerAndClient currentDeployerAndClient;
 
     private DeployerManager() {

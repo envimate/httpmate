@@ -21,9 +21,9 @@
 
 package com.envimate.httpmate.multipart.handler;
 
-import com.envimate.httpmate.convenience.handler.HttpHandler;
-import com.envimate.httpmate.convenience.handler.HttpRequest;
-import com.envimate.httpmate.convenience.handler.HttpResponse;
+import com.envimate.httpmate.handler.http.HttpHandler;
+import com.envimate.httpmate.handler.http.HttpRequest;
+import com.envimate.httpmate.handler.http.HttpResponse;
 
 import static com.envimate.httpmate.multipart.handler.MultipartRequest.multipartRequest;
 

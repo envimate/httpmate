@@ -25,9 +25,8 @@ import com.envimate.httpmate.HttpMateChainKeys;
 import com.envimate.httpmate.chains.ChainExtender;
 import com.envimate.httpmate.chains.ChainModule;
 import com.envimate.httpmate.chains.ChainName;
-import com.envimate.httpmate.chains.Configurator;
-import com.envimate.httpmate.http.headers.ContentType;
 import com.envimate.httpmate.http.Http;
+import com.envimate.httpmate.http.headers.ContentType;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
@@ -35,7 +34,6 @@ import lombok.ToString;
 
 import static com.envimate.httpmate.HttpMateChains.*;
 import static com.envimate.httpmate.chains.ChainName.chainName;
-import static com.envimate.httpmate.chains.Configurator.toUseModules;
 import static com.envimate.httpmate.chains.rules.Jump.jumpTo;
 import static com.envimate.httpmate.http.headers.ContentType.fromString;
 import static com.envimate.httpmate.multipart.MultipartProcessor.multipartProcessor;
@@ -50,8 +48,8 @@ public final class MultipartModule implements ChainModule {
     private static final String RULE_DESCRIPTION = format("%s=%s", Http.Headers.CONTENT_TYPE,
             CONTENT_TYPE.internalValueForMapping());
 
-    public static Configurator toExposeMultipartBodiesUsingMultipartIteratorBody() {
-        return toUseModules(new MultipartModule());
+    public static MultipartModule multipartModule() {
+        return new MultipartModule();
     }
 
     @Override

@@ -21,22 +21,90 @@
 
 package com.envimate.httpmate.security;
 
-import com.envimate.httpmate.chains.Processor;
+import com.envimate.httpmate.handler.http.HttpRequest;
+import com.envimate.httpmate.security.authentication.Authenticator;
+import com.envimate.httpmate.security.authentication.AuthenticatorProcessor;
+import com.envimate.httpmate.security.authorization.AuthorizerConfigurator;
+import com.envimate.httpmate.security.authorization.HttpAuthorizer;
+import com.envimate.httpmate.security.basicauth.BasicAuthAuthenticator;
+import com.envimate.httpmate.security.basicauth.BasicAuthConfigurator;
+import com.envimate.httpmate.security.filtering.FilterConfigurator;
+
+import static com.envimate.httpmate.security.SimpleSecurityConfigurator.simpleSecurityConfigurator;
+import static com.envimate.httpmate.security.authentication.AuthenticatorProcessor.authenticatorProcessor;
+import static com.envimate.httpmate.security.authorization.AuthorizerConfigurator.authorizerConfigurator;
+import static com.envimate.httpmate.security.basicauth.BasicAuthConfigurator.basicAuthenticationConfigurator;
+import static com.envimate.httpmate.security.filtering.FilterConfigurator.filterConfigurator;
+import static com.envimate.httpmate.security.oauth2.OAuth2Authenticator.oAuth2Authenticator;
+import static com.envimate.httpmate.util.Validators.validateNotNull;
+import static com.envimate.httpmate.util.Validators.validateNotNullNorEmpty;
 
 public final class SecurityConfigurators {
 
     private SecurityConfigurators() {
     }
 
-    public static InPhase<Authenticator> toAuthenticateRequests() {
-        return phase -> processor -> securityModule -> securityModule.addAuthenticator(phase, processor);
+    public static BasicAuthConfigurator toDoBasicAuthWith(final BasicAuthAuthenticator authenticator) {
+        return basicAuthenticationConfigurator(authenticator);
     }
 
-    public static InPhase<Authorizer> toAuthorizeRequests() {
-        return phase -> processor -> securityModule -> securityModule.addAuthorizer(phase, processor);
+    public static SimpleSecurityConfigurator toAuthenticateRequestsUsing(final Authenticator<HttpRequest> authenticator) {
+        final AuthenticatorProcessor authenticatorProcessor = authenticatorProcessor(metaData -> {
+            final HttpRequest request = HttpRequest.httpRequest(metaData);
+            return authenticator.authenticate(request);
+        });
+        return simpleSecurityConfigurator(authenticatorProcessor);
     }
 
-    public static InPhase<Processor> toFilterRequests() {
-        return phase -> processor -> securityModule -> securityModule.addFilter(phase, processor);
+    public static SimpleSecurityConfigurator toAuthenticateUsingOAuth2BearerToken(final Authenticator<String> authenticator) {
+        return toAuthenticateRequestsUsing(oAuth2Authenticator(authenticator));
+    }
+
+    public static SimpleSecurityConfigurator toAuthenticateUsingCookie(final String cookieName,
+                                                                       final Authenticator<String> authenticator) {
+        validateNotNullNorEmpty(cookieName, "cookieName");
+        validateNotNull(authenticator, "authenticator");
+        return toAuthenticateRequestsUsing(request -> request.cookies()
+                .getOptionalCookie(cookieName)
+                .flatMap(authenticator::authenticate));
+    }
+
+    public static SimpleSecurityConfigurator toAuthenticateUsingHeader(final String headerName,
+                                                                       final Authenticator<String> authenticator) {
+        validateNotNullNorEmpty(headerName, "headerName");
+        validateNotNull(authenticator, "authenticator");
+        return toAuthenticateRequestsUsing(request -> request.headers()
+                .getOptionalHeader(headerName)
+                .flatMap(authenticator::authenticate));
+    }
+
+    public static SimpleSecurityConfigurator toAuthenticateUsingQueryParameter(final String parameterName,
+                                                                               final Authenticator<String> authenticator) {
+        validateNotNullNorEmpty(parameterName, "parameterName");
+        validateNotNull(authenticator, "authenticator");
+        return toAuthenticateRequestsUsing(request -> request.queryParameters()
+                .getOptionalQueryParameter(parameterName)
+                .flatMap(authenticator::authenticate));
+    }
+
+    public static SimpleSecurityConfigurator toAuthenticateUsingPathParameter(final String parameterName,
+                                                                              final Authenticator<String> authenticator) {
+        validateNotNullNorEmpty(parameterName, "parameterName");
+        validateNotNull(authenticator, "authenticator");
+        return toAuthenticateRequestsUsing(request -> request.pathParameters()
+                .getOptionalPathParameter(parameterName)
+                .flatMap(authenticator::authenticate)).afterBodyProcessing();
+    }
+
+    public static AuthorizerConfigurator toAuthorizeRequestsUsing(final HttpAuthorizer authorizer) {
+        return authorizerConfigurator(authorizer);
+    }
+
+    public static AuthorizerConfigurator toAuthorizeAllAuthenticatedRequests() {
+        return toAuthorizeRequestsUsing((authenticationInformation, request) -> authenticationInformation.isPresent());
+    }
+
+    public static FilterConfigurator toFilterRequestsThat(final Filter filter) {
+        return filterConfigurator(filter);
     }
 }

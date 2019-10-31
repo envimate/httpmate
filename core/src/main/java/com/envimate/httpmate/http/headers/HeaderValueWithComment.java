@@ -61,6 +61,9 @@ public final class HeaderValueWithComment {
     }
 
     public String valueWithComment() {
+        if(comment == null || comment.isEmpty()) {
+            return value();
+        }
         return String.format("%s;%s", value, comment);
     }
 }

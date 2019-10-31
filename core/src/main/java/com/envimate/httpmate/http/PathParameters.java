@@ -32,6 +32,7 @@ import java.util.Optional;
 import static com.envimate.httpmate.http.PathParameterKey.pathParameterKey;
 import static com.envimate.httpmate.util.Maps.*;
 import static com.envimate.httpmate.util.Validators.validateNotNull;
+import static java.lang.String.format;
 
 @ToString
 @EqualsAndHashCode
@@ -48,7 +49,12 @@ public final class PathParameters {
         return new PathParameters(pathParameters);
     }
 
-    public Optional<String> getPathParameter(final String key) {
+    public String getPathParameter(final String key) {
+        return getOptionalPathParameter(key)
+                .orElseThrow(() -> new RuntimeException(format("No path parameter with the key '%s'", key)));
+    }
+
+    public Optional<String> getOptionalPathParameter(final String key) {
         final PathParameterKey pathParameterKey = pathParameterKey(key);
         return getOptionally(pathParameters, pathParameterKey).map(PathParameterValue::stringValue);
     }

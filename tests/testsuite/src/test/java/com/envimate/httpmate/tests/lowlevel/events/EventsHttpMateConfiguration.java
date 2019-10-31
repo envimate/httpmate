@@ -28,10 +28,8 @@ import com.envimate.messageMate.messageBus.MessageBusType;
 
 import java.util.HashMap;
 
-import static com.envimate.httpmate.HttpMate.anHttpMateConfiguredAs;
-import static com.envimate.httpmate.HttpMateChainKeys.REQUEST_BODY_STRING;
-import static com.envimate.httpmate.events.EventDrivenBuilder.EVENT_DRIVEN;
-import static com.envimate.httpmate.http.HttpRequestMethod.GET;
+import static com.envimate.httpmate.HttpMate.anHttpMate;
+import static com.envimate.httpmate.events.EventConfigurators.toUseTheMessageBus;
 import static com.envimate.messageMate.configuration.AsynchronousConfiguration.constantPoolSizeAsynchronousConfiguration;
 import static com.envimate.messageMate.messageBus.MessageBusBuilder.aMessageBus;
 import static com.envimate.messageMate.processingContext.EventType.eventTypeFromString;
@@ -48,9 +46,10 @@ final class EventsHttpMateConfiguration {
                 .withAsynchronousConfiguration(constantPoolSizeAsynchronousConfiguration(4))
                 .build();
 
-        final HttpMate httpMate = anHttpMateConfiguredAs(EVENT_DRIVEN).attachedTo(messageBus)
-                .triggeringTheEvent("trigger").forRequestPath("/trigger").andRequestMethod(GET)
-                .mappingResponsesUsing((event, metaData) -> metaData.set(REQUEST_BODY_STRING, event.toString()))
+        final HttpMate httpMate = anHttpMate()
+                .get("/trigger", eventTypeFromString("trigger"))
+                //.configured(toUseModules(eventModule()))
+                .configured(toUseTheMessageBus(messageBus))
                 .build();
 
         messageBus.subscribeRaw(eventTypeFromString("trigger"), processingContext -> {

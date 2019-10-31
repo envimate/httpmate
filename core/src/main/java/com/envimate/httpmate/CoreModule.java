@@ -23,8 +23,11 @@ package com.envimate.httpmate;
 
 import com.envimate.httpmate.chains.ChainExtender;
 import com.envimate.httpmate.chains.ChainModule;
+import com.envimate.httpmate.chains.DependencyRegistry;
+import com.envimate.httpmate.chains.MetaData;
 import com.envimate.httpmate.closing.ClosingAction;
 import com.envimate.httpmate.closing.ClosingActions;
+import com.envimate.httpmate.handler.distribution.HandlerDistributors;
 import com.envimate.httpmate.exceptions.ExceptionMapper;
 import com.envimate.httpmate.exceptions.ExceptionSerializer;
 import com.envimate.httpmate.filtermap.FilterMapBuilder;
@@ -38,16 +41,22 @@ import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Predicate;
 
 import static com.envimate.httpmate.HttpMateChains.*;
+import static com.envimate.httpmate.backchannel.BackChannelFactory.BACK_CHANNEL_FACTORY;
+import static com.envimate.httpmate.backchannel.LocalBackChannelFactory.localBackChannelFactory;
 import static com.envimate.httpmate.chains.builder.ChainBuilder.extendAChainWith;
 import static com.envimate.httpmate.chains.rules.Consume.consume;
 import static com.envimate.httpmate.chains.rules.Jump.jumpTo;
 import static com.envimate.httpmate.closing.ClosingActions.CLOSING_ACTIONS;
 import static com.envimate.httpmate.closing.ClosingActions.closingActions;
+import static com.envimate.httpmate.handler.distribution.HandlerDistributors.HANDLER_DISTRIBUTORS;
+import static com.envimate.httpmate.handler.distribution.HandlerDistributors.handlerDistributors;
 import static com.envimate.httpmate.exceptions.DefaultExceptionMapper.theDefaultExceptionMapper;
 import static com.envimate.httpmate.exceptions.ExceptionSerializer.exceptionSerializer;
 import static com.envimate.httpmate.filtermap.FilterMapBuilder.filterMapBuilder;
@@ -69,7 +78,8 @@ import static com.envimate.httpmate.util.Validators.validateNotNull;
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class CoreModule implements ChainModule {
-    private final List<Generator<Handler>> handlers = new LinkedList<>();
+    private final Map<GenerationCondition, Object> handlers = new HashMap<>();
+    private final List<Generator<Handler>> lowLevelHandlers = new LinkedList<>();
     private ResponseTemplate responseTemplate = ResponseTemplate.EMPTY_RESPONSE_TEMPLATE;
     private final FilterMapBuilder<Throwable, ExceptionMapper<Throwable>> exceptionMappers = filterMapBuilder();
     private Logger logger = stdoutAndStderrLogger();
@@ -81,11 +91,11 @@ public final class CoreModule implements ChainModule {
         return coreModule;
     }
 
-    public void addHandler(final Handler handler,
-                           final GenerationCondition generationCondition) {
+    public void registerHandler(final GenerationCondition condition,
+                                final Object handler) {
+        validateNotNull(condition, "generationCondition");
         validateNotNull(handler, "handler");
-        validateNotNull(generationCondition, "generationCondition");
-        handlers.add(generator(handler, generationCondition));
+        handlers.put(condition, handler);
     }
 
     public void setLogger(final Logger logger) {
@@ -116,6 +126,22 @@ public final class CoreModule implements ChainModule {
     }
 
     @Override
+    public void init(final MetaData configurationMetaData) {
+        final HandlerDistributors handlerDistributers = handlerDistributors();
+        configurationMetaData.set(HANDLER_DISTRIBUTORS, handlerDistributers);
+        handlerDistributers.register(handler -> handler instanceof Handler, (handler, condition) -> {
+            final Generator<Handler> generator = generator((Handler) handler, condition);
+            lowLevelHandlers.add(generator);
+        });
+    }
+
+    @Override
+    public void configure(final DependencyRegistry dependencyRegistry) {
+        final HandlerDistributors handlerDistributors = dependencyRegistry.getMetaDatum(HANDLER_DISTRIBUTORS);
+        handlers.forEach((condition, handler) -> handlerDistributors.distribute(handler, condition));
+    }
+
+    @Override
     public void register(final ChainExtender extender) {
         final ExceptionSerializer exceptionSerializer = exceptionSerializer(exceptionMappers.build());
         extendAChainWith(extender)
@@ -124,7 +150,7 @@ public final class CoreModule implements ChainModule {
                 .append(PROCESS_HEADERS)
                 .append(PROCESS_BODY)
                 .append(PROCESS_BODY_STRING, streamToStringProcessor())
-                .append(DETERMINE_HANDLER, determineHandlerProcessor(generators(handlers)))
+                .append(DETERMINE_HANDLER, determineHandlerProcessor(generators(lowLevelHandlers)))
                 .append(PREPARE_RESPONSE, initResponseProcessor(), applyResponseTemplateProcessor(responseTemplate))
                 .append(INVOKE_HANDLER, invokeHandlerProcessor())
                 .append(POST_INVOKE)
@@ -136,7 +162,7 @@ public final class CoreModule implements ChainModule {
                 .append(PREPARE_EXCEPTION_RESPONSE, initResponseProcessor())
                 .append(MAP_EXCEPTION_TO_RESPONSE, mapExceptionProcessor(exceptionSerializer))
                 .withTheExceptionChain(ERROR)
-                .withTheFinalAction(jumpTo(POST_PROCESS));
+                .withTheFinalAction(jumpTo(POST_INVOKE));
 
         extender.createChain(POST_PROCESS, consume(), jumpTo(ERROR));
         extender.appendProcessor(POST_PROCESS, stringBodyToStreamProcessor());
@@ -144,5 +170,6 @@ public final class CoreModule implements ChainModule {
         extender.createChain(ERROR, consume(), consume());
 
         extender.addMetaDatum(CLOSING_ACTIONS, closingActions);
+        extender.addMetaDatum(BACK_CHANNEL_FACTORY, localBackChannelFactory());
     }
 }

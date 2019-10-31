@@ -21,6 +21,7 @@
 
 package websockets.lowlevel;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static websockets.givenwhenthen.Given.given;
@@ -45,6 +46,7 @@ public final class LowLevelSpecs {
                 .exactlyOneWebSocketReceivedMessage("foobar");
     }
 
+    @Ignore
     @Test
     public void testMetaDataEntriesFromWebSocketEstablishmentCanBeSavedAndRestoredInWebSocketMessages() {
         given(theLowLevelHttpMateInstanceWithWebSocketsSupport())
@@ -55,6 +57,7 @@ public final class LowLevelSpecs {
                 .exactlyOneWebSocketReceivedMessage("bar");
     }
 
+    @Ignore
     @Test
     public void testTheLoggerIsAvailableDuringWebSocketMessageProcessing() {
         given(theLowLevelHttpMateInstanceWithWebSocketsSupport())

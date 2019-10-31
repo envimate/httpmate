@@ -21,7 +21,7 @@
 
 package com.envimate.httpmate.multipart.handler;
 
-import com.envimate.httpmate.convenience.handler.HttpRequest;
+import com.envimate.httpmate.handler.http.HttpRequest;
 import com.envimate.httpmate.http.Headers;
 import com.envimate.httpmate.http.PathParameters;
 import com.envimate.httpmate.http.QueryParameters;

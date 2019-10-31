@@ -21,21 +21,20 @@
 
 package com.envimate.httpmate.tests.lowlevel.handlers;
 
-import com.envimate.httpmate.convenience.downloads.Download;
-import com.envimate.httpmate.convenience.downloads.DownloadHandler;
-import com.envimate.httpmate.convenience.handler.HttpRequest;
+import com.envimate.httpmate.handler.http.HttpHandler;
+import com.envimate.httpmate.handler.http.HttpRequest;
+import com.envimate.httpmate.handler.http.HttpResponse;
 import com.envimate.httpmate.handler.Handler;
 
-import static com.envimate.httpmate.convenience.downloads.Download.download;
-
-public class MyDownloadHandler implements DownloadHandler {
+public class MyDownloadHandler implements HttpHandler {
 
     public static Handler downloadHandler() {
         return new MyDownloadHandler();
     }
 
     @Override
-    public Download handle(final HttpRequest httpRequest) {
-        return download("download-content", "foo.txt");
+    public void handle(final HttpRequest request, final HttpResponse response) {
+        response.setBody("download-content");
+        response.asDownloadWithFilename("foo.txt");
     }
 }

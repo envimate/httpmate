@@ -32,4 +32,6 @@
     <suppress checks="IllegalCatch" files="Chain" />
     <suppress checks="EmptyBlock" files="Chain" />
     <suppress checks="ClassFanOutComplexity" files="HttpMateConfigurator" />
+    <suppress checks="ExplicitInitialization" files=".*" />
+    <suppress checks="AbbreviationAsWordInName" files="CorsConfigurators" />
 </suppressions>

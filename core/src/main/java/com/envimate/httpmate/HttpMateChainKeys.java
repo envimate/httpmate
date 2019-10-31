@@ -29,6 +29,7 @@ import com.envimate.httpmate.path.Path;
 import com.envimate.httpmate.http.*;
 
 import java.io.InputStream;
+import java.util.List;
 import java.util.Map;
 
 import static com.envimate.httpmate.chains.MetaDataKey.metaDataKey;
@@ -47,7 +48,7 @@ public final class HttpMateChainKeys {
 
     public static final MetaDataKey<Boolean> IS_HTTP_REQUEST = metaDataKey("IS_HTTP_REQUEST");
 
-    public static final MetaDataKey<Map<String, String>> RAW_REQUEST_HEADERS = metaDataKey("RAW_REQUEST_HEADERS");
+    public static final MetaDataKey<Map<String, List<String>>> RAW_REQUEST_HEADERS = metaDataKey("RAW_REQUEST_HEADERS");
     public static final MetaDataKey<Map<String, String>> RAW_REQUEST_QUERY_PARAMETERS =
             metaDataKey("RAW_REQUEST_QUERY_PARAMETERS");
     public static final MetaDataKey<String> RAW_METHOD = metaDataKey("RAW_METHOD");

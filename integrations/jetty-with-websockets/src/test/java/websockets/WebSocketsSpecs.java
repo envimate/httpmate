@@ -21,79 +21,81 @@
 
 package websockets;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
-import static websockets.givenwhenthen.Given.givenTheExampleChatServer;
-import static websockets.givenwhenthen.Given.givenTheExampleHttpMateInstanceWithWebSocketSupport;
+import static websockets.givenwhenthen.Given.*;
+import static websockets.givenwhenthen.configurations.artificial.ArtificialConfiguration.theExampleHttpMateInstanceWithWebSocketsSupport;
+import static websockets.givenwhenthen.configurations.chat.ChatConfiguration.theExampleChatServerHttpMateInstance;
 
 public final class WebSocketsSpecs {
 
     @Test
     public void testAWebSocketCanConnectToHttpMate() {
-        givenTheExampleHttpMateInstanceWithWebSocketSupport()
+        given(theExampleHttpMateInstanceWithWebSocketsSupport())
                 .when().aWebSocketIsConnectedToThePath("/").withoutHeaders()
                 .then().allWebSocketConnectionsCouldBeEstablishedSuccessfully();
     }
 
     @Test
     public void testAWebSocketCannotConnectToAPathNotSpecifiedForWebSockets() {
-        givenTheExampleHttpMateInstanceWithWebSocketSupport()
+        given(theExampleHttpMateInstanceWithWebSocketsSupport())
                 .when().aWebSocketIsConnectedToThePath("/invalid").withoutHeaders()
                 .then().theWebSocketConnectionCouldNotBeEstablished();
     }
 
     @Test
     public void testARequestToANormalRouteStillWorks() {
-        givenTheExampleHttpMateInstanceWithWebSocketSupport()
+        given(theExampleHttpMateInstanceWithWebSocketsSupport())
                 .when().aNormalGETRequestIsIssuedToThePath("/normal").withoutHeaders()
-                .then().theResponseBodyWas("{stringValue=just a normal response}");
+                .then().theResponseBodyWas("{\"stringValue\":\"just a normal response\"}");
     }
 
     @Test
     public void testAWebSocketCannotConnectToAPathOnlySpecifiedForNormalRequests() {
-        givenTheExampleHttpMateInstanceWithWebSocketSupport()
+        given(theExampleHttpMateInstanceWithWebSocketsSupport())
                 .when().aWebSocketIsConnectedToThePath("/normal").withoutHeaders()
                 .then().theWebSocketConnectionCouldNotBeEstablished();
     }
 
     @Test
     public void testAWebSocketCanConnectToAPathThatIsSpecifiedForNormalAndWebSocketRequests() {
-        givenTheExampleHttpMateInstanceWithWebSocketSupport()
+        given(theExampleHttpMateInstanceWithWebSocketsSupport())
                 .when().aWebSocketIsConnectedToThePath("/both").withoutHeaders()
                 .then().allWebSocketConnectionsCouldBeEstablishedSuccessfully();
     }
 
     @Test
     public void testANormalRequestBeIssuedToAPathThatIsSpecifiedForNormalAndWebSocketRequests() {
-        givenTheExampleHttpMateInstanceWithWebSocketSupport()
+        given(theExampleHttpMateInstanceWithWebSocketsSupport())
                 .when().aNormalGETRequestIsIssuedToThePath("/both").withoutHeaders()
-                .then().theResponseBodyWas("{stringValue=this is both}");
+                .then().theResponseBodyWas("{\"stringValue\":\"this is both\"}");
     }
 
     @Test
     public void testAWebSocketCannotConnectUnauthorizedIfAuthorizationIsRequired() {
-        givenTheExampleHttpMateInstanceWithWebSocketSupport()
+        given(theExampleHttpMateInstanceWithWebSocketsSupport())
                 .when().aWebSocketIsConnectedToThePath("/authorized").withoutHeaders()
                 .then().theWebSocketConnectionCouldNotBeEstablished();
     }
 
     @Test
     public void testAWebSocketCanBeAuthenticatedByQueryParameters() {
-        givenTheExampleHttpMateInstanceWithWebSocketSupport()
+        given(theExampleHttpMateInstanceWithWebSocketsSupport())
                 .when().aWebSocketIsConnectedToThePath("/authorized?username=admin").withoutHeaders()
                 .then().allWebSocketConnectionsCouldBeEstablishedSuccessfully();
     }
 
     @Test
     public void testAWebSocketCanBeAuthenticatedByHeaderValues() {
-        givenTheExampleHttpMateInstanceWithWebSocketSupport()
+        given(theExampleHttpMateInstanceWithWebSocketsSupport())
                 .when().aWebSocketIsConnectedToThePath("/authorized").withTheHeaders("username=admin")
                 .then().allWebSocketConnectionsCouldBeEstablishedSuccessfully();
     }
 
     @Test
     public void testTheFramesOfAWebSocketAreForwardedToAUseCase() {
-        givenTheExampleHttpMateInstanceWithWebSocketSupport()
+        given(theExampleHttpMateInstanceWithWebSocketsSupport())
                 .when().aWebSocketIsConnectedToThePath("/count").withoutHeaders()
                 .andWhen().aMessageIsSentWithViaTheMostRecentlyEstablishedWebSocketWithEmptyContent()
                 .andWhen().itIsWaitedUntilTheCounterOfTheCountUseCaseReaches(1)
@@ -102,7 +104,7 @@ public final class WebSocketsSpecs {
 
     @Test
     public void testMultipleFramesOfAWebsocketCanBeForwardedToAUseCase() {
-        givenTheExampleHttpMateInstanceWithWebSocketSupport()
+        given(theExampleHttpMateInstanceWithWebSocketsSupport())
                 .when().aWebSocketIsConnectedToThePath("/count").withoutHeaders()
                 .andWhen().aMessageIsSentWithViaTheMostRecentlyEstablishedWebSocketWithEmptyContent()
                 .andWhen().aMessageIsSentWithViaTheMostRecentlyEstablishedWebSocketWithEmptyContent()
@@ -113,7 +115,7 @@ public final class WebSocketsSpecs {
 
     @Test
     public void testOneWebSocketCanSendMessagesToMulipleUseCases() {
-        givenTheExampleHttpMateInstanceWithWebSocketSupport()
+        given(theExampleHttpMateInstanceWithWebSocketsSupport())
                 .when().aWebSocketIsConnectedToThePath("/").withoutHeaders()
                 .andWhen().aMessageIsSentWithViaTheMostRecentlyEstablishedWebSocketWithTheContent("{ \"useCase\": \"A\" }")
                 .andWhen().aMessageIsSentWithViaTheMostRecentlyEstablishedWebSocketWithTheContent("{ \"useCase\": \"B\" }")
@@ -127,92 +129,95 @@ public final class WebSocketsSpecs {
 
     @Test
     public void testAUseCaseCanRespondViaTheWebSocket() {
-        givenTheExampleHttpMateInstanceWithWebSocketSupport()
+        given(theExampleHttpMateInstanceWithWebSocketsSupport())
                 .when().aWebSocketIsConnectedToThePath("/query_foo").withoutHeaders()
                 .andWhen().aMessageIsSentWithViaTheMostRecentlyEstablishedWebSocketWithEmptyContent()
                 .andWhen().itIsWaitedForTheReceptionOfAFrame()
-                .then().exactlyOneWebSocketReceivedMessage("{stringValue=foo}");
+                .then().exactlyOneWebSocketReceivedMessage("{\"stringValue\":\"foo\"}");
     }
 
     @Test
     public void testTheContentOfAFrameCanGetMappedToAUseCaseParameter() {
-        givenTheExampleHttpMateInstanceWithWebSocketSupport()
+        given(theExampleHttpMateInstanceWithWebSocketsSupport())
                 .when().aWebSocketIsConnectedToThePath("/echo").withoutHeaders()
                 .andWhen().aMessageIsSentWithViaTheMostRecentlyEstablishedWebSocketWithTheContent("{ \"echoValue\": \"test\" }")
                 .andWhen().itIsWaitedForTheReceptionOfAFrame()
-                .then().exactlyOneWebSocketReceivedMessage("{stringValue=test}");
+                .then().exactlyOneWebSocketReceivedMessage("{\"stringValue\":\"test\"}");
     }
 
     @Test
     public void testAWebSocketCanConnectToAParameterizedPath() {
-        givenTheExampleHttpMateInstanceWithWebSocketSupport()
+        given(theExampleHttpMateInstanceWithWebSocketsSupport())
                 .when().aWebSocketIsConnectedToThePath("/pre/foo/post").withoutHeaders()
                 .then().allWebSocketConnectionsCouldBeEstablishedSuccessfully();
     }
 
     @Test
     public void testPathParametersCanBeMappedToUseCaseParameters() {
-        givenTheExampleHttpMateInstanceWithWebSocketSupport()
+        given(theExampleHttpMateInstanceWithWebSocketsSupport())
                 .when().aWebSocketIsConnectedToThePath("/pre/yxcv/post").withoutHeaders()
                 .andWhen().aMessageIsSentWithViaTheMostRecentlyEstablishedWebSocketWithEmptyContent()
                 .andWhen().itIsWaitedForTheReceptionOfAFrame()
-                .then().exactlyOneWebSocketReceivedMessage("{stringValue=yxcv}");
+                .then().exactlyOneWebSocketReceivedMessage("{\"stringValue\":\"yxcv\"}");
     }
 
     @Test
     public void testQueryParametersCanBeMappedToUseCaseParameters() {
-        givenTheExampleHttpMateInstanceWithWebSocketSupport()
+        given(theExampleHttpMateInstanceWithWebSocketsSupport())
                 .when().aWebSocketIsConnectedToThePath("/query?var=hooo").withoutHeaders()
                 .andWhen().aMessageIsSentWithViaTheMostRecentlyEstablishedWebSocketWithEmptyContent()
                 .andWhen().itIsWaitedForTheReceptionOfAFrame()
-                .then().exactlyOneWebSocketReceivedMessage("{stringValue=hooo}");
+                .then().exactlyOneWebSocketReceivedMessage("{\"stringValue\":\"hooo\"}");
     }
 
     @Test
     public void testHeadersCanBeMappedToUseCaseParameters() {
-        givenTheExampleHttpMateInstanceWithWebSocketSupport()
+        given(theExampleHttpMateInstanceWithWebSocketsSupport())
                 .when().aWebSocketIsConnectedToThePath("/header").withTheHeaders("var=mmm")
                 .andWhen().aMessageIsSentWithViaTheMostRecentlyEstablishedWebSocketWithEmptyContent()
                 .andWhen().itIsWaitedForTheReceptionOfAFrame()
-                .then().exactlyOneWebSocketReceivedMessage("{stringValue=mmm}");
+                .then().exactlyOneWebSocketReceivedMessage("{\"stringValue\":\"mmm\"}");
     }
 
+    @Ignore
     @Test
     public void testAWebSocketCanReceiveArbitraryMessagesFromUseCases() {
-        givenTheExampleChatServer()
+        given(theExampleChatServerHttpMateInstance())
                 .when().aWebSocketIsConnectedToThePath("/subscribe").withTheHeaders("user=elefant")
                 .andWhen().aNormalGETRequestIsIssuedToThePath("/send").withTheHeaders("user=maus", "content=hallo", "recipient=elefant")
                 .andWhen().itIsWaitedForTheReceptionOfAFrame()
                 .then().allWebSocketConnectionsCouldBeEstablishedSuccessfully()
-                .exactlyOneWebSocketReceivedMessage("hallo");
+                .exactlyOneWebSocketReceivedMessage("{\"recipient\":\"elefant\",\"content\":\"hallo\"}");
     }
 
+    @Ignore
     @Test
     public void testAMultiBrowsertabAwareChatServerCanBeImplemented() {
-        givenTheExampleChatServer()
+        given(theExampleChatServerHttpMateInstance())
                 .when().aWebSocketIsConnectedToThePath("/subscribe").withTheHeaders("user=elefant")
                 .andWhen().aWebSocketIsConnectedToThePath("/subscribe").withTheHeaders("user=elefant")
                 .andWhen().aNormalGETRequestIsIssuedToThePath("/send").withTheHeaders("user=maus", "content=hallo", "recipient=elefant")
                 .andWhen().itIsWaitedForTheReceptionOfAFrame()
                 .andWhen().itIsWaitedForTheReceptionOfAFrame()
                 .then().allWebSocketConnectionsCouldBeEstablishedSuccessfully()
-                .exactlyTwoDifferentWebSocketsReceivedTheMessage("hallo");
+                .exactlyTwoDifferentWebSocketsReceivedTheMessage("{\"content\":\"hallo\",\"recipient\":\"elefant\"}");
     }
 
+    @Ignore
     @Test
     public void testASendingUseCaseCanDistinguishBetweenDifferentGroupsOfWebSockets() {
-        givenTheExampleChatServer()
+        given(theExampleChatServerHttpMateInstance())
                 .when().aWebSocketIsConnectedToThePath("/subscribe").withTheHeaders("user=elefant")
                 .andWhen().aWebSocketIsConnectedToThePath("/subscribe").withTheHeaders("user=ente")
                 .andWhen().aNormalGETRequestIsIssuedToThePath("/send").withTheHeaders("user=maus", "content=die ente ist doof", "recipient=elefant")
                 .andWhen().itIsWaitedForTheReceptionOfAFrame()
                 .then().allWebSocketConnectionsCouldBeEstablishedSuccessfully()
-                .exactlyOneWebSocketReceivedMessage("die ente ist doof");
+                .exactlyOneWebSocketReceivedMessage("{\"recipient\":\"elefant\",\"content\":\"die ente ist doof\"}");
     }
 
     @Test
     public void testTheNumberOfActiveConnectionsCanBeQueried() {
-        givenTheExampleHttpMateInstanceWithWebSocketSupport()
+        given(theExampleHttpMateInstanceWithWebSocketsSupport())
                 .when().aWebSocketIsConnectedToThePath("/").withoutHeaders()
                 .andWhen().theNumberOfActiveWebSocketsIsQueried()
                 .then().theQueriedNumberOfActiveConnectionsWas(1);
@@ -220,7 +225,7 @@ public final class WebSocketsSpecs {
 
     @Test
     public void testAWebSocketThatGetsClosedByTheClientWillGetCleanedUp() {
-        givenTheExampleHttpMateInstanceWithWebSocketSupport()
+        given(theExampleHttpMateInstanceWithWebSocketsSupport())
                 .when().aWebSocketIsConnectedToThePath("/").withoutHeaders()
                 .andWhen().theNumberOfActiveWebSocketsIsQueried()
                 .then().theQueriedNumberOfActiveConnectionsWas(1)
@@ -232,7 +237,7 @@ public final class WebSocketsSpecs {
 
     @Test
     public void testAWebSocketThatGetsClosedByTheServerWillGetCleanedUp() {
-        givenTheExampleHttpMateInstanceWithWebSocketSupport()
+        given(theExampleHttpMateInstanceWithWebSocketsSupport())
                 .when().aWebSocketIsConnectedToThePath("/close").withoutHeaders()
                 .andWhen().theNumberOfActiveWebSocketsIsQueried()
                 .then().theQueriedNumberOfActiveConnectionsWas(1)
@@ -245,7 +250,7 @@ public final class WebSocketsSpecs {
 
     @Test
     public void testAnExceptionDuringWebSocketMessageProcessingDoesNotCloseTheWebSocket() {
-        givenTheExampleHttpMateInstanceWithWebSocketSupport()
+        given(theExampleHttpMateInstanceWithWebSocketsSupport())
                 .when().aWebSocketIsConnectedToThePath("/exception").withoutHeaders()
                 .andWhen().theNumberOfActiveWebSocketsIsQueried()
                 .then().theQueriedNumberOfActiveConnectionsWas(1)
@@ -254,6 +259,6 @@ public final class WebSocketsSpecs {
                 .then().theQueriedNumberOfActiveConnectionsWas(1)
                 .andWhen().aMessageIsSentWithViaTheMostRecentlyEstablishedWebSocketWithTheContent("{ \"mode\": \"hello\"}")
                 .andWhen().itIsWaitedForTheReceptionOfAFrame()
-                .then().exactlyOneWebSocketReceivedMessage("{stringValue=hello}");
+                .then().exactlyOneWebSocketReceivedMessage("{\"stringValue\":\"hello\"}");
     }
 }

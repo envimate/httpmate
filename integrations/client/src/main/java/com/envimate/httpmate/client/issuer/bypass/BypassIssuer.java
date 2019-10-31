@@ -37,6 +37,7 @@ import java.util.function.Function;
 import static com.envimate.httpmate.HttpMateChainKeys.*;
 import static com.envimate.httpmate.chains.MetaData.emptyMetaData;
 import static com.envimate.httpmate.client.RawClientResponse.rawClientResponse;
+import static com.envimate.httpmate.util.Maps.mapToMultiMap;
 import static com.envimate.httpmate.util.Validators.validateNotNull;
 
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
@@ -55,7 +56,7 @@ public final class BypassIssuer implements Issuer {
         final String fixedPath = basePath.concatenateWithStartingAndTrailingSlash(request.path());
 
         final MetaData metaData = emptyMetaData();
-        metaData.set(RAW_REQUEST_HEADERS, request.headers());
+        metaData.set(RAW_REQUEST_HEADERS, mapToMultiMap(request.headers()));
         metaData.set(RAW_REQUEST_QUERY_PARAMETERS, request.queryParameters());
         metaData.set(RAW_METHOD, request.method());
         metaData.set(RAW_PATH, fixedPath);

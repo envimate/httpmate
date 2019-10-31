@@ -138,5 +138,11 @@
             <version>1.0.25</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>com.envimate.httpmate.integrations</groupId>
+            <artifactId>httpmate-websockets-usecases</artifactId>
+            <version>1.0.25</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 </project>

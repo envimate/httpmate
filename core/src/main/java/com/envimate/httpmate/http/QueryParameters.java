@@ -32,6 +32,7 @@ import java.util.Optional;
 import static com.envimate.httpmate.http.QueryParameterKey.queryParameterKey;
 import static com.envimate.httpmate.util.Maps.*;
 import static com.envimate.httpmate.util.Validators.validateNotNull;
+import static java.lang.String.format;
 
 @ToString
 @EqualsAndHashCode
@@ -48,7 +49,12 @@ public final class QueryParameters {
         return new QueryParameters(queryParameters);
     }
 
-    public Optional<String> getQueryParameter(final String key) {
+    public String getQueryParameter(final String key) {
+        return getOptionalQueryParameter(key)
+                .orElseThrow(() -> new RuntimeException(format("No query parameter with the key '%s'", key)));
+    }
+
+    public Optional<String> getOptionalQueryParameter(final String key) {
         final QueryParameterKey queryParameterKey = queryParameterKey(key);
         return getOptionally(queryParameters, queryParameterKey).map(QueryParameterValue::stringValue);
     }

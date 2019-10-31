@@ -44,7 +44,7 @@ public final class FooBarHandler implements Handler {
     @Override
     public void handle(final MetaData metaData) {
         final Headers headers = metaData.get(REQUEST_HEADERS);
-        final String foo = headers.getHeader("foo").orElseThrow();
+        final String foo = headers.getOptionalHeader("foo").orElseThrow();
         metaData.set(RESPONSE_BODY_STRING, foo);
     }
 }

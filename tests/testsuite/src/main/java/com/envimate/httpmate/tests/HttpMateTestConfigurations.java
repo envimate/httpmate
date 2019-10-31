@@ -24,11 +24,8 @@ package com.envimate.httpmate.tests;
 import com.envimate.httpmate.HttpMate;
 import com.envimate.httpmate.handler.NoHandlerFoundException;
 import com.envimate.httpmate.http.Http;
-import com.envimate.httpmate.security.NotAuthorizedException;
+import com.envimate.httpmate.mapmate.MapMateSerializerAndDeserializer;
 import com.envimate.httpmate.tests.usecases.ToStringWrapper;
-import com.envimate.httpmate.tests.usecases.authorized.AuthorizedUseCase;
-import com.envimate.httpmate.tests.usecases.echoauthentication.EchoAuthenticationInformationUseCase;
-import com.envimate.httpmate.tests.usecases.echoauthentication.EchoAuthenticationInformationValue;
 import com.envimate.httpmate.tests.usecases.echobody.EchoBodyUseCase;
 import com.envimate.httpmate.tests.usecases.echocontenttype.EchoContentTypeUseCase;
 import com.envimate.httpmate.tests.usecases.echomultipart.EchoMultipartUseCase;
@@ -56,6 +53,7 @@ import com.envimate.httpmate.tests.usecases.twoparameters.Parameter2;
 import com.envimate.httpmate.tests.usecases.twoparameters.TwoParametersUseCase;
 import com.envimate.httpmate.tests.usecases.unmappedexception.UnmappedExceptionUseCase;
 import com.envimate.httpmate.tests.usecases.vooooid.VoidUseCase;
+import com.envimate.httpmate.usecases.UseCasesModule;
 import com.envimate.mapmate.builder.MapMate;
 import com.envimate.mapmate.deserialization.Deserializer;
 import com.envimate.mapmate.serialization.Serializer;
@@ -64,28 +62,21 @@ import com.google.gson.Gson;
 import java.util.Map;
 import java.util.Objects;
 
-import static com.envimate.httpmate.HttpMate.anHttpMateConfiguredAs;
-import static com.envimate.httpmate.HttpMateChainKeys.*;
-import static com.envimate.httpmate.convenience.configurators.Configurators.toCustomizeResponsesUsing;
-import static com.envimate.httpmate.convenience.configurators.Configurators.toLogUsing;
-import static com.envimate.httpmate.convenience.configurators.exceptions.ExceptionMappingConfigurator.toMapExceptions;
-import static com.envimate.httpmate.convenience.cors.CorsConfigurator.toProtectAjaxRequestsAgainstCsrfAttacksByTellingTheBrowserThatRequests;
-import static com.envimate.httpmate.events.EventModule.EVENT_TYPE;
-import static com.envimate.httpmate.events.EventsChains.MAP_REQUEST_TO_EVENT;
-import static com.envimate.httpmate.exceptions.DefaultExceptionMapper.theDefaultExceptionMapper;
+import static com.envimate.httpmate.Configurators.toCustomizeResponsesUsing;
+import static com.envimate.httpmate.HttpMate.anHttpMate;
+import static com.envimate.httpmate.HttpMateChainKeys.RESPONSE_HEADERS;
+import static com.envimate.httpmate.HttpMateChainKeys.RESPONSE_STATUS;
+import static com.envimate.httpmate.chains.Configurator.configuratorForType;
+import static com.envimate.httpmate.events.EventConfigurators.toEnrichTheIntermediateMapWithAllRequestData;
+import static com.envimate.httpmate.exceptions.ExceptionConfigurators.toMapExceptionsOfType;
 import static com.envimate.httpmate.http.Http.StatusCodes.METHOD_NOT_ALLOWED;
 import static com.envimate.httpmate.http.Http.StatusCodes.OK;
 import static com.envimate.httpmate.http.HttpRequestMethod.*;
-import static com.envimate.httpmate.logger.Loggers.stderrLogger;
+import static com.envimate.httpmate.logger.LoggerConfigurators.toLogToStderr;
 import static com.envimate.httpmate.mapmate.MapMateSerializerAndDeserializer.mapMateIntegration;
-import static com.envimate.httpmate.security.SecurityConfigurators.toAuthenticateRequests;
-import static com.envimate.httpmate.security.SecurityConfigurators.toAuthorizeRequests;
-import static com.envimate.httpmate.tests.Util.extractUsername;
-import static com.envimate.httpmate.usecases.UseCaseDrivenBuilder.USE_CASE_DRIVEN;
 import static com.envimate.mapmate.deserialization.Deserializer.aDeserializer;
 import static com.envimate.mapmate.filters.ClassFilters.allBut;
 import static com.envimate.mapmate.filters.ClassFilters.allClassesThatHaveAStaticFactoryMethodWithASingleStringArgument;
-import static com.envimate.messageMate.processingContext.EventType.eventTypeFromString;
 import static java.util.Map.of;
 
 public final class HttpMateTestConfigurations {
@@ -117,90 +108,65 @@ public final class HttpMateTestConfigurations {
 
     @SuppressWarnings("unchecked")
     public static HttpMate theHttpMateInstanceUsedForTesting() {
-        final HttpMate httpMate = anHttpMateConfiguredAs(USE_CASE_DRIVEN)
-                .servingTheUseCase(TestUseCase.class).forRequestPath("/test").andRequestMethods(GET, POST, PUT, DELETE)
-                .servingTheUseCase(EchoBodyUseCase.class).forRequestPath("/echo_body").andRequestMethods(GET, POST, PUT, DELETE)
-                .servingTheUseCase(MappedExceptionUseCase.class).forRequestPath("/mapped_exception").andRequestMethod(GET)
-                .servingTheUseCase(UnmappedExceptionUseCase.class).forRequestPath("/unmapped_exception").andRequestMethod(GET)
-                .servingTheUseCase(WildCardUseCase.class).forRequestPath("/wild/<parameter>/card").andRequestMethod(GET)
+        final MapMateSerializerAndDeserializer mapMate = mapMateIntegration(MAP_MATE).build();
+        final HttpMate httpMate = anHttpMate()
+                .serving(TestUseCase.class).forRequestPath("/test").andRequestMethods(GET, POST, PUT, DELETE)
+                .serving(EchoBodyUseCase.class).forRequestPath("/echo_body").andRequestMethods(GET, POST, PUT, DELETE)
+                .get("/mapped_exception", MappedExceptionUseCase.class)
+                .get("/unmapped_exception", UnmappedExceptionUseCase.class)
+                .get("/wild/<parameter>/card", WildCardUseCase.class)
                 .get("/parameterized", ParameterizedUseCase.class)
-                .servingTheUseCase(QueryParametersUseCase.class).forRequestPath("/queryparameters").andRequestMethod(GET)
-                .servingTheUseCase(HeaderUseCase.class).forRequestPath("/headers").andRequestMethod(GET)
-                .servingTheUseCase(HeadersInResponseUseCase.class).forRequestPath("/headers_response").andRequestMethod(GET)
-                .servingTheUseCase(EchoContentTypeUseCase.class).forRequestPath("/echo_contenttype").andRequestMethod(GET)
-                .servingTheUseCase(SetContentTypeInResponseUseCase.class).forRequestPath("/set_contenttype_in_response").andRequestMethod(GET)
-                .servingTheUseCase(EchoMultipartUseCase.class).forRequestPath("/multipart_echo").andRequestMethods(GET, POST, PUT, DELETE)
-                .servingTheUseCase(EchoAuthenticationInformationUseCase.class).forRequestPath("/authentication_echo").andRequestMethods(GET, POST)
-                .post("/authorized", AuthorizedUseCase.class)
-                .servingTheUseCase(MapMateUseCase.class).forRequestPath("/mapmate/<value1>").andRequestMethods(GET, POST)
-                .servingTheUseCase(EchoPathAndQueryParametersUseCase.class).forRequestPath("/echo_path_and_query_parameters/<wildcard>").andRequestMethod(GET)
-                .servingTheUseCase(TwoParametersUseCase.class).forRequestPath("/twoparameters").andRequestMethod(GET)
-                .servingTheUseCase(VoidUseCase.class).forRequestPath("/void").andRequestMethod(GET)
+                .get("/queryparameters", QueryParametersUseCase.class)
+                .get("/headers", HeaderUseCase.class)
+                .get("/headers_response", HeadersInResponseUseCase.class)
+                .get("/echo_contenttype", EchoContentTypeUseCase.class)
+                .get("/set_contenttype_in_response", SetContentTypeInResponseUseCase.class)
+                .serving(EchoMultipartUseCase.class).forRequestPath("/multipart_echo").andRequestMethods(GET, POST, PUT, DELETE)
+                .serving(MapMateUseCase.class).forRequestPath("/mapmate/<value1>").andRequestMethods(GET, POST)
+                .get("/echo_path_and_query_parameters/<wildcard>", EchoPathAndQueryParametersUseCase.class)
+                .get("/twoparameters", TwoParametersUseCase.class)
+                .get("/void", VoidUseCase.class)
                 .put("/multipart_and_mapmate", MultipartAndMapmateUseCase.class)
-                .mappingUseCaseParametersOfType(Parameter.class).using((targetType, map) -> new Parameter())
-                .mappingUseCaseParametersOfType(WildcardParameter.class).using((targetType, map) -> new WildcardParameter((String) map.get("parameter")))
-                .mappingUseCaseParametersOfType(QueryParametersParameter.class).using((targetType, map) -> new QueryParametersParameter((Map<String, String>) (Object) map))
-                .mappingUseCaseParametersOfType(HeadersParameter.class).using((targetType, map) -> new HeadersParameter((Map<String, String>) (Object) map))
-                .mappingUseCaseParametersOfType(EchoPathAndQueryParametersValue.class).using((targetType, map) -> new EchoPathAndQueryParametersValue((Map<String, String>) (Object) map))
-                .mappingUseCaseParametersOfType(EchoAuthenticationInformationValue.class).using((targetType, map) -> {
-                    final String username = (String) map.getOrDefault("username", "guest");
-                    return new EchoAuthenticationInformationValue(username);
-                })
-                .mappingUseCaseParametersOfType(Parameter1.class).using(((targetType, map) -> {
-                    final Object param1 = map.get("param1");
-                    return new Parameter1((String) param1);
+
+                .configured(configuratorForType(UseCasesModule.class, useCasesModule -> {
+                    useCasesModule.addRequestMapperForType(Parameter.class, (targetType, map) -> new Parameter());
+                    useCasesModule.addRequestMapperForType(WildcardParameter.class, (targetType, map) -> new WildcardParameter((String) map.get("parameter")));
+                    useCasesModule.addRequestMapperForType(QueryParametersParameter.class, (targetType, map) -> new QueryParametersParameter((Map<String, String>) (Object) map));
+                    useCasesModule.addRequestMapperForType(HeadersParameter.class, (targetType, map) -> new HeadersParameter((Map<String, String>) (Object) map));
+                    useCasesModule.addRequestMapperForType(EchoPathAndQueryParametersValue.class, (targetType, map) -> new EchoPathAndQueryParametersValue((Map<String, String>) (Object) map));
+                    useCasesModule.addRequestMapperForType(Parameter1.class, (targetType, map) -> {
+                        final Object param1 = map.get("param1");
+                        return new Parameter1((String) param1);
+                    });
+                    useCasesModule.addRequestMapperForType(Parameter2.class, (targetType, map) -> {
+                        final Object param2 = map.get("param2");
+                        return new Parameter2((String) param2);
+                    });
+
+                    useCasesModule.addResponseSerializerForType(HeadersInResponseReturnValue.class, value -> of(value.key, value.value));
+                    useCasesModule.addResponseSerializerForType(SetContentTypeInResponseValue.class, value -> of("contentType", value.value));
+                    useCasesModule.addResponseSerializer(Objects::isNull, object -> null);
+                    useCasesModule.addResponseSerializerForType(String.class, string -> of("response", string));
+                    useCasesModule.addResponseSerializerForType(ToStringWrapper.class, wrapper -> of("response", wrapper.toString()));
+
+                    useCasesModule.setSerializerAndDeserializer(mapMate);
                 }))
-                .mappingUseCaseParametersOfType(Parameter2.class).using(((targetType, map) -> {
-                    final Object param2 = map.get("param2");
-                    return new Parameter2((String) param2);
+                .configured(toEnrichTheIntermediateMapWithAllRequestData())
+                .configured(mapMate)
+                .configured(toMapExceptionsOfType(NoHandlerFoundException.class, (exception, response) -> {
+                    response.setStatus(METHOD_NOT_ALLOWED);
+                    response.setBody("No use case found.");
                 }))
-                .serializingResponseObjectsOfType(HeadersInResponseReturnValue.class).using(value -> of(value.key, value.value))
-                .serializingResponseObjectsOfType(SetContentTypeInResponseValue.class).using(value -> of("contentType", value.value))
-                .serializingResponseObjectsThat(Objects::isNull).using(object -> null)
-                .serializingResponseObjectsOfType(String.class).using(string -> of("response", string))
-                .serializingResponseObjectsOfType(ToStringWrapper.class).using(wrapper -> of("response", wrapper.toString()))
-                .mappingRequestsAndResponsesUsing(mapMateIntegration(MAP_MATE).build())
-                .configured(toMapExceptions()
-                        .ofType(NoHandlerFoundException.class)
-                        .toResponsesUsing((exception, metaData) -> {
-                            metaData.set(RESPONSE_STATUS, METHOD_NOT_ALLOWED);
-                            metaData.set(RESPONSE_BODY_STRING, "No use case found.");
-                        })
-                        .ofType(MappedException.class).toResponsesUsing((exception, metaData) -> metaData.set(RESPONSE_STATUS, 201))
-                        .ofType(NotAuthorizedException.class).toResponsesUsing((object, metaData) -> {
-                            metaData.set(RESPONSE_STATUS, 403);
-                            metaData.set(RESPONSE_BODY_STRING, "Go away.");
-                        })
-                        .ofAllRemainingTypesUsing(theDefaultExceptionMapper())
-                )
+                .configured(toMapExceptionsOfType(MappedException.class, (exception, response) -> response.setStatus(201)))
 
                 .configured(toCustomizeResponsesUsing(metaData -> {
                     metaData.set(RESPONSE_STATUS, OK);
                     metaData.get(RESPONSE_HEADERS).put(Http.Headers.CONTENT_TYPE, "application/json");
                 }))
 
-                .configured(toProtectAjaxRequestsAgainstCsrfAttacksByTellingTheBrowserThatRequests()
-                        .usingTheHttpMethods(GET, POST, PUT, DELETE)
-                        .canOriginateFromAnyHost()
-                        .andOnlyContainTheHeaders("X-Custom-Header", "Upgrade-Insecure-Requests")
-                        .exposingNoHeadersExceptForSimpleHeaders()
-                        .notRequiringRessourceUsersToForwardCredentials()
-                        .withTheBrowserDefaultTimeOutSettings())
+                .configured(toLogToStderr())
 
-                .configured(toLogUsing(stderrLogger()))
-
-                .configured(toAuthenticateRequests().afterBodyProcessing().using(metaData -> metaData.getOptional(REQUEST_BODY_MAP).map(map -> map.get("username"))))
-                .configured(toAuthenticateRequests().beforeBodyProcessing().using(metaData -> metaData.get(REQUEST_HEADERS).getHeader("username")))
-                .configured(toAuthenticateRequests().beforeBodyProcessing().using(metaData -> metaData.get(QUERY_PARAMETERS).getQueryParameter("username")))
-                .configured(toAuthenticateRequests().afterBodyProcessing().using(metaData -> metaData.getOptional(REQUEST_BODY_STRING).map(body -> extractUsername(body).orElse(null))))
-                .configured(toAuthorizeRequests().inPhase(MAP_REQUEST_TO_EVENT).using(metaData -> metaData.getOptional(EVENT_TYPE).map(eventType -> {
-                    if (!eventType.equals(eventTypeFromString("com.envimate.httpmate.tests.usecases.authorized.AuthorizedUseCase"))) {
-                        return true;
-                    }
-                    return metaData.getOptional(AUTHENTICATION_INFORMATION).map("admin"::equals).orElse(false);
-                }).orElse(true)))
                 .build();
-        System.out.println("httpMate.dumpChains() = " + httpMate.dumpChains());
         return httpMate;
     }
 }

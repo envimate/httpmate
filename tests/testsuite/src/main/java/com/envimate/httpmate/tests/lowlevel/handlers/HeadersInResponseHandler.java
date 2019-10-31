@@ -21,9 +21,9 @@
 
 package com.envimate.httpmate.tests.lowlevel.handlers;
 
-import com.envimate.httpmate.convenience.handler.HttpHandler;
-import com.envimate.httpmate.convenience.handler.HttpRequest;
-import com.envimate.httpmate.convenience.handler.HttpResponse;
+import com.envimate.httpmate.handler.http.HttpHandler;
+import com.envimate.httpmate.handler.http.HttpRequest;
+import com.envimate.httpmate.handler.http.HttpResponse;
 import com.envimate.httpmate.handler.Handler;
 
 public final class HeadersInResponseHandler implements HttpHandler {

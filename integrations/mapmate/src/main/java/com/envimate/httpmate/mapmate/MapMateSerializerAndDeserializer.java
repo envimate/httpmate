@@ -25,7 +25,8 @@ import com.envimate.httpmate.chains.ChainModule;
 import com.envimate.httpmate.chains.DependencyRegistry;
 import com.envimate.httpmate.http.headers.ContentType;
 import com.envimate.httpmate.marshalling.MarshallingModule;
-import com.envimate.httpmate.usecases.usecase.SerializerAndDeserializer;
+import com.envimate.httpmate.usecases.UseCasesModule;
+import com.envimate.httpmate.usecases.serializing.SerializerAndDeserializer;
 import com.envimate.mapmate.builder.MapMate;
 import com.envimate.mapmate.marshalling.MarshallingType;
 import lombok.AccessLevel;
@@ -135,5 +136,7 @@ public final class MapMateSerializerAndDeserializer implements SerializerAndDese
                 });
         contentTypeMappingsForMarshalling.forEach((contentType, marshallingType) -> marshallingModule
                 .addMarshaller(contentType, map -> mapMate.serializer().serializeFromMap(map, marshallingType)));
+
+        dependencyRegistry.getDependency(UseCasesModule.class).setSerializerAndDeserializer(this);
     }
 }

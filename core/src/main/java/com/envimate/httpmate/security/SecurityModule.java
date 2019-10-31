@@ -25,49 +25,29 @@ import com.envimate.httpmate.chains.ChainExtender;
 import com.envimate.httpmate.chains.ChainModule;
 import com.envimate.httpmate.chains.ChainName;
 import com.envimate.httpmate.chains.Processor;
+import com.envimate.httpmate.util.Validators;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-
-import static com.envimate.httpmate.util.Validators.validateNotNull;
 
 @ToString
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class SecurityModule implements ChainModule {
-    private final Map<ChainName, List<Authenticator>> authenticators = new HashMap<>();
-    private final Map<ChainName, List<Authorizer>> authorizers = new HashMap<>();
-    private final Map<ChainName, List<Processor>> filters = new HashMap<>();
+    private final List<SecurityProcessor> securityProcessors = new LinkedList<>();
 
     public static ChainModule securityModule() {
         return new SecurityModule();
     }
 
-    public void addAuthenticator(final ChainName chainName,
-                                 final Authenticator authenticator) {
-        validateNotNull(chainName, "chainName");
-        validateNotNull(authenticator, "authenticator");
-        add(chainName, authenticator, authenticators);
-    }
-
-    public void addAuthorizer(final ChainName chainName,
-                              final Authorizer authorizer) {
-        validateNotNull(chainName, "chainName");
-        validateNotNull(authorizer, "authorizer");
-        add(chainName, authorizer, authorizers);
-    }
-
-    public void addFilter(final ChainName chainName,
-                          final Processor filter) {
-        validateNotNull(chainName, "chainName");
-        validateNotNull(filter, "filter");
-        add(chainName, filter, filters);
+    public void addSecurityProcessor(final SecurityProcessor securityProcessor) {
+        Validators.validateNotNull(securityProcessor, "securityProcessor");
+        securityProcessors.add(securityProcessor);
     }
 
     private static <T extends Processor> void add(final ChainName chainName,
@@ -79,11 +59,9 @@ public final class SecurityModule implements ChainModule {
 
     @Override
     public void register(final ChainExtender extender) {
-        authenticators.forEach((chainName, authenticatorsForChain) ->
-                authenticatorsForChain.forEach(authenticator -> extender.appendProcessor(chainName, authenticator)));
-        authorizers.forEach((chainName, authorizersForChain) ->
-                authorizersForChain.forEach(authorizer -> extender.appendProcessor(chainName, authorizer)));
-        filters.forEach((chainName, filtersForChain) ->
-                filtersForChain.forEach(filter -> extender.appendProcessor(chainName, filter)));
+        securityProcessors.forEach(securityProcessor -> {
+            final ChainName chainName = securityProcessor.chainName();
+            extender.appendProcessor(chainName, securityProcessor);
+        });
     }
 }

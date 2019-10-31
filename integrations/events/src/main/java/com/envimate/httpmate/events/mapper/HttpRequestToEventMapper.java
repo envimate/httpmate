@@ -22,11 +22,11 @@
 package com.envimate.httpmate.events.mapper;
 
 import com.envimate.httpmate.chains.MetaData;
-import com.envimate.httpmate.convenience.handler.HttpRequest;
+import com.envimate.httpmate.handler.http.HttpRequest;
 
 import java.util.Map;
 
-import static com.envimate.httpmate.convenience.handler.HttpRequest.httpRequest;
+import static com.envimate.httpmate.handler.http.HttpRequest.httpRequest;
 
 public interface HttpRequestToEventMapper extends RequestToEventMapper {
 

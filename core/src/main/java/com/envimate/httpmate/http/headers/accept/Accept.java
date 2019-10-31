@@ -21,14 +21,16 @@
 
 package com.envimate.httpmate.http.headers.accept;
 
-import com.envimate.httpmate.http.Headers;
+import com.envimate.httpmate.chains.MetaData;
 import com.envimate.httpmate.http.headers.ContentType;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
+import static com.envimate.httpmate.HttpMateChainKeys.REQUEST_HEADERS;
 import static com.envimate.httpmate.http.headers.accept.MimeType.parseMimeType;
+import static com.envimate.httpmate.http.headers.accept.MimeTypeMatcher.parseMimeTypeMatcher;
 
 @ToString
 @EqualsAndHashCode
@@ -36,10 +38,12 @@ import static com.envimate.httpmate.http.headers.accept.MimeType.parseMimeType;
 public final class Accept {
     private final MimeTypeMatcher mimeTypeMatcher;
 
-    public static Accept fromHeaders(final Headers headers) {
-        final String header = headers.getHeader("Accept").orElse("*/*");
-        final MimeTypeMatcher mimeTypeMatcher = MimeTypeMatcher.parseMimeTypeMatcher(header);
-        return new Accept(mimeTypeMatcher);
+    public static Accept fromMetaData(final MetaData metaData) {
+        return metaData.getOptional(REQUEST_HEADERS).map(headers -> {
+            final String header = headers.getOptionalHeader("Accept").orElse("*/*");
+            final MimeTypeMatcher mimeTypeMatcher = parseMimeTypeMatcher(header);
+            return new Accept(mimeTypeMatcher);
+        }).orElseGet(() -> new Accept(parseMimeTypeMatcher("*/*")));
     }
 
     public boolean contentTypeIsAccepted(final ContentType contentType) {

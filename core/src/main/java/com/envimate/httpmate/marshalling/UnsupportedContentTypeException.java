@@ -29,7 +29,7 @@ import static com.envimate.httpmate.util.Validators.validateNotNull;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
 
-public final class UnsupportedContentTypeException extends RuntimeException {
+public final class UnsupportedContentTypeException extends MarshallingException {
 
     private UnsupportedContentTypeException(final String message) {
         super(message);

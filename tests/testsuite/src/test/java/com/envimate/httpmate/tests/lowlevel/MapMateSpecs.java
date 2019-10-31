@@ -32,7 +32,7 @@ import org.junit.runners.Parameterized;
 import java.util.Collection;
 import java.util.Map;
 
-import static com.envimate.httpmate.HttpMate.aLowLevelHttpMate;
+import static com.envimate.httpmate.HttpMate.anHttpMate;
 import static com.envimate.httpmate.http.headers.ContentType.fromString;
 import static com.envimate.httpmate.mapmate.MapMateIntegration.toMarshalRequestAndResponseBodiesUsingMapMate;
 import static com.envimate.httpmate.tests.givenwhenthen.Given.given;
@@ -65,9 +65,9 @@ public final class MapMateSpecs {
                 })
                 .usingRecipe(urlEncodedMarshaller())
                 .build();
-        return aLowLevelHttpMate()
-                .post("/", (request, response) -> request.bodyAsMap().ifPresent(response::setBody))
-                .thatIs().configured(toMarshalRequestAndResponseBodiesUsingMapMate(mapMate)
+        return anHttpMate()
+                .post("/", (request, response) -> request.optionalBodyMap().ifPresent(response::setBody))
+                .configured(toMarshalRequestAndResponseBodiesUsingMapMate(mapMate)
                         .matchingTheContentType(fromString("custom")).toTheMarshallerType(marshallingType("custom")))
                 .build();
     }

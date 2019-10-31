@@ -52,9 +52,4 @@ public final class EventSpecs {
                 .theStatusCodeWas(200)
                 .theResponseBodyWas("");
     }
-
-    /*
-        exceptions get handled
-        unanswered event
-     */
 }

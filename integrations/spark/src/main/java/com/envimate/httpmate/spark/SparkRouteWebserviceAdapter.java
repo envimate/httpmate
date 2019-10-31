@@ -33,6 +33,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -41,6 +42,7 @@ import static com.envimate.httpmate.chains.MetaData.emptyMetaData;
 import static com.envimate.httpmate.util.Streams.streamInputStreamToOutputStream;
 import static com.envimate.httpmate.util.Streams.stringToInputStream;
 import static java.util.Arrays.stream;
+import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
 
@@ -55,8 +57,8 @@ final class SparkRouteWebserviceAdapter implements Route {
         metaData.set(RAW_METHOD, httpRequestMethod);
         final String path = request.pathInfo();
         metaData.set(RAW_PATH, path);
-        final Map<String, String> headers = request.headers().stream()
-                .collect(toMap(key -> key, request::headers));
+        final Map<String, List<String>> headers = request.headers().stream()
+                .collect(toMap(key -> key, header -> singletonList(request.headers(header))));
         metaData.set(RAW_REQUEST_HEADERS, headers);
         final Map<String, String> queryParameters = extractQueryParameters(request);
         metaData.set(RAW_REQUEST_QUERY_PARAMETERS, queryParameters);

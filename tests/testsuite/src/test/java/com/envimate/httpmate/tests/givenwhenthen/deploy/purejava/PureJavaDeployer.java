@@ -22,14 +22,14 @@
 package com.envimate.httpmate.tests.givenwhenthen.deploy.purejava;
 
 import com.envimate.httpmate.HttpMate;
-import com.envimate.httpmate.convenience.endpoints.PureJavaEndpoint;
+import com.envimate.httpmate.purejavaendpoint.PureJavaEndpoint;
 import com.envimate.httpmate.tests.givenwhenthen.client.ClientFactory;
 import com.envimate.httpmate.tests.givenwhenthen.deploy.Deployer;
 import com.envimate.httpmate.tests.givenwhenthen.deploy.Deployment;
 
 import java.util.List;
 
-import static com.envimate.httpmate.convenience.endpoints.PureJavaEndpoint.pureJavaEndpointFor;
+import static com.envimate.httpmate.purejavaendpoint.PureJavaEndpoint.pureJavaEndpointFor;
 import static com.envimate.httpmate.tests.givenwhenthen.client.real.RealHttpMateClientFactory.theRealHttpMateClient;
 import static com.envimate.httpmate.tests.givenwhenthen.client.real.RealHttpMateClientWithConnectionReuseFactory.theRealHttpMateClientWithConnectionReuse;
 import static com.envimate.httpmate.tests.givenwhenthen.client.shitty.ShittyClientFactory.theShittyTestClient;

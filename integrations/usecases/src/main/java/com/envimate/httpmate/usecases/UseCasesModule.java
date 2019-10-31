@@ -23,10 +23,13 @@ package com.envimate.httpmate.usecases;
 
 import com.envimate.httpmate.chains.ChainExtender;
 import com.envimate.httpmate.chains.ChainModule;
+import com.envimate.httpmate.chains.MetaData;
 import com.envimate.httpmate.chains.MetaDataKey;
-import com.envimate.httpmate.usecases.usecase.SerializerAndDeserializer;
+import com.envimate.httpmate.handler.distribution.HandlerDistributors;
+import com.envimate.httpmate.usecases.serializing.SerializerAndDeserializer;
 import com.envimate.messageMate.mapping.Demapifier;
 import com.envimate.messageMate.mapping.Mapifier;
+import com.envimate.messageMate.mapping.SerializationFilters;
 import com.envimate.messageMate.messageBus.MessageBus;
 import com.envimate.messageMate.processingContext.EventType;
 import com.envimate.messageMate.serializedMessageBus.SerializedMessageBus;
@@ -50,9 +53,15 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 import static com.envimate.httpmate.chains.MetaDataKey.metaDataKey;
+import static com.envimate.httpmate.handler.distribution.HandlerDistributors.HANDLER_DISTRIBUTORS;
 import static com.envimate.httpmate.events.EventModule.MESSAGE_BUS;
+import static com.envimate.httpmate.events.EventModule.eventModule;
 import static com.envimate.httpmate.util.Validators.validateNotNull;
+import static com.envimate.messageMate.mapping.DeserializationFilters.areOfType;
+import static com.envimate.messageMate.processingContext.EventType.eventTypeFromClass;
 import static com.envimate.messageMate.useCases.useCaseAdapter.UseCaseInvocationBuilder.anUseCaseAdapter;
+import static java.util.Collections.emptyMap;
+import static java.util.Collections.singletonList;
 import static java.util.Optional.ofNullable;
 
 @ToString
@@ -82,6 +91,12 @@ public final class UseCasesModule implements ChainModule {
         useCaseToEventMappings.put(useCaseClass, eventType);
     }
 
+    @SuppressWarnings("unchecked")
+    public <T> void addRequestMapperForType(final Class<T> type,
+                                            final Demapifier<T> requestMapper) {
+        addRequestMapper((clazz, event) -> areOfType(type).test(clazz, event), requestMapper);
+    }
+
     @SuppressWarnings({"unchecked", "rawtypes"})
     public void addRequestMapper(final EventFilter filter,
                                  final Demapifier<?> requestMapper) {
@@ -90,6 +105,12 @@ public final class UseCasesModule implements ChainModule {
         deserializers.add(deserializationStage -> deserializationStage
                 .mappingRequestsToUseCaseParametersThat((BiPredicate<Class<?>, Map<String, Object>>) filter::filter)
                 .using((Demapifier<Object>) requestMapper));
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T> void addResponseSerializerForType(final Class<T> type,
+                                                 final Mapifier<T> responseMapper) {
+        addResponseSerializer(SerializationFilters.areOfType(type), (Mapifier<Object>) responseMapper);
     }
 
     public void addResponseSerializer(final Predicate<Object> filter,
@@ -101,8 +122,24 @@ public final class UseCasesModule implements ChainModule {
                 .using(responseMapper));
     }
 
-    void setSerializerAndDeserializer(final SerializerAndDeserializer serializerAndDeserializer) {
+    public void setSerializerAndDeserializer(final SerializerAndDeserializer serializerAndDeserializer) {
         this.serializerAndDeserializer = serializerAndDeserializer;
+    }
+
+    @Override
+    public List<ChainModule> supplyModulesIfNotAlreadyPreset() {
+        return singletonList(eventModule());
+    }
+
+    @Override
+    public void init(final MetaData configurationMetaData) {
+        final HandlerDistributors handlerDistributors = configurationMetaData.get(HANDLER_DISTRIBUTORS);
+        handlerDistributors.register(handler -> handler instanceof Class, (handler, condition) -> {
+            final Class<?> useCaseClass = (Class<?>) handler;
+            final EventType eventType = eventTypeFromClass(useCaseClass);
+            useCaseToEventMappings.put(useCaseClass, eventType);
+            handlerDistributors.distribute(eventType, condition);
+        });
     }
 
     @Override
@@ -129,6 +166,7 @@ public final class UseCasesModule implements ChainModule {
 
         serializers.forEach(serializer -> serializer.accept(useCaseAdapterResponseSerializationStep1Builder));
         final UseCaseAdapter useCaseAdapter = useCaseAdapterResponseSerializationStep1Builder
+                .serializingResponseObjectsOfTypeVoid().using(object -> emptyMap())
                 .serializingObjectsByDefaultUsing(object -> serializerAndDeserializer.serialize(object))
                 .puttingExceptionObjectNamedAsExceptionIntoResponseMapByDefault()
                 .buildAsStandaloneAdapter();

@@ -38,7 +38,6 @@ import static com.envimate.httpmate.websockets.WebsocketChainKeys.RECIPIENT_WEBS
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class SendToWebSocketsProcessor implements Processor {
-    //private final WebSocketRegistry registry;
 
     public static Processor sendToWebSocketsProcessor() {
         return new SendToWebSocketsProcessor();
@@ -47,12 +46,8 @@ public final class SendToWebSocketsProcessor implements Processor {
     @Override
     public void apply(final MetaData metaData) {
         metaData.getOptional(RESPONSE_BODY_STRING).ifPresent(message -> {
-            //final WebSocketId webSocketId = metaData.get(WEBSOCKET_ID);
-            //final WebSocketRegistry registry = metaData.get(WEBSOCKET_REGISTRY);
             final List<WebSocket> webSockets = metaData.get(RECIPIENT_WEBSOCKETS);
             webSockets.forEach(webSocket -> webSocket.sendText(message));
-            //final WebSocket webSocket = registry.byId(webSocketId);
-            //webSocket.sendText(message);
         });
     }
 }

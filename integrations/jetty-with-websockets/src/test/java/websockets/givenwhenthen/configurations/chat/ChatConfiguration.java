@@ -22,8 +22,11 @@
 package websockets.givenwhenthen.configurations.chat;
 
 import com.envimate.httpmate.HttpMate;
-import com.envimate.httpmate.security.Authenticator;
-import com.envimate.httpmate.security.Authorizer;
+import com.envimate.httpmate.events.EventModule;
+import com.envimate.httpmate.handler.http.HttpRequest;
+import com.envimate.httpmate.security.SecurityConfigurators;
+import com.envimate.httpmate.security.authentication.Authenticator;
+import com.envimate.httpmate.security.authorization.HttpAuthorizer;
 import com.envimate.messageMate.messageBus.MessageBus;
 import com.envimate.messageMate.useCases.useCaseAdapter.UseCaseAdapter;
 import com.google.gson.Gson;
@@ -37,21 +40,24 @@ import websockets.givenwhenthen.configurations.chat.usecases.SendMessageUseCase;
 import java.util.Map;
 import java.util.Objects;
 
-import static com.envimate.httpmate.HttpMate.anHttpMateConfiguredAs;
-import static com.envimate.httpmate.HttpMateChainKeys.*;
-import static com.envimate.httpmate.convenience.configurators.Configurators.toLogUsing;
-import static com.envimate.httpmate.events.EventDrivenBuilder.EVENT_DRIVEN;
-import static com.envimate.httpmate.http.HttpRequestMethod.GET;
+import static com.envimate.httpmate.HttpMate.anHttpMate;
+import static com.envimate.httpmate.HttpMateChainKeys.AUTHENTICATION_INFORMATION;
+import static com.envimate.httpmate.chains.Configurator.configuratorForType;
+import static com.envimate.httpmate.chains.Configurator.toUseModules;
+import static com.envimate.httpmate.events.EventConfigurators.toEnrichTheIntermediateMapWithAllRequestData;
+import static com.envimate.httpmate.events.EventConfigurators.toUseTheMessageBus;
+import static com.envimate.httpmate.events.EventModule.eventModule;
 import static com.envimate.httpmate.http.headers.ContentType.json;
+import static com.envimate.httpmate.logger.LoggerConfigurators.toLogUsing;
 import static com.envimate.httpmate.logger.Loggers.stderrLogger;
 import static com.envimate.httpmate.marshalling.MarshallingModule.toMarshallBodiesBy;
-import static com.envimate.httpmate.security.SecurityConfigurators.toAuthenticateRequests;
-import static com.envimate.httpmate.security.SecurityConfigurators.toAuthorizeRequests;
+import static com.envimate.httpmate.security.SecurityConfigurators.toAuthenticateRequestsUsing;
 import static com.envimate.httpmate.websockets.WebSocketsConfigurator.toUseWebSockets;
 import static com.envimate.httpmate.websocketsevents.Conditions.forwardingItToAllWebSocketsThat;
 import static com.envimate.messageMate.configuration.AsynchronousConfiguration.constantPoolSizeAsynchronousConfiguration;
 import static com.envimate.messageMate.messageBus.MessageBusBuilder.aMessageBus;
 import static com.envimate.messageMate.messageBus.MessageBusType.ASYNCHRONOUS;
+import static com.envimate.messageMate.processingContext.EventType.eventTypeFromString;
 import static com.envimate.messageMate.useCases.useCaseAdapter.UseCaseInvocationBuilder.anUseCaseAdapter;
 import static websockets.givenwhenthen.configurations.TestConfiguration.testConfiguration;
 import static websockets.givenwhenthen.configurations.chat.domain.MessageContent.messageContent;
@@ -60,7 +66,6 @@ import static websockets.givenwhenthen.configurations.chat.domain.Username.usern
 import static websockets.givenwhenthen.configurations.chat.usecases.ChatMessage.chatMessage;
 
 public final class ChatConfiguration {
-
     private static final int POOL_SIZE = 4;
     public static volatile MessageBus messageBus;
 
@@ -75,11 +80,11 @@ public final class ChatConfiguration {
                 .build();
 
         final UserRepository userRepository = userRepository();
-        final Authenticator authenticator = metaData -> metaData.get(REQUEST_HEADERS)
-                .getHeader("user")
+        final Authenticator<HttpRequest> authenticator = request -> request.headers()
+                .getOptionalHeader("user")
                 .map(Username::username)
                 .map(userRepository::byName);
-        final Authorizer authorizer = metaData -> metaData.getOptional(AUTHENTICATION_INFORMATION).isPresent();
+        final HttpAuthorizer authorizer = (authenticationInformation, request) -> authenticationInformation.isPresent();
 
         final UseCaseAdapter useCaseAdapter = anUseCaseAdapter()
                 .invokingUseCase(SendMessageUseCase.class).forType("ChatMessage")
@@ -98,24 +103,29 @@ public final class ChatConfiguration {
 
         useCaseAdapter.attachAndEnhance(messageBus);
 
-        final HttpMate httpMate = anHttpMateConfiguredAs(EVENT_DRIVEN).attachedTo(messageBus)
-                .triggeringTheEvent("ChatMessage").forRequestPath("/send").andRequestMethod(GET)
-                .handlingTheEvent("NewMessageEvent").by(forwardingItToAllWebSocketsThat((metaData, event) -> {
-                    final String username = metaData.getAs(AUTHENTICATION_INFORMATION, User.class)
-                            .name().internalValueForMapping();
-                    return Objects.equals(event.get("recipient"), username);
-                }))
-                .mappingResponsesUsing((event, metaData) -> {
-                    final String content = (String) event.get("content");
-                    metaData.set(RESPONSE_BODY_STRING, content);
-                })
-                .configured(toAuthenticateRequests().beforeBodyProcessing().using(authenticator))
-                .configured(toAuthorizeRequests().beforeBodyProcessing().using(authorizer))
+        final HttpMate httpMate = anHttpMate()
+                .get("/send", eventTypeFromString("ChatMessage"))
+                .configured(toUseModules(eventModule()))
+                .configured(toAuthenticateRequestsUsing(authenticator))
+                .configured(SecurityConfigurators.toAuthorizeRequestsUsing(authorizer))
                 .configured(toLogUsing(stderrLogger()))
                 .configured(toUseWebSockets()
                         .acceptingWebSocketsToThePath("/subscribe").saving(AUTHENTICATION_INFORMATION))
+                .configured(toUseTheMessageBus(messageBus))
+
+                .configured(configuratorForType(EventModule.class, eventModule ->
+                        eventModule.addExternalEventMapping(eventTypeFromString("NewMessageEvent"),
+                                forwardingItToAllWebSocketsThat((metaData, event) -> {
+                                    final String username = metaData.getAs(AUTHENTICATION_INFORMATION, User.class)
+                                            .name().internalValueForMapping();
+                                    return Objects.equals(event.get("recipient"), username);
+                                }))))
+
+                .configured(toEnrichTheIntermediateMapWithAllRequestData())
+
                 .configured(toMarshallBodiesBy()
-                        .unmarshallingContentTypeInRequests(json()).with(body -> new Gson().fromJson(body, Map.class))
+                        .unmarshallingContentTypeInRequests(json()).with(string -> new Gson().fromJson(string, Map.class))
+                        .marshallingContentTypeInResponses(json()).with(map -> new Gson().toJson(map))
                         .usingTheDefaultContentType(json()))
                 .build();
 

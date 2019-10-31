@@ -24,7 +24,6 @@ package com.envimate.httpmate.events.processors;
 import com.envimate.httpmate.chains.MetaData;
 import com.envimate.httpmate.chains.Processor;
 import com.envimate.httpmate.events.mapper.RequestToEventMapper;
-import com.envimate.httpmate.filtermap.FilterMap;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
@@ -39,17 +38,16 @@ import static com.envimate.httpmate.util.Validators.validateNotNull;
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class MapToEventProcessor implements Processor {
-    private final FilterMap<MetaData, RequestToEventMapper> requestToEventMappers;
+    private final RequestToEventMapper requestToEventMapper;
 
-    public static Processor mapToEventProcessor(final FilterMap<MetaData, RequestToEventMapper> requestToEventMappers) {
-        validateNotNull(requestToEventMappers, "requestToEventMappers");
-        return new MapToEventProcessor(requestToEventMappers);
+    public static Processor mapToEventProcessor(final RequestToEventMapper requestToEventMapper) {
+        validateNotNull(requestToEventMapper, "requestToEventMapper");
+        return new MapToEventProcessor(requestToEventMapper);
     }
 
     @Override
     public void apply(final MetaData metaData) {
-        final RequestToEventMapper mapper = requestToEventMappers.get(metaData);
-        final Map<String, Object> map = mapper.map(metaData);
+        final Map<String, Object> map = requestToEventMapper.map(metaData);
         metaData.set(EVENT, map);
     }
 }

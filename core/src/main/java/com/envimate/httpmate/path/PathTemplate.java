@@ -29,8 +29,8 @@ import lombok.RequiredArgsConstructor;
 import java.util.List;
 import java.util.Map;
 
-import static com.envimate.httpmate.path.AnyMatcher.isRecursiveWildcard;
 import static com.envimate.httpmate.path.AnyMatcher.anyMatcher;
+import static com.envimate.httpmate.path.AnyMatcher.isRecursiveWildcard;
 import static com.envimate.httpmate.path.CaptureMatcher.isWildcard;
 import static com.envimate.httpmate.path.statemachine.ElementPosition.start;
 import static com.envimate.httpmate.path.statemachine.StateMachineBuilder.stateMachineBuilder;
@@ -94,6 +94,9 @@ public final class PathTemplate {
         }
         if (isWildcard(stringSpecification)) {
             return CaptureMatcher.fromStringSpecification(stringSpecification);
+        }
+        if(RegexMatcher.isRegex(stringSpecification)) {
+            return RegexMatcher.fromStringSpecification(stringSpecification);
         }
         return StaticMatcher.fromStringSpecification(stringSpecification);
     }

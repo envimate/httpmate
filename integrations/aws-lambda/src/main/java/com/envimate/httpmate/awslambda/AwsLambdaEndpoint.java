@@ -39,6 +39,7 @@ import static com.envimate.httpmate.HttpMateChainKeys.*;
 import static com.envimate.httpmate.awslambda.AwsLambdaLogger.awsLambdaLogger;
 import static com.envimate.httpmate.chains.MetaData.emptyMetaData;
 import static com.envimate.httpmate.chains.MetaDataKey.metaDataKey;
+import static com.envimate.httpmate.util.Maps.mapToMultiMap;
 import static com.envimate.httpmate.util.Streams.inputStreamToString;
 import static com.envimate.httpmate.util.Streams.stringToInputStream;
 import static com.envimate.httpmate.util.Validators.validateNotNull;
@@ -69,7 +70,7 @@ public final class AwsLambdaEndpoint {
         final Map<String, String> queryParameters = ofNullable(event.getQueryStringParameters()).orElseGet(HashMap::new);
 
         final MetaData metaData = emptyMetaData();
-        metaData.set(RAW_REQUEST_HEADERS, headers);
+        metaData.set(RAW_REQUEST_HEADERS, mapToMultiMap(headers));
         metaData.set(RAW_REQUEST_QUERY_PARAMETERS, queryParameters);
         metaData.set(RAW_METHOD, httpRequestMethod);
         metaData.set(RAW_PATH, path);

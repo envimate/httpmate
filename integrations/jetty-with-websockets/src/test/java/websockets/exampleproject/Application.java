@@ -33,13 +33,6 @@ import websockets.exampleproject.usecases.SendMessageResponse;
 import websockets.exampleproject.usecases.SendMessageUseCase;
 import websockets.exampleproject.usecases.events.NewMessageEvent;
 
-import static com.envimate.httpmate.HttpMate.anHttpMateConfiguredAs;
-import static com.envimate.httpmate.HttpMateChainKeys.AUTHENTICATION_INFORMATION;
-import static com.envimate.httpmate.events.EventDrivenBuilder.EVENT_DRIVEN;
-import static com.envimate.httpmate.http.HttpRequestMethod.DELETE;
-import static com.envimate.httpmate.websockets.WebSocketsConfigurator.toUseWebSockets;
-import static com.envimate.httpmate.websockets.WebsocketChainKeys.IS_WEBSOCKET_MESSAGE;
-import static com.envimate.httpmate.websocketsevents.Conditions.forwardingItToAllWebSocketsThat;
 import static com.envimate.mapmate.deserialization.Deserializer.aDeserializer;
 import static com.envimate.mapmate.serialization.Serializer.aSerializer;
 import static com.envimate.messageMate.configuration.AsynchronousConfiguration.constantPoolSizeAsynchronousConfiguration;
@@ -96,39 +89,6 @@ public final class Application {
                 .puttingExceptionObjectNamedAsExceptionIntoResponseMapByDefault()
                 .buildAsStandaloneAdapter();
         useCaseAdapter.attachAndEnhance(MESSAGE_BUS);
-
-        anHttpMateConfiguredAs(EVENT_DRIVEN).attachedTo(MESSAGE_BUS)
-                .triggeringTheEvent("SendMessageRequest").forRequestPath("/qwrefewiflrwefjierwipower").andRequestMethod(DELETE)
-                .triggeringTheEvent("SendMessageRequest").when(metaData -> metaData.getOptional(IS_WEBSOCKET_MESSAGE).orElse(false))
-                .handlingTheEvent("NewMessageEvent").by(forwardingItToAllWebSocketsThat((metaData, event) -> {
-                    //return event.message.recipients.contains(metaData.get(AUTHENTICATION_INFORMATION));
-                    throw new UnsupportedOperationException();
-                }))
-                .handlingTheEvent("BanUserEvent").by(forwardingItToAllWebSocketsThat((metaData, event) -> {
-                    //return category.equals(event.username());
-                    throw new UnsupportedOperationException();
-                }))
-                .mappingResponsesUsing((event, metaData) -> {
-                })
-                .configured(toUseWebSockets().acceptingWebSocketsToThePath("/connect").saving(AUTHENTICATION_INFORMATION))
-                .configured(configurator -> {
-                    /*
-                    configurator.configureSecurity().addAuthenticator(metaData -> metaData.get(HEADERS).getHeader("cookie").flatMap(
-                            cookieHeader -> getCookie("username", cookieHeader).flatMap(
-                                    username -> getCookie("password", cookieHeader).flatMap(
-                                            password -> userRepository.getIfCorrectAuthenticationInformation(username, password)))));
-                    configurator.configureSecurity().addAuthorizer(metaData -> metaData.getOptional(AUTHENTICATION_INFORMATION).isPresent());
-                    configurator.configureLogger().loggingToStderr();
-                     */
-                    //configurator.registerModule(webSocketModule);
-                    //configurator.registerModule(multipartModule());
-                    //configurator.registerModule(aBodyMapParsingModule()
-                    //        .parsingContentType(json()).with(body -> new Gson().fromJson(body, Map.class))
-                    //        .usingTheDefaultContentType(json()));
-                })
-                .build();
-
-        //final JettyEndpoint jettyEndpoint = jettyEndpointFor(doubleServletFor(httpMate)).listeningOnThePort(8976);
 
         AntiHateSpeechUseCase.register();
     }

@@ -32,7 +32,9 @@ import java.util.List;
 
 import static com.envimate.httpmate.chains.DependencyRegistry.load;
 import static com.envimate.httpmate.chains.MetaData.emptyMetaData;
+import static com.envimate.httpmate.chains.autoloading.Autoloader.loadModule;
 import static com.envimate.httpmate.util.Validators.validateNotNull;
+import static com.envimate.httpmate.util.Validators.validateNotNullNorEmpty;
 
 @ToString
 @EqualsAndHashCode
@@ -50,6 +52,11 @@ public final class ChainRegistryBuilder {
         modules.add(module);
     }
 
+    public void addModuleIfPresent(final String fullyQualifiedClassName) {
+        validateNotNullNorEmpty(fullyQualifiedClassName, "fullyQualifiedClassName");
+        loadModule(fullyQualifiedClassName).ifPresent(this::addModule);
+    }
+
     public void addConfigurator(final Configurator configurator) {
         validateNotNull(configurator, "configurator");
         configurators.add(configurator);
@@ -60,6 +67,10 @@ public final class ChainRegistryBuilder {
         final DependencyRegistry dependencyRegistry = load(modules, metaData);
         enterDefaultDependencies(modules, dependencyRegistry);
         enterDefaultDependencies(configurators, dependencyRegistry);
+
+        dependencyRegistry.modules().stream().forEach(module -> module.init(metaData));
+        configurators.forEach(configurator -> configurator.init(metaData));
+
         dependencyRegistry.modules().stream().forEach(module -> module.configure(dependencyRegistry));
         configurators.forEach(configurator -> configurator.configure(dependencyRegistry));
         return dependencyRegistry.buildChainRegistry();

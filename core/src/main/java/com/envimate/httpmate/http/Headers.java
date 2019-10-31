@@ -26,12 +26,14 @@ import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 import static com.envimate.httpmate.http.HeaderKey.headerKey;
 import static com.envimate.httpmate.util.Maps.*;
 import static com.envimate.httpmate.util.Validators.validateNotNull;
+import static java.lang.String.format;
 
 @ToString
 @EqualsAndHashCode
@@ -39,18 +41,21 @@ import static com.envimate.httpmate.util.Validators.validateNotNull;
 public final class Headers {
     private final Map<HeaderKey, HeaderValue> headers;
 
-    public static Headers headers(final Map<String, String> stringMap) {
+    public static Headers headers(final Map<String, List<String>> stringMap) {
         validateNotNull(stringMap, "stringMap");
-        final Map<HeaderKey, HeaderValue> headers = stringsToValueObjects(
-                stringMap,
-                HeaderKey::headerKey,
-                HeaderValue::headerValue);
+        final Map<HeaderKey, HeaderValue> headers = transformMap(stringMap, HeaderKey::headerKey, HeaderValue::headerValue);
         return new Headers(headers);
     }
 
-    public Optional<String> getHeader(final String key) {
+    public Optional<String> getOptionalHeader(final String key) {
         final HeaderKey headerKey = headerKey(key);
-        return getOptionally(headers, headerKey).map(HeaderValue::stringValue);
+        return getOptionally(headers, headerKey)
+                .map(HeaderValue::stringValue);
+    }
+
+    public String getHeader(final String key) {
+        return getOptionalHeader(key)
+                .orElseThrow(() -> new IllegalArgumentException(format("No header with name %s", key)));
     }
 
     public Map<String, String> asStringMap() {

@@ -26,7 +26,10 @@ import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
+import java.util.List;
+
 import static com.envimate.httpmate.util.Validators.validateNotNull;
+import static java.lang.String.join;
 
 @ToString
 @EqualsAndHashCode
@@ -34,8 +37,9 @@ import static com.envimate.httpmate.util.Validators.validateNotNull;
 final class HeaderValue {
     private final String value;
 
-    static HeaderValue headerValue(final String value) {
-        validateNotNull(value, "stringValue");
+    static HeaderValue headerValue(final List<String> values) {
+        validateNotNull(values, "values");
+        final String value = join(", ", values);
         return new HeaderValue(value);
     }
 

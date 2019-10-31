@@ -21,12 +21,15 @@
 
 package com.envimate.httpmate.chains;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.function.Consumer;
 
 import static com.envimate.httpmate.util.Validators.validateNotNull;
 import static java.util.Arrays.asList;
+import static java.util.Arrays.stream;
 import static java.util.Collections.emptyList;
+import static java.util.stream.Collectors.toList;
 
 public interface Configurator {
 
@@ -53,8 +56,33 @@ public interface Configurator {
         };
     }
 
+    static Configurator allOf(final Configurator... configurators) {
+        return new Configurator() {
+            @Override
+            public List<ChainModule> supplyModulesIfNotAlreadyPreset() {
+                return stream(configurators)
+                        .map(Configurator::supplyModulesIfNotAlreadyPreset)
+                        .flatMap(Collection::stream)
+                        .collect(toList());
+            }
+
+            @Override
+            public void init(final MetaData configurationMetaData) {
+                stream(configurators).forEach(configurator -> configurator.init(configurationMetaData));
+            }
+
+            @Override
+            public void configure(final DependencyRegistry dependencyRegistry) {
+                stream(configurators).forEach(configurator -> configurator.configure(dependencyRegistry));
+            }
+        };
+    }
+
     default List<ChainModule> supplyModulesIfNotAlreadyPreset() {
         return emptyList();
+    }
+
+    default void init(final MetaData configurationMetaData) {
     }
 
     void configure(DependencyRegistry dependencyRegistry);

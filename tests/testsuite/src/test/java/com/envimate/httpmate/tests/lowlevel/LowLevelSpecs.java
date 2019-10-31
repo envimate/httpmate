@@ -21,7 +21,6 @@
 
 package com.envimate.httpmate.tests.lowlevel;
 
-import com.envimate.httpmate.exceptions.HttpExceptionMapper;
 import com.envimate.httpmate.tests.givenwhenthen.DeployerAndClient;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -29,9 +28,10 @@ import org.junit.runners.Parameterized;
 
 import java.util.Collection;
 
-import static com.envimate.httpmate.HttpMate.aLowLevelHttpMate;
-import static com.envimate.httpmate.convenience.configurators.Configurators.toCustomizeResponsesUsing;
-import static com.envimate.httpmate.convenience.configurators.exceptions.ExceptionMappingConfigurator.toMapExceptions;
+import static com.envimate.httpmate.HttpMate.anHttpMate;
+import static com.envimate.httpmate.Configurators.toCustomizeResponsesUsing;
+import static com.envimate.httpmate.exceptions.ExceptionConfigurators.toMapExceptionsByDefaultUsing;
+import static com.envimate.httpmate.exceptions.ExceptionConfigurators.toMapExceptionsOfType;
 import static com.envimate.httpmate.tests.givenwhenthen.Given.given;
 import static com.envimate.httpmate.tests.givenwhenthen.deploy.DeployerManager.activeDeployers;
 import static com.envimate.httpmate.tests.givenwhenthen.deploy.DeployerManager.setCurrentDeployerAndClient;
@@ -121,7 +121,7 @@ public final class LowLevelSpecs {
                 .theStatusCodeWas(200)
                 .theResponseContentTypeWas("application/x-msdownload")
                 .theResponseBodyWas("download-content")
-                .theReponseContainsTheHeader("Content-Disposition", "foo.txt");
+                .theReponseContainsTheHeader("Content-Disposition", "attachment; filename=\"foo.txt\"");
     }
 
     @Test
@@ -150,8 +150,8 @@ public final class LowLevelSpecs {
 
     @Test
     public void testEmptyTemplate() {
-        given(aLowLevelHttpMate().get("/test", (request, response) -> response.setBody("OK"))
-                .thatIs().configured(toCustomizeResponsesUsing(metaData -> {
+        given(anHttpMate().get("/test", (request, response) -> response.setBody("OK"))
+                .configured(toCustomizeResponsesUsing(metaData -> {
                 })).build())
                 .when().aRequestToThePath("/test").viaTheGetMethod().withAnEmptyBody().isIssued()
                 .theStatusCodeWas(200)
@@ -160,15 +160,13 @@ public final class LowLevelSpecs {
 
     @Test
     public void testCheckedExceptionsCanBeMapped() {
-        given(
-                aLowLevelHttpMate().get("/test", (request, response) -> {
+        given(anHttpMate()
+                .get("/test", (request, response) -> {
                     throw (RuntimeException) new Exception();
-                }).thatIs()
-                        .configured(toMapExceptions()
-                                .ofType(Exception.class)
-                                .toResponsesUsing((HttpExceptionMapper<Exception>) (exception, response) -> response.setStatus(501))
-                                .ofAllRemainingTypesUsing((HttpExceptionMapper<Throwable>) (exception, response) -> response.setStatus(500)))
-                        .build())
+                })
+                .configured(toMapExceptionsOfType(Exception.class, (exception, response) -> response.setStatus(501)))
+                .configured(toMapExceptionsByDefaultUsing((exception, response) -> response.setStatus(500)))
+                .build())
                 .when().aRequestToThePath("/test").viaTheGetMethod().withAnEmptyBody().isIssued()
                 .theStatusCodeWas(501);
     }

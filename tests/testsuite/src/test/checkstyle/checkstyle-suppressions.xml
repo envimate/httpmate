@@ -41,4 +41,5 @@
     <suppress checks="Regexp" files="AwsDeployer.java|LambdaStatus.java" />
     <suppress checks="IllegalCatch" files="ServletDeployer.java|DeployerManager.java|JettyDeployer.java" />
     <suppress checks="ClassFanOutComplexity|ClassDataAbstractionCoupling" files="ShittyHttpClientWrapper.java" />
+    <suppress checks="MagicNumber|LineLength" files=".*Specs" />
 </suppressions>

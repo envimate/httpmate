@@ -21,6 +21,7 @@
 
 package com.envimate.httpmate.tests.lowlevel;
 
+import com.envimate.httpmate.marshalling.MarshallingException;
 import com.envimate.httpmate.marshalling.MarshallingModule;
 import com.envimate.httpmate.marshalling.UnsupportedContentTypeException;
 import com.envimate.httpmate.tests.givenwhenthen.DeployerAndClient;
@@ -31,11 +32,9 @@ import org.junit.runners.Parameterized;
 import java.util.Collection;
 import java.util.Map;
 
-import static com.envimate.httpmate.HttpMate.aLowLevelHttpMate;
-import static com.envimate.httpmate.HttpMateChainKeys.RESPONSE_BODY_STRING;
-import static com.envimate.httpmate.HttpMateChainKeys.RESPONSE_STATUS;
+import static com.envimate.httpmate.HttpMate.anHttpMate;
 import static com.envimate.httpmate.chains.Configurator.configuratorForType;
-import static com.envimate.httpmate.convenience.configurators.exceptions.ExceptionMappingConfigurator.toMapExceptions;
+import static com.envimate.httpmate.exceptions.ExceptionConfigurators.toMapExceptionsOfType;
 import static com.envimate.httpmate.http.headers.ContentType.fromString;
 import static com.envimate.httpmate.marshalling.MarshallingModule.toMarshallBodiesBy;
 import static com.envimate.httpmate.tests.givenwhenthen.Given.given;
@@ -56,15 +55,17 @@ public final class MarshallingSpecs {
 
     @Test
     public void unmarshallerCanBeSet() {
-        given(aLowLevelHttpMate()
-                .post("/", (request, response) -> request.bodyAsMap().ifPresent(map -> {
-                    final Object value = map.get("a");
-                    response.setBody((String) value);
-                }))
-                .thatIs().configured(toMarshallBodiesBy()
-                        .unmarshallingContentTypeInRequests(fromString("qwer")).with(body -> Map.of("a", "b"))
-                        .usingTheDefaultContentType(fromString("qwer")))
-                .build())
+        given(
+                anHttpMate()
+                        .post("/", (request, response) -> request.optionalBodyMap().ifPresent(map -> {
+                            final Object value = map.get("a");
+                            response.setBody((String) value);
+                        }))
+                        .configured(toMarshallBodiesBy()
+                                .unmarshallingContentTypeInRequests(fromString("qwer")).with(body -> Map.of("a", "b"))
+                                .usingTheDefaultContentType(fromString("qwer")))
+                        .build()
+        )
                 .when().aRequestToThePath("/").viaThePostMethod().withAnEmptyBody().withContentType("qwer").isIssued()
                 .theStatusCodeWas(200)
                 .theResponseBodyWas("b");
@@ -72,13 +73,15 @@ public final class MarshallingSpecs {
 
     @Test
     public void marshallerCanBeSet() {
-        given(aLowLevelHttpMate()
-                .post("/", (request, response) -> request.bodyAsMap().ifPresent(response::setBody))
-                .thatIs().configured(toMarshallBodiesBy()
-                        .unmarshallingContentTypeInRequests(fromString("qwer")).with(body -> Map.of("a", "b"))
-                        .marshallingContentTypeInResponses(fromString("qwer")).with(map -> (String) map.get("a"))
-                        .usingTheDefaultContentType(fromString("qwer")))
-                .build())
+        given(
+                anHttpMate()
+                        .post("/", (request, response) -> request.optionalBodyMap().ifPresent(response::setBody))
+                        .configured(toMarshallBodiesBy()
+                                .unmarshallingContentTypeInRequests(fromString("qwer")).with(body -> Map.of("a", "b"))
+                                .marshallingContentTypeInResponses(fromString("qwer")).with(map -> (String) map.get("a"))
+                                .usingTheDefaultContentType(fromString("qwer")))
+                        .build()
+        )
                 .when().aRequestToThePath("/").viaThePostMethod().withAnEmptyBody().withContentType("qwer").withTheHeader("Accept", "qwer").isIssued()
                 .theStatusCodeWas(200)
                 .theResponseBodyWas("b");
@@ -86,16 +89,18 @@ public final class MarshallingSpecs {
 
     @Test
     public void requestUsesContentTypeHeaderForUnmarshalling() {
-        given(aLowLevelHttpMate()
-                .post("/", (request, response) -> request.bodyAsMap().ifPresent(map -> {
-                    final Object value = map.get("a");
-                    response.setBody((String) value);
-                }))
-                .thatIs().configured(toMarshallBodiesBy()
-                        .unmarshallingContentTypeInRequests(fromString("wrong")).with(body -> Map.of("a", "wrong"))
-                        .unmarshallingContentTypeInRequests(fromString("right")).with(body -> Map.of("a", "right"))
-                        .usingTheDefaultContentType(fromString("wrong")))
-                .build())
+        given(
+                anHttpMate()
+                        .post("/", (request, response) -> request.optionalBodyMap().ifPresent(map -> {
+                            final Object value = map.get("a");
+                            response.setBody((String) value);
+                        }))
+                        .configured(toMarshallBodiesBy()
+                                .unmarshallingContentTypeInRequests(fromString("wrong")).with(body -> Map.of("a", "wrong"))
+                                .unmarshallingContentTypeInRequests(fromString("right")).with(body -> Map.of("a", "right"))
+                                .usingTheDefaultContentType(fromString("wrong")))
+                        .build()
+        )
                 .when().aRequestToThePath("/").viaThePostMethod().withAnEmptyBody().withContentType("right").isIssued()
                 .theStatusCodeWas(200)
                 .theResponseBodyWas("right");
@@ -103,16 +108,18 @@ public final class MarshallingSpecs {
 
     @Test
     public void defaultContentTypeIsUsedForUnmarshallingIfNoContentTypeIsSpecified() {
-        given(aLowLevelHttpMate()
-                .post("/", (request, response) -> request.bodyAsMap().ifPresent(map -> {
-                    final Object value = map.get("a");
-                    response.setBody((String) value);
-                }))
-                .thatIs().configured(toMarshallBodiesBy()
-                        .unmarshallingContentTypeInRequests(fromString("wrong")).with(body -> Map.of("a", "wrong"))
-                        .unmarshallingContentTypeInRequests(fromString("right")).with(body -> Map.of("a", "right"))
-                        .usingTheDefaultContentType(fromString("right")))
-                .build())
+        given(
+                anHttpMate()
+                        .post("/", (request, response) -> request.optionalBodyMap().ifPresent(map -> {
+                            final Object value = map.get("a");
+                            response.setBody((String) value);
+                        }))
+                        .configured(toMarshallBodiesBy()
+                                .unmarshallingContentTypeInRequests(fromString("wrong")).with(body -> Map.of("a", "wrong"))
+                                .unmarshallingContentTypeInRequests(fromString("right")).with(body -> Map.of("a", "right"))
+                                .usingTheDefaultContentType(fromString("right")))
+                        .build()
+        )
                 .when().aRequestToThePath("/").viaThePostMethod().withAnEmptyBody().isIssued()
                 .theStatusCodeWas(200)
                 .theResponseBodyWas("right");
@@ -120,14 +127,16 @@ public final class MarshallingSpecs {
 
     @Test
     public void responseUsesContentTypeOfAcceptHeader() {
-        given(aLowLevelHttpMate()
-                .post("/", (request, response) -> request.bodyAsMap().ifPresent(response::setBody))
-                .thatIs().configured(toMarshallBodiesBy()
-                        .unmarshallingContentTypeInRequests(fromString("qwer")).with(body -> Map.of("a", "b"))
-                        .marshallingContentTypeInResponses(fromString("wrong")).with(map -> "the wrong marshaller")
-                        .marshallingContentTypeInResponses(fromString("right")).with(map -> "the right marshaller")
-                        .usingTheDefaultContentType(fromString("qwer")))
-                .build())
+        given(
+                anHttpMate()
+                        .post("/", (request, response) -> request.optionalBodyMap().ifPresent(response::setBody))
+                        .configured(toMarshallBodiesBy()
+                                .unmarshallingContentTypeInRequests(fromString("qwer")).with(body -> Map.of("a", "b"))
+                                .marshallingContentTypeInResponses(fromString("wrong")).with(map -> "the wrong marshaller")
+                                .marshallingContentTypeInResponses(fromString("right")).with(map -> "the right marshaller")
+                                .usingTheDefaultContentType(fromString("qwer")))
+                        .build()
+        )
                 .when().aRequestToThePath("/").viaThePostMethod().withAnEmptyBody().withContentType("qwer").withTheHeader("Accept", "right")
                 .isIssued()
                 .theStatusCodeWas(200)
@@ -137,14 +146,16 @@ public final class MarshallingSpecs {
 
     @Test
     public void responseIsMarshalledUsingContentTypeIfNoAcceptHeaderIsSet() {
-        given(aLowLevelHttpMate()
-                .post("/", (request, response) -> request.bodyAsMap().ifPresent(response::setBody))
-                .thatIs().configured(toMarshallBodiesBy()
-                        .unmarshallingContentTypeInRequests(fromString("right")).with(body -> Map.of("a", "b"))
-                        .marshallingContentTypeInResponses(fromString("wrong")).with(map -> "the wrong marshaller")
-                        .marshallingContentTypeInResponses(fromString("right")).with(map -> "the right marshaller")
-                        .usingTheDefaultContentType(fromString("right")))
-                .build())
+        given(
+                anHttpMate()
+                        .post("/", (request, response) -> request.optionalBodyMap().ifPresent(response::setBody))
+                        .configured(toMarshallBodiesBy()
+                                .unmarshallingContentTypeInRequests(fromString("right")).with(body -> Map.of("a", "b"))
+                                .marshallingContentTypeInResponses(fromString("wrong")).with(map -> "the wrong marshaller")
+                                .marshallingContentTypeInResponses(fromString("right")).with(map -> "the right marshaller")
+                                .usingTheDefaultContentType(fromString("right")))
+                        .build()
+        )
                 .when().aRequestToThePath("/").viaThePostMethod().withAnEmptyBody().withContentType("right")
                 .isIssued()
                 .theStatusCodeWas(200)
@@ -154,14 +165,16 @@ public final class MarshallingSpecs {
 
     @Test
     public void wildcardsInAcceptHeaderCanBeUsedToSpecifyResponseContentType() {
-        given(aLowLevelHttpMate()
-                .post("/", (request, response) -> request.bodyAsMap().ifPresent(response::setBody))
-                .thatIs().configured(toMarshallBodiesBy()
-                        .unmarshallingContentTypeInRequests(fromString("wrong/x")).with(body -> Map.of("a", "b"))
-                        .marshallingContentTypeInResponses(fromString("wrong/x")).with(map -> "the wrong marshaller")
-                        .marshallingContentTypeInResponses(fromString("right/x")).with(map -> "the right marshaller")
-                        .usingTheDefaultContentType(fromString("wrong/x")))
-                .build())
+        given(
+                anHttpMate()
+                        .post("/", (request, response) -> request.optionalBodyMap().ifPresent(response::setBody))
+                        .configured(toMarshallBodiesBy()
+                                .unmarshallingContentTypeInRequests(fromString("wrong/x")).with(body -> Map.of("a", "b"))
+                                .marshallingContentTypeInResponses(fromString("wrong/x")).with(map -> "the wrong marshaller")
+                                .marshallingContentTypeInResponses(fromString("right/x")).with(map -> "the right marshaller")
+                                .usingTheDefaultContentType(fromString("wrong/x")))
+                        .build()
+        )
                 .when().aRequestToThePath("/").viaThePostMethod().withAnEmptyBody().withTheHeader("Accept", "right/*")
                 .isIssued()
                 .theStatusCodeWas(200)
@@ -171,15 +184,17 @@ public final class MarshallingSpecs {
 
     @Test
     public void responseIsMarshalledUsingContentTypeIfAcceptHeaderAllowsMultipleMarshallers() {
-        given(aLowLevelHttpMate()
-                .post("/", (request, response) -> request.bodyAsMap().ifPresent(response::setBody))
-                .thatIs().configured(toMarshallBodiesBy()
-                        .unmarshallingContentTypeInRequests(fromString("right/x")).with(body -> Map.of("a", "b"))
-                        .unmarshallingContentTypeInRequests(fromString("right/y")).with(body -> Map.of("a", "c"))
-                        .marshallingContentTypeInResponses(fromString("right/x")).with(map -> "the right marshaller")
-                        .marshallingContentTypeInResponses(fromString("right/y")).with(map -> "the wrong marshaller")
-                        .usingTheDefaultContentType(fromString("right/y")))
-                .build())
+        given(
+                anHttpMate()
+                        .post("/", (request, response) -> request.optionalBodyMap().ifPresent(response::setBody))
+                        .configured(toMarshallBodiesBy()
+                                .unmarshallingContentTypeInRequests(fromString("right/x")).with(body -> Map.of("a", "b"))
+                                .unmarshallingContentTypeInRequests(fromString("right/y")).with(body -> Map.of("a", "c"))
+                                .marshallingContentTypeInResponses(fromString("right/x")).with(map -> "the right marshaller")
+                                .marshallingContentTypeInResponses(fromString("right/y")).with(map -> "the wrong marshaller")
+                                .usingTheDefaultContentType(fromString("right/y")))
+                        .build()
+        )
                 .when().aRequestToThePath("/").viaThePostMethod().withAnEmptyBody().withContentType("right/x").withTheHeader("Accept", "right/*")
                 .isIssued()
                 .theStatusCodeWas(200)
@@ -189,14 +204,16 @@ public final class MarshallingSpecs {
 
     @Test
     public void responseIsMarshalledUsingDefaultContentTypeIfAcceptAndContentTypeHeaderCannotBeUsed() {
-        given(aLowLevelHttpMate()
-                .post("/", (request, response) -> request.bodyAsMap().ifPresent(response::setBody))
-                .thatIs().configured(toMarshallBodiesBy()
-                        .unmarshallingContentTypeInRequests(fromString("qwer")).with(body -> Map.of("a", "b"))
-                        .unmarshallingContentTypeInRequests(fromString("asdf")).with(body -> Map.of("a", "c"))
-                        .marshallingContentTypeInResponses(fromString("qwer")).with(map -> "right")
-                        .usingTheDefaultContentType(fromString("qwer")))
-                .build())
+        given(
+                anHttpMate()
+                        .post("/", (request, response) -> request.optionalBodyMap().ifPresent(response::setBody))
+                        .configured(toMarshallBodiesBy()
+                                .unmarshallingContentTypeInRequests(fromString("qwer")).with(body -> Map.of("a", "b"))
+                                .unmarshallingContentTypeInRequests(fromString("asdf")).with(body -> Map.of("a", "c"))
+                                .marshallingContentTypeInResponses(fromString("qwer")).with(map -> "right")
+                                .usingTheDefaultContentType(fromString("qwer")))
+                        .build()
+        )
                 .when().aRequestToThePath("/").viaThePostMethod().withAnEmptyBody().withContentType("asdf").isIssued()
                 .theStatusCodeWas(200)
                 .theResponseBodyWas("right");
@@ -204,21 +221,20 @@ public final class MarshallingSpecs {
 
     @Test
     public void unknownUnmarshallerCanThrowException() {
-        given(aLowLevelHttpMate()
-                .post("/", (request, response) -> request.bodyAsMap().ifPresent(response::setBody))
-                .thatIs().configured(toMarshallBodiesBy()
-                        .unmarshallingContentTypeInRequests(fromString("qwer")).with(body -> Map.of("a", "b"))
-                        .usingTheDefaultContentType(fromString("qwer")))
-                .configured(configuratorForType(MarshallingModule.class,
-                        marshallingModule -> marshallingModule.setThrowExceptionIfNoMarshallerFound(true)))
-                .configured(toMapExceptions()
-                        .ofType(UnsupportedContentTypeException.class)
-                        .toResponsesUsing((exception, metaData) -> {
-                            metaData.set(RESPONSE_STATUS, 501);
-                            metaData.set(RESPONSE_BODY_STRING, exception.getMessage());
-                        })
-                        .ofAllRemainingTypesUsing((exception, metaData) -> metaData.set(RESPONSE_STATUS, 500)))
-                .build())
+        given(
+                anHttpMate()
+                        .post("/", (request, response) -> request.optionalBodyMap().ifPresent(response::setBody))
+                        .configured(toMarshallBodiesBy()
+                                .unmarshallingContentTypeInRequests(fromString("qwer")).with(body -> Map.of("a", "b"))
+                                .usingTheDefaultContentType(fromString("qwer")))
+                        .configured(configuratorForType(MarshallingModule.class,
+                                marshallingModule -> marshallingModule.setThrowExceptionIfNoMarshallerFound(true)))
+                        .configured(toMapExceptionsOfType(UnsupportedContentTypeException.class, (exception, response) -> {
+                            response.setStatus(501);
+                            response.setBody(exception.getMessage());
+                        }))
+                        .build()
+        )
                 .when().aRequestToThePath("/").viaThePostMethod().withAnEmptyBody().withContentType("asdf").isIssued()
                 .theStatusCodeWas(501)
                 .theResponseBodyWas("Content type 'asdf' is not supported; supported content types are: 'qwer'");
@@ -226,23 +242,18 @@ public final class MarshallingSpecs {
 
     @Test
     public void unknownMarshallerCanThrowException() {
-        given(aLowLevelHttpMate()
-                .post("/", (request, response) -> request.bodyAsMap().ifPresent(response::setBody))
-                .thatIs().configured(toMarshallBodiesBy()
-                        .unmarshallingContentTypeInRequests(fromString("qwer")).with(body -> Map.of("a", "b"))
-                        .usingTheDefaultContentType(fromString("qwer")))
-                .configured(configuratorForType(MarshallingModule.class,
-                        marshallingModule -> marshallingModule.setThrowExceptionIfNoMarshallerFound(true)))
-                .configured(toMapExceptions()
-                        .ofType(UnsupportedContentTypeException.class)
-                        .toResponsesUsing((exception, metaData) -> {
-                            metaData.set(RESPONSE_STATUS, 501);
-                            metaData.set(RESPONSE_BODY_STRING, exception.getMessage());
-                        })
-                        .ofAllRemainingTypesUsing((exception, metaData) -> metaData.set(RESPONSE_STATUS, 500)))
-                .build())
+        given(
+                anHttpMate()
+                        .post("/", (request, response) -> request.optionalBodyMap().ifPresent(response::setBody))
+                        .configured(toMarshallBodiesBy()
+                                .unmarshallingContentTypeInRequests(fromString("qwer")).with(body -> Map.of("a", "b"))
+                                .usingTheDefaultContentType(fromString("qwer")))
+                        .configured(configuratorForType(MarshallingModule.class,
+                                marshallingModule -> marshallingModule.setThrowExceptionIfNoMarshallerFound(true)))
+                        .configured(toMapExceptionsOfType(MarshallingException.class, (exception, response) -> response.setStatus(501)))
+                        .build()
+        )
                 .when().aRequestToThePath("/").viaThePostMethod().withAnEmptyBody().withContentType("qwer").isIssued()
-                .theStatusCodeWas(501)
-                .theResponseBodyWas("Content type 'qwer' is not supported; supported content types are: ''");
+                .theStatusCodeWas(501);
     }
 }

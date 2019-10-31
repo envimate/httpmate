@@ -22,6 +22,10 @@
 package com.envimate.httpmate;
 
 import com.envimate.httpmate.chains.*;
+import com.envimate.httpmate.generator.builder.ConditionStage;
+import com.envimate.httpmate.handler.Handler;
+import com.envimate.httpmate.handler.http.HttpHandler;
+import com.envimate.httpmate.http.HttpRequestMethod;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
@@ -29,22 +33,101 @@ import lombok.ToString;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.Consumer;
 
+import static com.envimate.httpmate.CoreModule.coreModule;
 import static com.envimate.httpmate.HttpMate.httpMate;
 import static com.envimate.httpmate.chains.ChainRegistryBuilder.chainRegistryBuilder;
+import static com.envimate.httpmate.http.HttpRequestMethod.*;
 import static com.envimate.httpmate.util.Validators.validateNotNull;
-import static java.util.Arrays.asList;
 
 @ToString
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class HttpMateBuilder {
-    private final List<ChainModule> modules;
+    private boolean autodetectionOfModules = true;
+    private final CoreModule coreModule;
     private final List<Configurator> configurators;
 
-    public static HttpMateBuilder httpMateBuilder(final ChainModule... initialModules) {
-        validateNotNull(initialModules, "initialModules");
-        return new HttpMateBuilder(new LinkedList<>(asList(initialModules)), new LinkedList<>());
+    static HttpMateBuilder httpMateBuilder() {
+        return new HttpMateBuilder(coreModule(), new LinkedList<>());
+    }
+
+    public HttpMateBuilder disableAutodectectionOfModules() {
+        autodetectionOfModules = false;
+        return this;
+    }
+
+    public HttpMateBuilder get(final String url, final Object handler) {
+        return this
+                .serving(handler)
+                .forRequestPath(url)
+                .andRequestMethod(GET);
+    }
+
+    public HttpMateBuilder get(final String url, final HttpHandler handler) {
+        return get(url, (Object) handler);
+    }
+
+    public HttpMateBuilder get(final String url, final Processor handler) {
+        return get(url, (Handler) handler::apply);
+    }
+
+    public HttpMateBuilder post(final String url, final Object handler) {
+        return this
+                .serving(handler)
+                .forRequestPath(url)
+                .andRequestMethod(POST);
+    }
+
+    public HttpMateBuilder post(final String url, final HttpHandler handler) {
+        return post(url, (Object) handler);
+    }
+
+    public HttpMateBuilder post(final String url, final Consumer<MetaData> handler) {
+        return post(url, (Handler) handler::accept);
+    }
+
+    public HttpMateBuilder put(final String url, final Object handler) {
+        return this
+                .serving(handler)
+                .forRequestPath(url)
+                .andRequestMethod(PUT);
+    }
+
+    public HttpMateBuilder put(final String url, final HttpHandler handler) {
+        return put(url, (Object) handler);
+    }
+
+    public HttpMateBuilder put(final String url, final Consumer<MetaData> handler) {
+        return put(url, (Handler) handler::accept);
+    }
+
+    public HttpMateBuilder delete(final String url, final Object handler) {
+        return this
+                .serving(handler)
+                .forRequestPath(url)
+                .andRequestMethod(HttpRequestMethod.DELETE);
+    }
+
+    public HttpMateBuilder delete(final String url, final HttpHandler handler) {
+        return delete(url, (Object) handler);
+    }
+
+    public HttpMateBuilder delete(final String url, final Consumer<MetaData> handler) {
+        return delete(url, (Handler) handler::accept);
+    }
+
+    public ConditionStage<HttpMateBuilder> serving(final Object handler) {
+        validateNotNull(handler, "handler");
+        return condition -> {
+            coreModule.registerHandler(condition, handler);
+            return this;
+        };
+    }
+
+    public ConditionStage<HttpMateBuilder> serving(final Handler handler) {
+        return serving((Object) handler);
     }
 
     public HttpMateBuilder configured(final ConfiguratorBuilder configuratorBuilder) {
@@ -61,7 +144,11 @@ public final class HttpMateBuilder {
 
     public HttpMate build() {
         final ChainRegistryBuilder chainRegistryBuilder = chainRegistryBuilder();
-        modules.forEach(chainRegistryBuilder::addModule);
+        chainRegistryBuilder.addModule(coreModule);
+        if(autodetectionOfModules) {
+            chainRegistryBuilder.addModuleIfPresent("com.envimate.httpmate.events.EventModule");
+            chainRegistryBuilder.addModuleIfPresent("com.envimate.httpmate.usecases.UseCasesModule");
+        }
         configurators.forEach(chainRegistryBuilder::addConfigurator);
         final ChainRegistry chainRegistry = chainRegistryBuilder.build();
         return httpMate(chainRegistry);

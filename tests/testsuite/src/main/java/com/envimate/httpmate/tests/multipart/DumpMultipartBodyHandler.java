@@ -21,7 +21,7 @@
 
 package com.envimate.httpmate.tests.multipart;
 
-import com.envimate.httpmate.convenience.handler.HttpResponse;
+import com.envimate.httpmate.handler.http.HttpResponse;
 import com.envimate.httpmate.handler.Handler;
 import com.envimate.httpmate.multipart.MultipartIteratorBody;
 import com.envimate.httpmate.multipart.handler.MultipartHandler;
