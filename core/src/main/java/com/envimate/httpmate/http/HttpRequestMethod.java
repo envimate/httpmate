@@ -21,10 +21,35 @@
 
 package com.envimate.httpmate.http;
 
-public enum HttpRequestMethod {
-    GET, POST, PUT, DELETE, OPTIONS, HEAD;
+import lombok.AccessLevel;
+import lombok.EqualsAndHashCode;
+import lombok.RequiredArgsConstructor;
+import lombok.ToString;
+
+import static com.envimate.httpmate.util.Validators.validateNotNullNorEmpty;
+
+@ToString
+@EqualsAndHashCode
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
+public final class HttpRequestMethod {
+    public static final HttpRequestMethod GET = parse("GET");
+    public static final HttpRequestMethod POST = parse("POST");
+    public static final HttpRequestMethod PUT = parse("PUT");
+    public static final HttpRequestMethod DELETE = parse("DELETE");
+    public static final HttpRequestMethod OPTIONS = parse("OPTIONS");
+    public static final HttpRequestMethod HEAD = parse("HEAD");
+    public static final HttpRequestMethod CONNECT = parse("CONNECT");
+    public static final HttpRequestMethod TRACE = parse("TRACE");
+    public static final HttpRequestMethod PATCH = parse("PATCH");
+
+    private final String value;
 
     public static HttpRequestMethod parse(final String requestMethod) {
-        return valueOf(requestMethod);
+        validateNotNullNorEmpty(requestMethod, "requestMethod");
+        return new HttpRequestMethod(requestMethod);
+    }
+
+    public String name() {
+        return value;
     }
 }

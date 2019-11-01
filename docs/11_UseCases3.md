@@ -37,7 +37,7 @@ Query Parameters, etc.  -----
 Request Body    --->    Map<String, Object>    --->    Domain Object
 ```
 
-To configure this enrichment in HttpMate, the class `ÈventConfigurators` offers
+To configure this enrichment in HttpMate, the class `EventConfigurators` offers
 a ton of convenient configurator methods to choose from.
 You can even provide more than one of them and they are cascaded in the order they were configured.
 

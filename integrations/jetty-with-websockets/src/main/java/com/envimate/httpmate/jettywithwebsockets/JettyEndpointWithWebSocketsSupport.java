@@ -30,36 +30,39 @@ import org.eclipse.jetty.servlet.ServletHolder;
 
 import javax.servlet.Servlet;
 
+import static com.envimate.httpmate.closing.ClosingActions.CLOSING_ACTIONS;
 import static com.envimate.httpmate.servletwithwebsockets.WebSocketAwareHttpMateServlet.webSocketAwareHttpMateServlet;
 
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class JettyEndpointWithWebSocketsSupport implements AutoCloseable {
-    private final Server server;
+    private final HttpMate httpMate;
 
     public static PortStage jettyEndpointWithWebSocketsSupportFor(final HttpMate httpMate) {
         return port -> {
-            final Server server;
             try {
-                server = new Server(port);
+                final Server server = new Server(port);
                 final ServletHandler servletHandler = new ServletHandler();
                 server.setHandler(servletHandler);
                 final Servlet servlet = webSocketAwareHttpMateServlet(httpMate);
                 final ServletHolder servletHolder = new ServletHolder(servlet);
                 servletHandler.addServletWithMapping(servletHolder, "/*");
                 server.start();
+                httpMate.getMetaDatum(CLOSING_ACTIONS).addClosingAction(() -> {
+                    try {
+                        server.stop();
+                    } catch (final Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                });
             } catch (final Exception e) {
                 throw new RuntimeException(e);
             }
-            return new JettyEndpointWithWebSocketsSupport(server);
+            return new JettyEndpointWithWebSocketsSupport(httpMate);
         };
     }
 
     @Override
     public void close() {
-        try {
-            server.stop();
-        } catch (final Exception e) {
-            throw new RuntimeException(e);
-        }
+        httpMate.close();
     }
 }

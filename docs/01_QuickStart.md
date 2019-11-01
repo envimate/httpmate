@@ -9,7 +9,7 @@ Add this to your pom.xml:
 ```xml
 <dependency>
     <groupId>com.envimate.httpmate</groupId>
-    <artifactId>httpmate-core</artifactId>
+    <artifactId>core</artifactId>
     <version>${httpmate.version}</version>
 </dependency>
 ```
@@ -32,8 +32,18 @@ or integrating into a servlet engine. In our example, we will facilitate the
 so-called `PureJavaEndpoint`, which is implemented on top of the native Java http
 server and has therefore a minimal dependency footprint:
 ```java
-pureJavaEndpointFor(httpMate).listeningOnThePort(1337);
+final PureJavaEndpoint endpoint = pureJavaEndpointFor(httpMate).listeningOnThePort(1337);
 ```
 You can now point a web browser of your choice to http://localhost:1337/hello and
 see the expected `"hi!"` message.
 
+## Clean up
+When you are serving http requests, you can easily clean up all resources like so:
+```java
+httpMate.close();
+```
+or so:
+```java
+endpoint.close();
+```
+it doesn't really matter which one you call - both statements have the exact same effect.

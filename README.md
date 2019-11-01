@@ -6,8 +6,7 @@
 # HttpMate
 
 HttpMate is an http framework that allows you to "just publish my business logic as HTTP endpoint".
-It's non-invasive, flexible and ultra-extendable and offers you 3 modes of handling http requests - UseCase driven, 
-low-level http and event-driven request handling, as well as a mix of those modes.
+It's non-invasive, flexible and ultra-extendable.
 
 <br/>
 <br/>
@@ -19,7 +18,7 @@ Let's see some low-level example:
 
 
 ```
-final HttpMate httpMate = HttpMate.aLowLevelHttpMate()
+final HttpMate httpMate = HttpMate.anHttpMate()
         .get("/api/hello", new HttpHandler() {
             @Override
             public void handle(final HttpRequest request, final HttpResponse httpResponse) {
@@ -30,9 +29,9 @@ final HttpMate httpMate = HttpMate.aLowLevelHttpMate()
         .build();
 ```
 
-Treat HttpMate instance as a description of your endpoints: we have here a request handler, for the path `api/hello`, 
+Treat the HttpMate instance as a description of your endpoints: we have here a request handler, for the path `api/hello`, 
 with the request method `GET`, which handles the request by setting the response to the String `Hello World!` and the 
-status to 200. Pretty descriptive right?
+status to 200. Pretty descriptive, right?
 
 This way of saying hello gives you full control over the HTTP protocol. Once your UseCase is more complicated than just 
 saying hello, you want to focus on implementing it instead of dealing with protocol details.
@@ -60,42 +59,32 @@ public class SendEmail {
 Now we can expose this UseCase using HttpMate:
 
 ```
-final HttpMate useCaseDrivenHttpMate = HttpMate.anHttpMateConfiguredAs(UseCaseDrivenBuilder.USE_CASE_DRIVEN)
+final HttpMate useCaseDrivenHttpMate = HttpMate.anHttpMate()
         .post("/api/sendEmail", SendEmail.class)
-        .mappingRequestsAndResponsesUsing(
-                mapMateIntegration(MAP_MATE)
-                        .mappingAllStandardContentTypes()
-                        .assumingTheDefaultContentType(ContentType.json())
-                        .build())
-        .configured(Configurators.toCreateUseCaseInstancesUsing(INJECTOR::getInstance))
+        .configured(toUseMapMate(MAP_MATE))
+        .configured(toCreateUseCaseInstancesUsing(INJECTOR::getInstance))
         .build();
 ```
 
 Want to extract the sender from the authorization, the receiver and subject from path and 
 the email contents from the request body?
 
-```
-final HttpMate useCaseDrivenHttpMate = HttpMate.anHttpMateConfiguredAs(UseCaseDrivenBuilder.USE_CASE_DRIVEN)
+```java
+final HttpMate useCaseDrivenHttpMate = HttpMate.anHttpMate()
         .post("/api/sendEmail/<receiver>/<subject>", SendEmail.class)
-        .mappingRequestsAndResponsesUsing(
-                mapMateIntegration(MAP_MATE)
-                        .mappingAllStandardContentTypes()
-                        .assumingTheDefaultContentType(ContentType.json())
-                        .build())
-        .configured(Configurators.toCreateUseCaseInstancesUsing(INJECTOR::getInstance))
-        .configured(Configurator.configuratorForType(EventModule.class, eventModule -> {
-            eventModule.setDefaultRequestToEventMapper(RequestToEventMapper.byDirectlyMappingAllData());
-        }))
-        .configured(com.envimate.httpmate.security.Configurators.toAuthenticateRequests().afterBodyProcessing().using(new HttpAuthenticator() {
-            @Override
-            public Optional<?> authenticateAs(final HttpRequest request) {
-                final Optional<String> jwtToken = request.headers().getHeader("Authorization");
-                final Optional<String> userEmail = TOKEN_SERVICE.decrypt(jwtToken);
-                userEmail.ifPresent(email -> {
-                    metaData.get(BODY_MAP).put("sender", email);
-                });
-                return userEmail; 
-            }
+        .configured(toUseMapMate(MAP_MATE))
+        .configured(toCreateUseCaseInstancesUsing(INJECTOR::getInstance))
+        .configured(toEnrichTheIntermediateMapWithAllPathParameters())
+        .configured(toAuthenticateRequestsUsing(request -> {
+            final Optional<String> jwtToken = request.headers().getHeader("Authorization");
+            final Optional<String> userEmail = TOKEN_SERVICE.decrypt(jwtToken);
+            return userEmail; 
+        }).afterBodyProcessing())
+        .configured(toEnrichTheIntermediateMapUsing((map, request) -> {
+            final Optional<String> userEmail = request.authenticationInformationAs(String.class);
+            userEmail.ifPresent(email -> {
+                map.put("sender", email);
+            });
         }))
         .build();
 ```
@@ -161,7 +150,7 @@ Configure HttpMate with an HttpHandler and expose as a PureJavaEndpoint
 ```
 public class Application {
     public static void main(String[] args) {
-        final HttpMate httpMate = HttpMate.aLowLevelHttpMate()
+        final HttpMate httpMate = HttpMate.anHttpMate()
                 .get("/api/hello", new HttpHandler() {
                     @Override
                     public void handle(final HttpRequest request, final HttpResponse httpResponse) {
@@ -205,4 +194,4 @@ And replace the `PureJavaEndpoint` line with:
 Restart the application and enjoy the benefits of Jetty.
 
 ## Documentation
-You can find an extensive documentation [here](docs/UserGuide.md).
+You can find an extensive documentation [here](docs/00_Introduction.md).

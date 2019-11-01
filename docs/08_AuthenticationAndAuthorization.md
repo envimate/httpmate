@@ -289,7 +289,7 @@ The following list will explain them briefly.
 with the status code `401` (Unauthenticated) and the `WWW-Authenticate` header is set accordingly. If authenticated successfully
 with the supplied lambda, the authentication information is set to the authenticated username as `String`.
 
-- `toAuthenticateRequestsUsing` - authenticates requests with a lambda that gets the whole `HttpRequest`.
+- `toAuthenticateRequestsUsing()` - authenticates requests with a lambda that gets the whole `HttpRequest`.
 Does not reject unauthenticated requests.
 Sets the authentication information according to the returned lambda.
 

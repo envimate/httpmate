@@ -24,22 +24,34 @@ It offers the following methods:
 - `withExpiration()` - instructs the browser to delete the cookie after the provided expiration date by setting the `Expires` cookie directive.
 Is not set by default, which will cause browsers to delete the cookie after the session ends.
 
+- `withExpiresDirective()` - same as `withExpiration()`, but allows to set the `Expires` directive in a low-level fashion by directly setting its string value.
+
 - `withMaxAge()` - instructs the browser to delete the cookie after the provided time has passed by setting the `Max-Age` cookie directive.
 Is not set by default, which will cause browsers to delete the cookie after the session ends.
+
+- `withMaxAgeDirective()` - same as `withMaxAge()`, but allows to set the `Max-Age` directive in a low-level fashion by directly setting its string value.
 
 - `exposedToAllSubdomainsOf()` - tells the browser to send the cookie with all requests to one of the specified domains (and their subdomains) by setting the
 `Domain` cookie directive.
 Is not set by default, which will cause the browser to send the cookie with requests to the domain from which the cookie has been set, but not subdomains of it. 
 Note that most browsers will reject the cookie if the server from which the cookie is set is not included in the list.
 
+- `withDomainDirective()` - same as `exposedToAllSubdomainsOf()`, but allows to set the `Domain` directive in a low-level fashion by directly setting its string value.
+
 - `exposedOnlyToSubpathsOf()` - tells the browser to only send the cookie with requests to the provided (sub-)routes by setting the `Path` cookie directive.
 Is not set by default, which will cause the browser to send the cookie with every request, regardless of the route. 
+
+- `withPathDirective()` - same as `exposedOnlyToSubpathsOf()`, but allows to set the `Path` directive in a low-level fashion by directly setting its string value.
 
 - `thatIsOnlySentViaHttps()` - instructs the browser to send the cookie only with requests that are https-secured by setting the `Secure` cookie directive.
 Is not set by default.
 
+- `withSecureDirective()` - exactly the same as `thatIsOnlySentViaHttps()`.
+
 - `thatIsNotAccessibleFromJavaScript()` - instructs the browser to not send the cookie with JavaScript/AJAX requests by setting the `HttpOnly` cookie directive.
 Is not set by default.
+
+- `withHttpOnlyDirective()` - exactly the same as `thatIsNotAccessibleFromJavaScript()`.
 
 - `withSameSitePolicy()` - tells the browsers whether the cookie can be sent with cross-origin requests by setting the `SameSite` cookie directive. Possible options are
    - `STRICT` - cross-origin requests will not include the cookie
@@ -47,7 +59,12 @@ Is not set by default.
    - `NONE` - send the cookie with every request
 
     Not set by default, which will cause most browsers to default to the `NONE` policy.
-    
+
+- `withSameSiteDirective()` - same as `withSameSitePolicy()`, but allows to set the `SameSite` directive in a low-level fashion by directly setting its string value.
+
+- `withDirective()` - allows to set a custom cookie directive. When called with one parameter, the directive is inserted as-is. When called with two parameters,
+both parameters (key and value) are concatenated with an `=` and inserted.
+
 The following example will set the `myCookie` cookie with a lifetime of two hours:
 ```java
 final HttpMate httpMate = anHttpMate()

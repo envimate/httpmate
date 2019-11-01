@@ -31,17 +31,16 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.StringJoiner;
 import java.util.concurrent.TimeUnit;
 
 import static com.envimate.httpmate.http.headers.cookies.CookieName.cookieName;
 import static com.envimate.httpmate.http.headers.cookies.CookieValue.cookieValue;
 import static com.envimate.httpmate.util.Validators.validateNotNull;
-import static java.lang.String.format;
-import static java.lang.String.join;
+import static com.envimate.httpmate.util.Validators.validateNotNullNorEmpty;
+import static java.lang.String.*;
 import static java.util.Arrays.asList;
-import static java.util.Objects.nonNull;
 
 @ToString
 @EqualsAndHashCode
@@ -49,98 +48,92 @@ import static java.util.Objects.nonNull;
 public final class CookieBuilder {
     private final DateTimeFormatter httpDateTimeFormatter = DateTimeFormatter.ofPattern("EEE, dd MMM yyyy HH:mm:ss O");
 
-    private final CookieName cookieName;
-    private final CookieValue cookieValue;
-
-    private volatile Instant expires;
-    private volatile Long maxAgeInSeconds;
-    private volatile boolean secure = false;
-    private volatile boolean httpOnly = false;
-    private volatile SameSitePolicy sameSitePolicy;
-    private volatile List<String> domainScope;
-    private volatile List<String> pathScope;
+    private final List<String> elements;
 
     public static CookieBuilder cookie(final String name, final String value) {
         final CookieName cookieName = cookieName(name);
         final CookieValue cookieValue = cookieValue(value);
-        return new CookieBuilder(cookieName, cookieValue);
+        final String nameAndValue = format("%s=\"%s\"", cookieName.stringValue(), cookieValue.stringValue());
+        final List<String> elements = new LinkedList<>();
+        elements.add(nameAndValue);
+        return new CookieBuilder(elements);
+    }
+
+    public CookieBuilder withDirective(final String directive) {
+        validateNotNullNorEmpty(directive, "directive");
+        elements.add(directive);
+        return this;
+    }
+
+    public CookieBuilder withDirective(final String key, final String value) {
+        validateNotNullNorEmpty(key, "key");
+        validateNotNullNorEmpty(value, "value");
+        return withDirective(format("%s=%s", key, value));
+    }
+
+    public CookieBuilder withExpiresDirective(final String expiresDirective) {
+        return withDirective("Expires", expiresDirective);
     }
 
     public CookieBuilder withExpiration(final Instant expiration) {
         Validators.validateNotNull(expiration, "expiration");
-        this.expires = expiration;
-        return this;
+        final ZonedDateTime zonedDateTime = expiration.atZone(ZoneId.of("GMT"));
+        final String formattedDate = httpDateTimeFormatter.format(zonedDateTime);
+        return withExpiresDirective(formattedDate);
+    }
+
+    public CookieBuilder withMaxAgeDirective(final String maxAgeDirective) {
+        return withDirective("Max-Age", maxAgeDirective);
     }
 
     public CookieBuilder withMaxAge(final int time, final TimeUnit unit) {
         validateNotNull(unit, "unit");
-        maxAgeInSeconds = unit.toSeconds(time);
-        return this;
+        final long maxAgeInSeconds = unit.toSeconds(time);
+        return withMaxAgeDirective(valueOf(maxAgeInSeconds));
+    }
+
+    public CookieBuilder withSecureDirective() {
+        return withDirective("Secure");
     }
 
     public CookieBuilder thatIsOnlySentViaHttps() {
-        this.secure = true;
-        return this;
+        return withSecureDirective();
+    }
+
+    public CookieBuilder withHttpOnlyDirective() {
+        return withDirective("HttpOnly");
     }
 
     public CookieBuilder thatIsNotAccessibleFromJavaScript() {
-        this.httpOnly = true;
-        return this;
+        return withHttpOnlyDirective();
+    }
+
+    public CookieBuilder withSameSiteDirective(final String sameSiteDirective) {
+        return withDirective("SameSite", sameSiteDirective);
     }
 
     public CookieBuilder withSameSitePolicy(final SameSitePolicy policy) {
         validateNotNull(policy, "policy");
-        this.sameSitePolicy = policy;
-        return this;
+        return withSameSiteDirective(policy.stringValue());
+    }
+
+    public CookieBuilder withDomainDirective(final String domainDirective) {
+        return withDirective("Domain", domainDirective);
     }
 
     public CookieBuilder exposedToAllSubdomainsOf(final String... domains) {
-        this.domainScope = asList(domains);
-        return this;
+        return withDomainDirective(join(",", asList(domains)));
+    }
+
+    public CookieBuilder withPathDirective(final String pathDirective) {
+        return withDirective("Path", pathDirective);
     }
 
     public CookieBuilder exposedOnlyToSubpathsOf(final String... paths) {
-        this.pathScope = asList(paths);
-        return this;
+        return withPathDirective(join(",", asList(paths)));
     }
 
     public String build() {
-        final StringJoiner joiner = new StringJoiner("; ");
-        final String nameAndValue = format("%s=\"%s\"", cookieName.stringValue(), cookieValue.stringValue());
-        joiner.add(nameAndValue);
-
-        if (nonNull(expires)) {
-            final ZonedDateTime zonedDateTime = expires.atZone(ZoneId.of("GMT"));
-            final String formattedDate = httpDateTimeFormatter.format(zonedDateTime);
-            joiner.add(format("Expires=%s", formattedDate));
-        }
-
-        if (nonNull(maxAgeInSeconds)) {
-            joiner.add(format("Max-Age=%d", maxAgeInSeconds));
-        }
-
-        if (nonNull(domainScope)) {
-            final String domains = join(",", domainScope);
-            joiner.add(format("Domain=%s", domains));
-        }
-
-        if (nonNull(pathScope)) {
-            final String paths = join(",", pathScope);
-            joiner.add(format("Path=%s", paths));
-        }
-
-        if (secure) {
-            joiner.add("Secure");
-        }
-
-        if (httpOnly) {
-            joiner.add("HttpOnly");
-        }
-
-        if (nonNull(sameSitePolicy)) {
-            joiner.add(format("SameSite=%s", sameSitePolicy.stringValue()));
-        }
-
-        return joiner.toString();
+        return join("; ", elements);
     }
 }

@@ -29,35 +29,38 @@ import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.HttpConnectionFactory;
 import org.eclipse.jetty.server.Server;
 
+import static com.envimate.httpmate.closing.ClosingActions.CLOSING_ACTIONS;
 import static com.envimate.httpmate.jetty.JettyEndpointHandler.jettyEndpointHandler;
 
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class JettyEndpoint implements AutoCloseable {
-    private final Server server;
+    private final HttpMate httpMate;
 
     public static PortStage jettyEndpointFor(final HttpMate httpMate) {
         return port -> {
-            final Server server;
             try {
-                server = new Server(port);
+                final Server server = new Server(port);
                 final HttpConnectionFactory connectionFactory = extractConnectionFactory(server);
                 connectionFactory.getHttpConfiguration().setFormEncodedMethods();
                 server.setHandler(jettyEndpointHandler(httpMate));
                 server.start();
+                httpMate.getMetaDatum(CLOSING_ACTIONS).addClosingAction(() -> {
+                    try {
+                        server.stop();
+                    } catch (final Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                });
             } catch (final Exception e) {
                 throw new RuntimeException(e);
             }
-            return new JettyEndpoint(server);
+            return new JettyEndpoint(httpMate);
         };
     }
 
     @Override
     public void close() {
-        try {
-            server.stop();
-        } catch (final Exception e) {
-            throw new RuntimeException(e);
-        }
+        httpMate.close();
     }
 
     private static HttpConnectionFactory extractConnectionFactory(final Server server) {

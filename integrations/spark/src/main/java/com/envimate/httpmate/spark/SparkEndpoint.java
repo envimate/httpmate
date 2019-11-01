@@ -26,11 +26,12 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import spark.Service;
 
+import static com.envimate.httpmate.closing.ClosingActions.CLOSING_ACTIONS;
 import static spark.Service.ignite;
 
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class SparkEndpoint implements AutoCloseable {
-    private final Service spark;
+    private final HttpMate httpMate;
 
     public static PortStage sparkEndpointFor(final HttpMate httpMate) {
         return port -> {
@@ -43,13 +44,16 @@ public final class SparkEndpoint implements AutoCloseable {
             spark.delete("/*", webserviceAdapterRoute);
             spark.options("/*", webserviceAdapterRoute);
             spark.awaitInitialization();
-            return new SparkEndpoint(spark);
+            httpMate.getMetaDatum(CLOSING_ACTIONS).addClosingAction(() -> {
+                spark.stop();
+                spark.awaitStop();
+            });
+            return new SparkEndpoint(httpMate);
         };
     }
 
     @Override
     public void close() {
-        spark.stop();
-        spark.awaitStop();
+        httpMate.close();
     }
 }
