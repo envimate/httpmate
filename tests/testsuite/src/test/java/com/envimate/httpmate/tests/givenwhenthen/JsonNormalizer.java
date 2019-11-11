@@ -24,7 +24,7 @@ package com.envimate.httpmate.tests.givenwhenthen;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
-import java.util.TreeMap;
+import java.util.Map;
 
 final class JsonNormalizer {
 
@@ -32,9 +32,8 @@ final class JsonNormalizer {
     }
 
     @SuppressWarnings("unchecked")
-    static String normalizeJson(final String json) {
+    static Map<String, Object> normalizeJsonToMap(final String json) {
         final Gson gson = new GsonBuilder().setPrettyPrinting().create();
-        final TreeMap<String, Object> map = gson.fromJson(json, TreeMap.class);
-        return gson.toJson(map);
+        return gson.fromJson(json, Map.class);
     }
 }

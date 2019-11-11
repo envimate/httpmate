@@ -26,6 +26,7 @@ import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -33,6 +34,7 @@ import static com.envimate.httpmate.util.Validators.validateNotNull;
 import static java.lang.String.format;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toList;
 
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
@@ -81,6 +83,12 @@ public final class MetaData {
 
     public boolean contains(final MetaDataKey<?> key) {
         return getOptional(key).isPresent();
+    }
+
+    public List<MetaDataKey<?>> keys() {
+        return map.keySet().stream()
+                .map(MetaDataKey::metaDataKey)
+                .collect(toList());
     }
 
     @Override

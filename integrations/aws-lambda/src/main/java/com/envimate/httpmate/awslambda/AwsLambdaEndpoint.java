@@ -27,7 +27,7 @@ import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent
 import com.envimate.httpmate.HttpMate;
 import com.envimate.httpmate.chains.MetaData;
 import com.envimate.httpmate.chains.MetaDataKey;
-import com.envimate.httpmate.logger.Logger;
+import com.envimate.httpmate.logger.LoggerImplementation;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 
@@ -52,7 +52,7 @@ public final class AwsLambdaEndpoint {
 
     private final HttpMate httpMate;
 
-    public static Logger awsLogger() {
+    public static LoggerImplementation awsLogger() {
         return awsLambdaLogger();
     }
 

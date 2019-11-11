@@ -30,31 +30,32 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.StringJoiner;
 
 import static com.envimate.httpmate.client.HeaderKey.headerKey;
 import static com.envimate.httpmate.client.HeaderValue.headerValue;
 import static com.envimate.httpmate.client.HttpClientRequest.httpClientRequest;
-import static com.envimate.httpmate.client.QueryParameterKey.queryParameterKey;
-import static com.envimate.httpmate.client.QueryParameterValue.queryParameterValue;
+import static com.envimate.httpmate.client.QueryParameter.queryParameter;
 import static com.envimate.httpmate.client.body.Body.bodyWithoutContentType;
 import static com.envimate.httpmate.client.body.multipart.MultipartBodyCreator.createMultipartBody;
 import static com.envimate.httpmate.util.Streams.stringToInputStream;
+import static com.envimate.httpmate.util.Validators.validateNotNull;
 import static com.envimate.httpmate.util.Validators.validateNotNullNorEmpty;
 
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class HttpClientRequestBuilder<T> {
     private final String method;
-    private final String path;
+    private final RequestPath path;
     private Body body;
     private final Map<HeaderKey, HeaderValue> headers = new HashMap<>();
-    private final Map<QueryParameterKey, QueryParameterValue> explicitQueryParameters = new HashMap<>();
     private Class<T> targetType;
 
     static HttpClientRequestBuilder<SimpleHttpResponseObject> httpClientRequestBuilderImplementation(
             final String method, final String path) {
         validateNotNullNorEmpty(method, "method");
-        validateNotNullNorEmpty(path, "path");
-        final HttpClientRequestBuilder<?> httpClientRequestBuilder = new HttpClientRequestBuilder<>(method, path);
+        validateNotNull(path, "path");
+        final RequestPath requestPath = RequestPath.parse(path);
+        final HttpClientRequestBuilder<?> httpClientRequestBuilder = new HttpClientRequestBuilder<>(method, requestPath);
         return httpClientRequestBuilder.mappedTo(SimpleHttpResponseObject.class);
     }
 
@@ -86,8 +87,13 @@ public final class HttpClientRequestBuilder<T> {
         return this;
     }
 
+    public HttpClientRequestBuilder<T> withQueryParameter(final String key) {
+        this.path.add(queryParameter(key));
+        return this;
+    }
+
     public HttpClientRequestBuilder<T> withQueryParameter(final String key, final String value) {
-        this.explicitQueryParameters.put(queryParameterKey(key), queryParameterValue(value));
+        this.path.add(queryParameter(key, value));
         return this;
     }
 
@@ -101,7 +107,19 @@ public final class HttpClientRequestBuilder<T> {
         return (HttpClientRequestBuilder<X>) this;
     }
 
-    HttpClientRequest<T> build() {
-        return httpClientRequest(path, method, headers, explicitQueryParameters, Optional.ofNullable(body), targetType);
+    HttpClientRequest<T> build(final BasePath basePath) {
+        //if (isNull(rawPath)) {
+        //final String query = createQuery(explicitQueryParameters);
+        //}
+        return httpClientRequest(path, method, headers, Optional.ofNullable(body), targetType);
+    }
+
+    private static String createQuery(final Map<String, String> queryParameters) {
+        if (queryParameters.isEmpty()) {
+            return "";
+        }
+        final StringJoiner joiner = new StringJoiner("&", "?", "");
+        queryParameters.forEach((key, value) -> joiner.add(key + "=" + value));
+        return joiner.toString();
     }
 }

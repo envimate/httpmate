@@ -1,7 +1,9 @@
 # HttpMate Client
 
-Additionally to HttpMate's main server functionality, it can also be used as a http client. In
-order to do this, you need to include the client integration.
+Additionally to HttpMate's main server functionality, it can also be used as a http client.
+It should be noted that this client arose a from a necessity in test code and was never
+intended to be used in production code.
+In access it, you need to include the client integration.
 
 ```xml
 <dependency>

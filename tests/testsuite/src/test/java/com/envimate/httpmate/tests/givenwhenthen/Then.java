@@ -27,7 +27,7 @@ import com.envimate.httpmate.tests.lowlevel.LowLevelHttpMateConfiguration;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.envimate.httpmate.tests.givenwhenthen.JsonNormalizer.normalizeJson;
+import static com.envimate.httpmate.tests.givenwhenthen.JsonNormalizer.normalizeJsonToMap;
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertThat;
 
@@ -83,9 +83,9 @@ public final class Then {
     }
 
     public Then theJsonResponseEquals(final String expectedJson) {
-        final String normalizedExpected = normalizeJson(expectedJson);
+        final Map<String, Object> normalizedExpected = normalizeJsonToMap(expectedJson);
         final String actualResponseBody = response.getBody();
-        final String normalizedActual = normalizeJson(actualResponseBody);
+        final Map<String, Object> normalizedActual = normalizeJsonToMap(actualResponseBody);
         assertThat(normalizedActual, is(normalizedExpected));
         return this;
     }

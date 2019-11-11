@@ -69,8 +69,8 @@ public final class CustomLoginExample {
                 })
                 .get("/normal", (request, response) -> response.setBody("The normal section"))
                 .get("/admin", (request, response) -> response.setBody("The admin section"))
-                .configured(toAuthenticateUsingCookie("jwt", jwt -> Optional.of(jwtParser.parseClaimsJws(jwt).getBody())))
-                .configured(toAuthorizeAllAuthenticatedRequests().exceptRequestsTo("/login"))
+                .configured(toAuthenticateUsingCookie("jwt", jwt -> Optional.of(jwtParser.parseClaimsJws(jwt).getBody()))
+                        .failingOnMissingAuthenticationOnlyForRequestsTo("/login"))
                 .configured(toAuthorizeRequestsUsing((authenticationInformation, request) -> authenticationInformation
                         .map(object -> (Claims) object)
                         .map(claims -> (Boolean) claims.get("admin"))

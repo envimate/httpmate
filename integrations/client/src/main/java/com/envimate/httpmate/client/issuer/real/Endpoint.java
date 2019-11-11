@@ -22,6 +22,7 @@
 package com.envimate.httpmate.client.issuer.real;
 
 import com.envimate.httpmate.client.BasePath;
+import com.envimate.httpmate.client.RequestPath;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
@@ -64,18 +65,15 @@ final class Endpoint {
         return this.protocol;
     }
 
-    String toUrl(final String path,
-                 final Map<String, String> queryParameters) {
+    String toUrl(final RequestPath requestPath) {
         final StringBuilder urlBuilder = new StringBuilder();
         urlBuilder.append(this.protocol.identifier());
         urlBuilder.append("://");
         urlBuilder.append(this.host);
         urlBuilder.append(":");
         urlBuilder.append(this.port);
-        final String fixedPath = basePath.concatenateWithStartingAndTrailingSlash(path);
-        urlBuilder.append(fixedPath);
-        final String queryParametersString = createQuery(queryParameters);
-        urlBuilder.append(queryParametersString);
+        final String renderedPath = requestPath.render();
+        urlBuilder.append(renderedPath);
         return urlBuilder.toString();
     }
 

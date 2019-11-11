@@ -17,12 +17,6 @@ If you intend to use websockets, you can go with the Jetty-for-websockets varian
 ```java
 jettyEndpointWithWebSocketsSupportFor(httpMate).listeningOnThePort(1337);
 ```
-## Spark
-The Spark endpoint is another endpoint you can choose.
-```java
-sparkEndpointFor(httpMate).listeningOnThePort(1337)
-```
-It does not come with websockets support.
 ## Servlet
 If you intend to host your application using standard Java servlet technology, you can go with the servlet endpoint.
 Using it depends on how your servlet is loaded.

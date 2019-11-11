@@ -140,12 +140,12 @@ public final class ArtificialConfiguration {
                         .marshallingContentTypeInResponses(json()).with(map -> new Gson().toJson(map))
                         .usingTheDefaultContentType(json()))
 
-                .configured(toAuthenticateRequestsUsing(request -> request.queryParameters().getOptionalQueryParameter("username")))
-                .configured(toAuthenticateRequestsUsing(request -> request.headers().getOptionalHeader("username")))
+                .configured(toAuthenticateRequestsUsing(request -> request.queryParameters().getOptionalQueryParameter("username")).notFailingOnMissingAuthentication())
+                .configured(toAuthenticateRequestsUsing(request -> request.headers().getOptionalHeader("username")).notFailingOnMissingAuthentication())
                 .configured(SecurityConfigurators.toAuthorizeRequestsUsing((authenticationInformation, request) -> {
                     final Path path = request.path();
                     if (path.matches("/authorized")) {
-                        return (boolean) authenticationInformation
+                        return authenticationInformation
                                 .map("admin"::equals)
                                 .orElse(false);
                     }

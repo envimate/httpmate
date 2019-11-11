@@ -22,6 +22,7 @@
 package websockets.givenwhenthen.configurations.lowlevel;
 
 import com.envimate.httpmate.HttpMate;
+import com.envimate.httpmate.logger.LoggerImplementation;
 import websockets.givenwhenthen.configurations.TestConfiguration;
 
 import static com.envimate.httpmate.HttpMate.anHttpMate;
@@ -51,9 +52,16 @@ public final class LowLevelConfiguration {
                         .acceptingWebSocketsToThePath("/").taggedBy("ROOT")
                         .acceptingWebSocketsToThePath("/foobar").taggedBy("FOOBAR")
                         .acceptingWebSocketsToThePath("/logger").taggedBy("LOGGER"))
-                .configured(toLogUsing((message, metaData) -> logger.append(message)))
+                .configured(toLogUsing(logger()))
                 .configured(toEnrichTheIntermediateMapWithAllRequestData())
                 .build();
         return testConfiguration(httpMate);
+    }
+
+    private static LoggerImplementation logger() {
+        return logMessage -> {
+            final String formattedMessage = logMessage.formattedMessage();
+            logger.append(formattedMessage);
+        };
     }
 }

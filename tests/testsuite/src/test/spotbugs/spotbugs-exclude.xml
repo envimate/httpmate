@@ -31,4 +31,7 @@
     <Match>
         <Bug pattern="MS_PKGPROTECT"/>
     </Match>
+    <Match>
+        <Bug pattern="NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE"/>
+    </Match>
 </FindBugsFilter>

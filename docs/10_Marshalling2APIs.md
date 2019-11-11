@@ -20,7 +20,12 @@ the body might be encoded as Json:
 ```json
 {
   "surname": "Joe",
-  "name": "Doe"  
+  "name": "Doe",
+  "address": {
+    "country": "USA",
+    "zip": "TX 78023",
+    "street": "340 San Carlos Drive"
+  }
 }
 ```
 or as XML:
@@ -28,18 +33,32 @@ or as XML:
 <Request>
     <surname>Joe</surname>
     <name>Doe</name>
+    <address>
+        <country>USA</country>
+        <zip>TX 78023</zip>
+        <street>340 San Carlos Drive</street>
+    </address>
 </Request>
 ```
 or as YAML:
 ```yaml
-    surname: Joe
-    name: Doe
+surname: Joe
+name: Doe
+address:
+  country: USA
+  zip: TX 78023
+  street: 340 San Carlos Drive
 ```
 In order to handle the incoming request transparently, all these format would be translated
 into the same `Map<String, Object>` with this content: 
-```java
+```
 "surname" = "Joe"
 "name" = "Doe"
+"address" = Map(
+                "country" = "USA"
+                "zip" = "TX 78023" 
+                "street" = "340 San Carlos Drive"
+            )
 ```
 This way, the request handler does not need to bother about parsing.
 In the response, the request just needs to provide a `Map<String, Object>` with the
@@ -67,19 +86,20 @@ or to XML:
 ```
 or to YAML:
 ```yaml
-    orderId: qwefgfd-gt-yeetgtr
-    status: SHIPPING
+orderId: qwefgfd-gt-yeetgtr
+status: SHIPPING
 ```
 
 ## Configuring (un)marshalling
 In order to configure HttpMate to (un)marshall requests and responses, the marshalling module needs to be configured. Example:
 ```java
-aLowLevelHttpMate()
+anHttpMate()
                 [...]
-                .thatIs().configured(toMarshallBodiesBy()
+                .configured(toMarshallBodiesBy()
                         .unmarshallingContentTypeInRequests(fromString("application/json")).with(body -> GSON.fromJson(body, Map.class))
                         .marshallingContentTypeInResponses(fromString("application/json")).with(map -> GSON.toJson(map))
                         .usingTheDefaultContentType(fromString("application/json")))
+                .build();
 ```
 In the example, HttpMate is configured to (un)marshall Json using the Gson library. The last line configures the default `Content-Type`, which
 is the `Content-Type` that is assumed if a request does not provide its own `Content-Type` header.
@@ -143,7 +163,8 @@ has been found, HttpMate will assume an `Accept` header that accepts all `Conten
 In the next step, HttpMate will look at all `Content-Type`s that it actually knows how 
 to marshall, i.e. for which a marshaller has been configured. It will only further
 consider `Content-Type`s that are accepted by the `Accept` header and it knows how
-to marshall.
+to marshall. If this set is empty, it will instead continue with all `Content-Type`s
+it knows how to marshall.
 
 From this set of accepted and supported `Content-Type`s, it will pick a `Content-Type`.
 If the `Content-Type` of the request is in this set, this one will be picked in
@@ -157,9 +178,8 @@ choice would be to source marshalling and unmarshalling out to HttpMate's sister
 MapMate. In order to integrate MapMate into HttpMate, an integration module is offered
 which can be configured like this:
 ```java
-aLowLevelHttpMate()
-                [...]
-                .thatIs().configured(toMarshalRequestAndResponseBodiesUsingMapMate(mapMate))
+anHttpMate()
+                .configured(toUseMapMate(mapMate))
                 .build();
 ```
 All settings will be automatically adapted from the provided MapMate object.

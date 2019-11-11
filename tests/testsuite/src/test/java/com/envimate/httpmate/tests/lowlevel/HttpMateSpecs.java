@@ -19,7 +19,7 @@
  * under the License.
  */
 
-package com.envimate.httpmate.tests;
+package com.envimate.httpmate.tests.lowlevel;
 
 import com.envimate.httpmate.tests.givenwhenthen.DeployerAndClient;
 import org.junit.AfterClass;
@@ -147,22 +147,6 @@ public final class HttpMateSpecs {
                 .when().aRequestToThePath("/this_has_no_usecase").viaTheGetMethod().withAnEmptyBody().isIssued()
                 .theStatusCodeWas(405)
                 .theResponseBodyWas("No use case found.");
-    }
-
-    @Test
-    public void testMappedExceptionHandler() {
-        given(theHttpMateInstanceUsedForTesting())
-                .when().aRequestToThePath("/mapped_exception").viaTheGetMethod().withAnEmptyBody().isIssued()
-                .theStatusCodeWas(201)
-                .theResponseBodyWas("");
-    }
-
-    @Test
-    public void testDefaultExceptionHandlerDoesNotDiscloseTheExceptionInTheResponse() {
-        given(theHttpMateInstanceUsedForTesting())
-                .when().aRequestToThePath("/unmapped_exception").viaTheGetMethod().withAnEmptyBody().isIssued()
-                .theStatusCodeWas(500)
-                .theResponseBodyWas("");
     }
 
     @Test

@@ -28,10 +28,8 @@ import org.junit.runners.Parameterized;
 
 import java.util.Collection;
 
-import static com.envimate.httpmate.HttpMate.anHttpMate;
 import static com.envimate.httpmate.Configurators.toCustomizeResponsesUsing;
-import static com.envimate.httpmate.exceptions.ExceptionConfigurators.toMapExceptionsByDefaultUsing;
-import static com.envimate.httpmate.exceptions.ExceptionConfigurators.toMapExceptionsOfType;
+import static com.envimate.httpmate.HttpMate.anHttpMate;
 import static com.envimate.httpmate.tests.givenwhenthen.Given.given;
 import static com.envimate.httpmate.tests.givenwhenthen.deploy.DeployerManager.activeDeployers;
 import static com.envimate.httpmate.tests.givenwhenthen.deploy.DeployerManager.setCurrentDeployerAndClient;
@@ -111,7 +109,7 @@ public final class LowLevelSpecs {
         given(theLowLevelHttpMateInstanceUsedForTesting())
                 .when().aRequestToThePath("/log").viaTheGetMethod().withAnEmptyBody().isIssued()
                 .theStatusCodeWas(200)
-                .theLogOutputStartedWith("foobar");
+                .theLogOutputStartedWith("INFO: foobar");
     }
 
     @Test
@@ -133,41 +131,16 @@ public final class LowLevelSpecs {
     }
 
     @Test
-    public void testDefaultExceptionHandler() {
-        given(theLowLevelHttpMateInstanceUsedForTesting())
-                .when().aRequestToThePath("/exception").viaTheGetMethod().withAnEmptyBody().isIssued()
-                .theStatusCodeWas(500)
-                .theResponseBodyContains("");
-    }
-
-    @Test
-    public void testResources() {
-        given(theLowLevelHttpMateInstanceUsedForTesting())
-                .when().aRequestToThePath("/resource").viaTheGetMethod().withAnEmptyBody().isIssued()
-                .theStatusCodeWas(200)
-                .theResponseBodyContains("this is a resource");
-    }
-
-    @Test
     public void testEmptyTemplate() {
-        given(anHttpMate().get("/test", (request, response) -> response.setBody("OK"))
-                .configured(toCustomizeResponsesUsing(metaData -> {
-                })).build())
+        given(
+                anHttpMate()
+                        .get("/test", (request, response) -> response.setBody("OK"))
+                        .configured(toCustomizeResponsesUsing(metaData -> {
+                        }))
+                        .build()
+        )
                 .when().aRequestToThePath("/test").viaTheGetMethod().withAnEmptyBody().isIssued()
                 .theStatusCodeWas(200)
                 .theResponseBodyWas("OK");
-    }
-
-    @Test
-    public void testCheckedExceptionsCanBeMapped() {
-        given(anHttpMate()
-                .get("/test", (request, response) -> {
-                    throw (RuntimeException) new Exception();
-                })
-                .configured(toMapExceptionsOfType(Exception.class, (exception, response) -> response.setStatus(501)))
-                .configured(toMapExceptionsByDefaultUsing((exception, response) -> response.setStatus(500)))
-                .build())
-                .when().aRequestToThePath("/test").viaTheGetMethod().withAnEmptyBody().isIssued()
-                .theStatusCodeWas(501);
     }
 }

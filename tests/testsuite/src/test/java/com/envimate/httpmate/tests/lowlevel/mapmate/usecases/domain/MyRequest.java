@@ -19,7 +19,22 @@
  * under the License.
  */
 
-package com.envimate.httpmate.tests.usecases.unmappedexception;
+package com.envimate.httpmate.tests.lowlevel.mapmate.usecases.domain;
 
-public final class UnmappedException extends RuntimeException {
+import lombok.AccessLevel;
+import lombok.EqualsAndHashCode;
+import lombok.RequiredArgsConstructor;
+import lombok.ToString;
+
+@ToString
+@EqualsAndHashCode
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
+public final class MyRequest {
+    public final CustomPrimitive1 field1;
+    public final CustomPrimitive2 field2;
+
+    public static MyRequest myRequest(final CustomPrimitive1 field1,
+                                      final CustomPrimitive2 field2) {
+        return new MyRequest(field1, field2);
+    }
 }

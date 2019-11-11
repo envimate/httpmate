@@ -21,8 +21,9 @@
 
 package com.envimate.httpmate.awslambda;
 
-import com.envimate.httpmate.chains.MetaData;
-import com.envimate.httpmate.logger.Logger;
+import com.amazonaws.services.lambda.runtime.LambdaLogger;
+import com.envimate.httpmate.logger.LogMessage;
+import com.envimate.httpmate.logger.LoggerImplementation;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -33,16 +34,15 @@ import static com.envimate.httpmate.awslambda.AwsLambdaEndpoint.CONTEXT_KEY;
 @ToString
 @EqualsAndHashCode
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-final class AwsLambdaLogger implements Logger {
+final class AwsLambdaLogger implements LoggerImplementation {
 
-    static Logger awsLambdaLogger() {
+    static LoggerImplementation awsLambdaLogger() {
         return new AwsLambdaLogger();
     }
 
     @Override
-    public void log(final String message, final MetaData metaData) {
-        metaData.get(CONTEXT_KEY)
-                .getLogger()
-                .log(message);
+    public void log(final LogMessage message) {
+        final LambdaLogger lambdaLogger = message.metaData().get(CONTEXT_KEY).getLogger();
+        lambdaLogger.log(message.formattedMessage());
     }
 }

@@ -4,7 +4,7 @@ In the first part of the usecases chapter, we looked at the ping usecase which
 is actually not very useful.
 It does not receive any parameters and does not return anything.
 In this chapter, we will create a more realistic scenario in a webservice
-that simulates a reservation to a restaurant.
+that offers the multiplication of two integers.
 
 ## Parameters and Return Values
 Let's start with defining the use case:
@@ -12,10 +12,8 @@ Let's start with defining the use case:
 public final class MultiplicationUseCase {
 
     public CalculationResponse multiply(final MultiplicationRequest multiplicationRequest) {
-        final Number firstFactor = multiplicationRequest.getFactor1();
-        final Number secondFactor = multiplicationRequest.getFactor2();
-        final int result = firstFactor.value() * secondFactor.value();
-        return new CalculationResponse(new Number(result));
+        final int result = multiplicationRequest.factor1 * multiplicationRequest.factor2;
+        return new CalculationResponse(result);
     }
 }
 ```
@@ -23,66 +21,34 @@ This usecase takes an object of type `MultiplicationRequest` as parameter:
 
 ```java
 public final class MultiplicationRequest {
-    public final Number factor1;
-    public final Number factor2;
+    public final Integer factor1;
+    public final Integer factor2;
 
-    public MultiplicationRequest(final Number factor1, final Number factor2) {
+    public MultiplicationRequest(final Integer factor1, final Integer factor2) {
         this.factor1 = factor1;
         this.factor2 = factor2;
     }
 
-    public static MultiplicationRequest multiplicationRequest(final Number factor1,
-                                                              final Number factor2) {
+    public static MultiplicationRequest multiplicationRequest(final Integer factor1,
+                                                              final Integer factor2) {
         return new MultiplicationRequest(factor1, factor2);
-    }
-
-    public Number getFactor1() {
-        return factor1;
-    }
-
-    public Number getFactor2() {
-        return factor2;
     }
 }
 ```
 As you can see, a `MultiplicationRequest` simply encapsulates two factors, each of with
-having the datatype `Number`:
-
-```java
-public final class Number {
-    private final int number;
-
-    public Number(final int number) {
-        this.number = number;
-    }
-
-    public static Number parseNumber(final String numberAsString) {
-        final int number = parseInt(numberAsString);
-        return new Number(number);
-    }
-
-    public int value() {
-        return number;
-    }
-
-    public String stringValue() {
-        return String.valueOf(number);
-    }
-}
-```
-
+having the datatype `Integer`.
 The `MultiplicationUseCase` will then take both factors, multiply them, and return the result
 encapsulated in an object of type `CalculationResponse`:
 
 ```java
 public final class CalculationResponse {
-    public final Number result;
+    public final Integer result;
 
-    public CalculationResponse(final Number result) {
+    public CalculationResponse(final Integer result) {
         this.result = result;
     }
 
-    public static CalculationResponse calculationResult(final Number result) {
+    public static CalculationResponse calculationResult(final Integer result) {
         return new CalculationResponse(result);
     }
 }
@@ -151,4 +117,13 @@ final HttpMate httpMate = anHttpMate()
         .post("/multiply", MultiplicationUseCase.class)
         .configured(toUseMapMate(mapMate))
         .build();
+```
+
+You can try the configuration with the following curl command:
+```bash
+curl --request POST --header 'Content-Type: application/json' --data '{"factor1": "3", "factor2": "4"}' http://localhost:1337/multiply
+```
+And see the correct result for the multiplication of 3 and 4:
+```json
+{"result":"12"}
 ```

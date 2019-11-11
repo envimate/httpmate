@@ -1,133 +1,238 @@
-# Usecases III: Advanced topics
+# Usecases III: Validation
+Let's add another usecase to the multiplication example. One obvious additional feature
+would be to support division.
+The accompanying usecase is fairly trivial:
+```java
+public final class DivisionUseCase {
 
-You now know how to configure HttpMate to directly serve usecases and
-how to facilitate the MapMate integration to map request and responses
-to usecase parameters and return values. This chapter will talk about
-some aspects that arise in most projects and how to configure aspects that
-are more advanced. 
-
-## Mapping headers/query parameters/etc.
-In the second usecases chapter we showed you how to map
-a request body to usecase parameters and the usecase's return value
-to the response body.
-This is not the only way http allows data to be communicated between the caller on
-the client side and the application on server side.
-Given the multiplication example from the previous chapter,
-crafting a `POST` request to access the webservice might not be the optimal choice.
-Another option would be encoding
-the `factor1` and `factor2` fields into the url itself as query parameters.
-Depending on the circumstances, this could be a more usable approach
-since it's accessible from a normal web browser.
-Either way, HttpMate has you covered.
-
-### Enriching requests with other data
-Let's first look at request processing i.e. parsing the usecase parameters.
-The established workflow looks like this:
-```
-Request Body    --->    Map<String, Object>    --->    Domain Object
-```
-If we now want to include other aspect of the request (headers, query parameters,
-path parameters, authentication data, etc.), we can enrich the intermediate
-map with exactly this data. The resulting workflow would look like
-this:
-```
-Query Parameters, etc.  -----
-                            |
-                            V
-Request Body    --->    Map<String, Object>    --->    Domain Object
+    public CalculationResponse divide(final DivisionRequest divisionRequest) {
+        final int result = divisionRequest.dividend / divisionRequest.divisor;
+        return new CalculationResponse(result);
+    }
+}
 ```
 
-To configure this enrichment in HttpMate, the class `EventConfigurators` offers
-a ton of convenient configurator methods to choose from.
-You can even provide more than one of them and they are cascaded in the order they were configured.
+with the corresponding `DivisionRequest`:
+```java
+public final class DivisionRequest {
+    public final Integer dividend;
+    public final Integer divisor;
 
-#### toEnrichTheIntermediateMapUsing()
-Takes as parameter an implementation of `RequestMapEnricher` which consumes
-the current intermediate map and the current `HttpRequest`. You
-can make arbitrary changes to the intermediate map. 
+    public DivisionRequest(final Integer dividend, final Integer divisor) {
+        this.dividend = dividend;
+        this.divisor = divisor;
+    }
 
-#### toEnrichTheIntermediateMapWithAllHeaders()
-Enriches the intermediate map with all request headers. Each header
-is directly put into the map at top level with its header key as key and its
-header value as value.
-
-#### toEnrichTheIntermediateMapWithAllQueryParameters()
-The same as `toEnrichTheIntermediateMapWithAllHeaders()`, but with
-query parameters instead of headers.
-
-#### toEnrichTheIntermediateMapWithAllPathParameters()
-The same as `toEnrichTheIntermediateMapWithAllHeaders()`, but with
-path parameters instead of headers.
-
-#### toEnrichTheIntermediateMapWithAllRequestData()
-The combination of `toEnrichTheIntermediateMapWithAllHeaders()`,
-`toEnrichTheIntermediateMapWithAllQueryParameters()` and
-`toEnrichTheIntermediateMapWithAllPathParameters()`.
-
-#### toEnrichTheIntermediateMapWithTheAuthenticationInformationAs()
-Takes as parameter a `String` that will be used as key.
-If the request has been authenticated and there is an authentication information
-object, it will be stored in the intermediate map at top level
-under the provided key.
-
-
-
-### Extracting response data
-Now let's consider the opposite direction, where the returned domain object
-gets mapped to the response body with the intermediate step of
-creating a map:
+    public static DivisionRequest divisionRequest(final Integer dividend,
+                                                  final Integer divisor) {
+        return new DivisionRequest(dividend, divisor);
+    }
+}
 ```
-Domain Object    --->    Map<String, Object>    --->    Response Body
-```
-
-Now, if we want some of the map to be e.g. set as a response header - instead of ending
-up in the response body - we need to extract the respective data from the intermediate
-map and set the headers accordingly. This procedure is visualized in this extended workflow: 
-```
-Domain Object    --->    Map<String, Object>    --->    Response Body
-                                    |
-                                    --------------->    Headers, etc.
-```
-
-To configure the extraction, you can again choose from a variety of
-configurator methods in `ÈventConfigurators`:
-
-#### toExtractFromTheResponseMapUsing()
-Takes as parameter an implementation of `ResponseMapExtractor` which consumes
-the current response map and the `HttpResponse` that is associated with the current request.
-You can query and/or remove arbitrary values from the map and set them as headers, etc.
-
-#### toExtractFromTheResponseMapTheHeader()
-Takes a header key and a map key as parameters - when the map key is omitted, it will be
-the same as the header key. If the response map contains a value under the provided map key,
-the value will be removed from the map and added as a response header value with the
-provided header key. 
-
-## Dependency Injection
-Until now, we assumed that all usecase classes have a public constructor with
-zero arguments and HttpMate would call this constructor when instantiating the 
-usecases. Of course, this assumption is often not feasible. Serious projects
-oftentimes facilitate dependency injection frameworks and/or the usecase classes
-have dependencies like database objects that need to be provided in the constructor.
-It is very easy to reflect these requirements in the HttpMate configuration.
-In order to configure usecase instantiation to your needs and e.g. register
-the injector of your choice, the `UseCaseConfigurators.toCreateUseCaseInstancesUsing()`
-configurator method exists. If for example you would like
-to register a Guice injector, the configuration would look like this:
+To add this usecase to HttpMate, all you need to do is add one single line:
 
 ```java
-anHttpMate()
-        ...
-        .configured(toCreateUseCaseInstancesUsing(injector::getInstance))
-        .build();
+final HttpMate httpMate = anHttpMate()
+                .post("/multiply", MultiplicationUseCase.class)
+                .post("/divide", DivisionUseCase.class)
+                .configured(toUseMapMate(mapMate))
+                .build();
+```
+Since the `DivisionRequest` class resides in the same package as `MultiplicationRequest`,
+the MapMate configuration from the previous example will auto-detect the new class and does
+not need to be changed.
+
+You can try it out with the following curl command:
+```bash
+curl --request POST --header 'Content-Type: application/json' --data '{"dividend": "12", "divisor": "3"}' http://localhost:1337/divide
+```
+The output will be the correct result to the division of 12 by 3:
+```json
+{"result":"4"}
 ```
 
-<!--
-## Object mapping without MapMate
-Not all projects might want to use MapMate, which is perfectly fine with
-HttpMate. In order to create usecase objects without it, you have several options.
+## Illegal input
+Now, school taught every single one of us that there is one highly illegal thing you should never ever even think of doing: dividing by zero.
+Let's go:
+```bash
+curl --request POST --header 'Content-Type: application/json' --data '{"dividend": "12", "divisor": "0"}' http://localhost:1337/divide
+```
+Unlike us, Java actually respects the laws of math and we should see the following exception on the console:
+```
+ERROR: java.lang.ArithmeticException: / by zero
+```
+with an accompanying stacktrace.
 
-### Default serializer and deserializer
+Obviously, our calculation application should be ready to deal with illegal input like this and handle it accordingly.
+As with every unhandled exception in HttpMate, it is logged (to `STDERR` by default) and the request is answered with
+an empty status code `500` (Internal Server Error) response.
+This might not be particularly useful to the user, since a potential frontend needs to be able to tell
+what exactly was wrong about the provided input. Otherwise, the user would not know how to correct it.
 
-### Specialized serializer and deserializer
--->
+## Validating input
+One way to tell the user what went wrong would be normal HttpMate exception mapping.
+It has aleady been explained in previous chapters how this can be achieved.
+An obvious downside to this approach is that we need to execute the actual division to trigger the `ArithmeticException`
+and know that the input was wrong.
+By the time we execute the divsion, our input should already have been validated.
+This might not be obvious for the divison, but think of a more mature example, where the usecase
+would not consist of a simple math operation, but of database queries with potentially corrupt data.
+To mitigate this problem, we can validate the divisor in the `DivisionRequest`, so the exception would
+be thrown before the usecase and calculation could be called:
+
+```java
+public final class DivisionRequest {
+    public final Integer dividend;
+    public final Integer divisor;
+
+    public DivisionRequest(final Integer dividend, final Integer divisor) {
+        this.dividend = dividend;
+        this.divisor = divisor;
+    }
+
+    public static DivisionRequest divisionRequest(final Integer dividend,
+                                                  final Integer divisor) {
+        if (divisor == 0) {
+            throw new IllegalArgumentException("the divisor must not be 0");
+        }
+        return new DivisionRequest(dividend, divisor);
+    }
+}
+```
+
+
+Let's devide through zero again:
+```bash
+curl --request POST --header 'Content-Type: application/json' --data '{"dividend": "12", "divisor": "0"}' http://localhost:1337/divide
+```
+
+Now, we see an `UnrecognizedExceptionOccurredException` on the console. This is actually an exception of the MapMate project,
+with our `IllegalArgumentException` down below the stacktrace as the causing exception:
+```
+Caused by: java.lang.IllegalArgumentException: the divisor must not be 0
+```
+This means that MapMate is not prepared to see this particular exception i.e. it does not recognise it. In this case, MapMate will abort and
+re-throw the exception wrapped in the observed `UnrecognizedExceptionOccurredException` since that is the only safe thing to do.
+However, if we tell MapMate that an `IllegalArgumentException` is to be expected and that it indicates a failed
+validation, MapMate will behave differently. Let's tell MapMate about the exception:
+
+```java
+final MapMate mapMate = aMapMate(MultiplicationRequest.class.getPackageName())
+                .usingJsonMarshaller(gson::toJson, gson::fromJson)
+                .withExceptionIndicatingValidationError(IllegalArgumentException.class)
+                .usingRecipe(builtInPrimitiveSerializedAsStringSupport())
+                .build();
+```
+
+Now, when we devide by zero (again):
+
+```bash
+curl --request POST --header 'Content-Type: application/json' --data '{"dividend": "12", "divisor": "0"}' http://localhost:1337/divide
+```
+we actually get something meaningful out of it:
+```json
+{"errors":[{"path":"","message":"the divisor must not be 0"}]}
+```
+MapMate will gather all recognised validation exceptions and present all of them to us in a format that
+is easy to process.
+
+
+## Custom primitives
+Let's take a deeper look at MapMate's validation output:
+```json
+{
+   "errors":[
+      {
+         "path":"",
+         "message":"the divisor must not be 0"
+      }
+   ]
+}
+```
+Under the key `error`, we find a list of all occurred exceptions. Since only
+the `DivisionRequest` object has thrown one, the list has only one single entry.
+The entry has two fields. Under the key `message`, the message of the caught exception
+is stored.
+The key `path` is of more interest. Under it, MapMate stores the logical location where
+the exception occured.
+This can be used to easily highlight the input fields in a user form that have been filled in incorrectly.
+Since the validation exception is thrown in the top level class `DivisionRequest`, the path is empty.
+Ideally, we want it to contain the value `divisor`, since this is the field that is validated.
+In order to achieve this, the `IllegalArgumentException` needs to be thrown in this exact field.
+Currently, it is thrown in the `DivisionRequest` class.
+In order for it to be located in the `divisor` field, we need to throw the exception in the class of this field.
+Unfortunately, the divisor's data type is `Integer` and we cannot change the implementation of this class.
+To solve the problem, we need to write our own `Divisor` data type that contains the validation:
+```java
+public final class Divisor {
+    private final int value;
+
+    private Divisor(final int value) {
+        this.value = value;
+    }
+
+    public static Divisor parseDivisor(final String divisorAsString) {
+        final int value = parseInt(divisorAsString);
+        if (value == 0) {
+            throw new IllegalArgumentException("the divisor must not be 0");
+        }
+        return new Divisor(value);
+    }
+
+    public int value() {
+        return value;
+    }
+
+    public String stringValue() {
+        return String.valueOf(value);
+    }
+}
+```
+We will call these kinds of classes *custom primitives* throughout this guide since
+they act pretty much the same as primitive data types like int, double, or even String
+(which is technically not a primitve data type but it is used like one).
+In the world of domain-driven design (DDD) they are also called *value objects*,
+but it does not really matter how you call them. 
+They encapsulate all aspects of a specific type of data and make sure that its
+value is valid. We can now change the `DivisionRequest` accordingly:
+
+```java
+public final class DivisionRequest {
+    public final Integer dividend;
+    public final Divisor divisor;
+
+    private DivisionRequest(final Integer dividend, final Divisor divisor) {
+        this.dividend = dividend;
+        this.divisor = divisor;
+    }
+
+    public static DivisionRequest divisionRequest(final Integer dividend,
+                                                  final Divisor divisor) {
+        return new DivisionRequest(dividend, divisor);
+    }
+}
+```
+
+Also the `DivisionUseCase` needs a small change:
+```java
+public final class DivisionUseCase {
+
+    public CalculationResponse divide(final DivisionRequest divisionRequest) {
+        final int divisor = divisionRequest.divisor.value();
+        final int result = divisionRequest.dividend / divisor;
+        return new CalculationResponse(result);
+    }
+}
+```
+
+When you once again request the division by zero like this:
+```bash
+curl --request POST --header 'Content-Type: application/json' --data '{"dividend": "12", "divisor": "0"}' http://localhost:1337/divide
+```
+you will receive the following validation output:
+```json
+{"errors":[{"path":"divisor","message":"the divisor must not be 0"}]}
+```
+This time, the path correctly points to the affected field: `divisor`.
+It can easily be used in a frontend to present the according form validation to
+the user.

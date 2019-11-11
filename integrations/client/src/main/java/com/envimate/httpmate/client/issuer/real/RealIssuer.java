@@ -24,6 +24,7 @@ package com.envimate.httpmate.client.issuer.real;
 import com.envimate.httpmate.client.BasePath;
 import com.envimate.httpmate.client.HttpClientRequest;
 import com.envimate.httpmate.client.RawClientResponse;
+import com.envimate.httpmate.client.RequestPath;
 import com.envimate.httpmate.client.issuer.Issuer;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -39,9 +40,9 @@ import java.util.Map;
 import java.util.function.Function;
 
 import static com.envimate.httpmate.client.RawClientResponse.rawClientResponse;
+import static com.envimate.httpmate.client.issuer.real.Endpoint.endpoint;
 import static com.envimate.httpmate.client.issuer.real.NormalConnectionFactory.normalConnectionFactory;
 import static com.envimate.httpmate.client.issuer.real.PooledConnectionFactory.pooledConnectionFactory;
-import static com.envimate.httpmate.client.issuer.real.Endpoint.endpoint;
 import static java.util.Arrays.stream;
 import static org.apache.http.protocol.HttpProcessorBuilder.create;
 
@@ -66,11 +67,9 @@ public final class RealIssuer implements Issuer {
 
     @Override
     public <T> T issue(final HttpClientRequest<T> request,
-                       final BasePath basePath,
                        final Function<RawClientResponse, T> responseMapper) {
-        final String path = request.path();
-        final Map<String, String> queryParameters = request.queryParameters();
-        final String url = this.endpoint.toUrl(path, queryParameters);
+        final RequestPath path = request.path();
+        final String url = this.endpoint.toUrl(path);
         final String method = request.method();
         final HttpEntityEnclosingRequest lowLevelRequest = new BasicHttpEntityEnclosingRequest(method, url);
         request.headers().forEach(lowLevelRequest::addHeader);

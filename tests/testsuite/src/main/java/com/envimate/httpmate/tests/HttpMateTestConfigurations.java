@@ -23,8 +23,6 @@ package com.envimate.httpmate.tests;
 
 import com.envimate.httpmate.HttpMate;
 import com.envimate.httpmate.handler.NoHandlerFoundException;
-import com.envimate.httpmate.http.Http;
-import com.envimate.httpmate.mapmate.MapMateSerializerAndDeserializer;
 import com.envimate.httpmate.tests.usecases.ToStringWrapper;
 import com.envimate.httpmate.tests.usecases.echobody.EchoBodyUseCase;
 import com.envimate.httpmate.tests.usecases.echocontenttype.EchoContentTypeUseCase;
@@ -34,8 +32,6 @@ import com.envimate.httpmate.tests.usecases.echopathandqueryparameters.EchoPathA
 import com.envimate.httpmate.tests.usecases.headers.HeaderUseCase;
 import com.envimate.httpmate.tests.usecases.headers.HeadersParameter;
 import com.envimate.httpmate.tests.usecases.mapmate.MapMateUseCase;
-import com.envimate.httpmate.tests.usecases.mappedexception.MappedException;
-import com.envimate.httpmate.tests.usecases.mappedexception.MappedExceptionUseCase;
 import com.envimate.httpmate.tests.usecases.multipartandmapmate.MultipartAndMapmateUseCase;
 import com.envimate.httpmate.tests.usecases.parameter.Parameter;
 import com.envimate.httpmate.tests.usecases.parameter.ParameterizedUseCase;
@@ -51,7 +47,6 @@ import com.envimate.httpmate.tests.usecases.simple.TestUseCase;
 import com.envimate.httpmate.tests.usecases.twoparameters.Parameter1;
 import com.envimate.httpmate.tests.usecases.twoparameters.Parameter2;
 import com.envimate.httpmate.tests.usecases.twoparameters.TwoParametersUseCase;
-import com.envimate.httpmate.tests.usecases.unmappedexception.UnmappedExceptionUseCase;
 import com.envimate.httpmate.tests.usecases.vooooid.VoidUseCase;
 import com.envimate.httpmate.usecases.UseCasesModule;
 import com.envimate.mapmate.builder.MapMate;
@@ -69,11 +64,11 @@ import static com.envimate.httpmate.HttpMateChainKeys.RESPONSE_STATUS;
 import static com.envimate.httpmate.chains.Configurator.configuratorForType;
 import static com.envimate.httpmate.events.EventConfigurators.toEnrichTheIntermediateMapWithAllRequestData;
 import static com.envimate.httpmate.exceptions.ExceptionConfigurators.toMapExceptionsOfType;
+import static com.envimate.httpmate.http.Http.Headers.CONTENT_TYPE;
 import static com.envimate.httpmate.http.Http.StatusCodes.METHOD_NOT_ALLOWED;
 import static com.envimate.httpmate.http.Http.StatusCodes.OK;
 import static com.envimate.httpmate.http.HttpRequestMethod.*;
-import static com.envimate.httpmate.logger.LoggerConfigurators.toLogToStderr;
-import static com.envimate.httpmate.mapmate.MapMateSerializerAndDeserializer.mapMateIntegration;
+import static com.envimate.httpmate.mapmate.MapMateConfigurator.toUseMapMate;
 import static com.envimate.mapmate.deserialization.Deserializer.aDeserializer;
 import static com.envimate.mapmate.filters.ClassFilters.allBut;
 import static com.envimate.mapmate.filters.ClassFilters.allClassesThatHaveAStaticFactoryMethodWithASingleStringArgument;
@@ -108,12 +103,9 @@ public final class HttpMateTestConfigurations {
 
     @SuppressWarnings("unchecked")
     public static HttpMate theHttpMateInstanceUsedForTesting() {
-        final MapMateSerializerAndDeserializer mapMate = mapMateIntegration(MAP_MATE).build();
         final HttpMate httpMate = anHttpMate()
                 .serving(TestUseCase.class).forRequestPath("/test").andRequestMethods(GET, POST, PUT, DELETE)
                 .serving(EchoBodyUseCase.class).forRequestPath("/echo_body").andRequestMethods(GET, POST, PUT, DELETE)
-                .get("/mapped_exception", MappedExceptionUseCase.class)
-                .get("/unmapped_exception", UnmappedExceptionUseCase.class)
                 .get("/wild/<parameter>/card", WildCardUseCase.class)
                 .get("/parameterized", ParameterizedUseCase.class)
                 .get("/queryparameters", QueryParametersUseCase.class)
@@ -148,24 +140,17 @@ public final class HttpMateTestConfigurations {
                     useCasesModule.addResponseSerializer(Objects::isNull, object -> null);
                     useCasesModule.addResponseSerializerForType(String.class, string -> of("response", string));
                     useCasesModule.addResponseSerializerForType(ToStringWrapper.class, wrapper -> of("response", wrapper.toString()));
-
-                    useCasesModule.setSerializerAndDeserializer(mapMate);
                 }))
                 .configured(toEnrichTheIntermediateMapWithAllRequestData())
-                .configured(mapMate)
+                .configured(toUseMapMate(MAP_MATE))
                 .configured(toMapExceptionsOfType(NoHandlerFoundException.class, (exception, response) -> {
                     response.setStatus(METHOD_NOT_ALLOWED);
                     response.setBody("No use case found.");
                 }))
-                .configured(toMapExceptionsOfType(MappedException.class, (exception, response) -> response.setStatus(201)))
-
                 .configured(toCustomizeResponsesUsing(metaData -> {
                     metaData.set(RESPONSE_STATUS, OK);
-                    metaData.get(RESPONSE_HEADERS).put(Http.Headers.CONTENT_TYPE, "application/json");
+                    metaData.get(RESPONSE_HEADERS).put(CONTENT_TYPE, "application/json");
                 }))
-
-                .configured(toLogToStderr())
-
                 .build();
         return httpMate;
     }

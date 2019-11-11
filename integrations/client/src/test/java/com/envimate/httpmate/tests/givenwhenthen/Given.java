@@ -26,8 +26,9 @@ import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
+import java.util.function.BiConsumer;
+
 import static com.envimate.httpmate.tests.givenwhenthen.RequestLog.requestLog;
-import static com.envimate.httpmate.tests.givenwhenthen.Server.start;
 
 @ToString
 @EqualsAndHashCode
@@ -37,9 +38,17 @@ public final class Given {
     private final RequestLog requestLog;
 
     public static Given givenAHttpServer() {
+        return given(Server::start);
+    }
+
+    public static Given givenAnOpenSocketThatCanInterpretHttpValues() {
+        return given(SocketServer::start);
+    }
+
+    private static Given given(final BiConsumer<Integer, RequestLog> server) {
         final int port = 1337;
         final RequestLog requestLog = requestLog();
-        start(port, requestLog);
+        server.accept(port, requestLog);
         return new Given(port, requestLog);
     }
 

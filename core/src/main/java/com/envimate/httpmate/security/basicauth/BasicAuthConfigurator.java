@@ -23,24 +23,19 @@ package com.envimate.httpmate.security.basicauth;
 
 import com.envimate.httpmate.chains.ChainName;
 import com.envimate.httpmate.chains.DependencyRegistry;
-import com.envimate.httpmate.chains.MetaData;
 import com.envimate.httpmate.handler.http.HttpRequest;
 import com.envimate.httpmate.security.Filter;
-import com.envimate.httpmate.security.authentication.AuthenticatorProcessor;
-import com.envimate.httpmate.security.authorization.AuthorizerConfigurator;
-import com.envimate.httpmate.security.authorization.HttpAuthorizer;
+import com.envimate.httpmate.security.authentication.AuthenticatorConfigurator;
 import com.envimate.httpmate.security.config.SecurityConfigurator;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
-import static com.envimate.httpmate.HttpMateChainKeys.AUTHENTICATION_INFORMATION;
 import static com.envimate.httpmate.handler.http.HttpRequest.httpRequest;
 import static com.envimate.httpmate.http.Http.Headers.WWW_AUTHENTICATE;
 import static com.envimate.httpmate.http.Http.StatusCodes.UNAUTHORIZED;
-import static com.envimate.httpmate.security.authentication.AuthenticatorProcessor.authenticatorProcessor;
-import static com.envimate.httpmate.security.authorization.AuthorizerConfigurator.authorizerConfigurator;
+import static com.envimate.httpmate.security.authentication.AuthenticatorConfigurator.authenticatorConfigurator;
 import static com.envimate.httpmate.util.Validators.validateNotNull;
 import static java.lang.String.format;
 import static java.util.Objects.nonNull;
@@ -49,34 +44,26 @@ import static java.util.Objects.nonNull;
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class BasicAuthConfigurator implements SecurityConfigurator<BasicAuthConfigurator> {
-    private final AuthorizerConfigurator authorizerConfigurator;
+    private final AuthenticatorConfigurator authenticatorConfigurator;
     private volatile String realm;
 
     public static BasicAuthConfigurator basicAuthenticationConfigurator(final BasicAuthAuthenticator authenticator) {
-        final AuthenticatorProcessor authenticatorProcessor = authenticatorProcessor(metaData -> {
+        final AuthenticatorConfigurator authenticatorConfigurator = authenticatorConfigurator(metaData -> {
             final HttpRequest request = httpRequest(metaData);
             return authenticator.authenticate(request);
         });
-
-        final HttpAuthorizer authorizer = (authenticationInformation, request) -> {
-            final MetaData metaData = request.getMetaData();
-            authenticatorProcessor.apply(metaData);
-            return metaData.getOptional(AUTHENTICATION_INFORMATION).isPresent();
-        };
-
-        final AuthorizerConfigurator authorizerConfigurator = authorizerConfigurator(authorizer);
-        return new BasicAuthConfigurator(authorizerConfigurator);
+        return new BasicAuthConfigurator(authenticatorConfigurator);
     }
 
     @Override
     public BasicAuthConfigurator inPhase(final ChainName phase) {
-        authorizerConfigurator.inPhase(phase);
+        authenticatorConfigurator.inPhase(phase);
         return this;
     }
 
     @Override
     public BasicAuthConfigurator onlyRequestsThat(final Filter filter) {
-        authorizerConfigurator.onlyRequestsThat(filter);
+        authenticatorConfigurator.onlyRequestsThat(filter);
         return this;
     }
 
@@ -88,7 +75,7 @@ public final class BasicAuthConfigurator implements SecurityConfigurator<BasicAu
 
     @Override
     public void configure(final DependencyRegistry dependencyRegistry) {
-        authorizerConfigurator.rejectingUnauthorizedRequestsUsing((request, response) -> {
+        authenticatorConfigurator.rejectingUnauthenticatedRequestsUsing((request, response) -> {
             final StringBuilder headerBuilder = new StringBuilder();
             headerBuilder.append("Basic");
             if(nonNull(realm)) {
@@ -97,6 +84,6 @@ public final class BasicAuthConfigurator implements SecurityConfigurator<BasicAu
             response.addHeader(WWW_AUTHENTICATE, headerBuilder.toString());
             response.setStatus(UNAUTHORIZED);
         });
-        authorizerConfigurator.configure(dependencyRegistry);
+        authenticatorConfigurator.configure(dependencyRegistry);
     }
 }

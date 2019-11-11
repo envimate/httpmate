@@ -73,13 +73,13 @@ public final class HttpMateClient {
     }
 
     public <T> T issue(final HttpClientRequestBuilder<T> requestBuilder) {
-        return issue(requestBuilder.build());
+        return issue(requestBuilder.build(basePath));
     }
 
     @SuppressWarnings("unchecked")
     public <T> T issue(final HttpClientRequest<T> request) {
         validateNotNull(request, "request");
-        return issuer.issue(request, basePath, response -> {
+        return issuer.issue(request, response -> {
             final Class<T> targetType = request.targetType();
             final ClientResponseMapper<T> responseMapper = (ClientResponseMapper<T>) responseMappers.get(targetType);
             return responseMapper.map(response, targetType);

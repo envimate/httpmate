@@ -22,40 +22,33 @@
 package com.envimate.httpmate.documentation.xx_usecases.calculation;
 
 import com.envimate.httpmate.HttpMate;
-import com.envimate.httpmate.client.HttpMateClient;
-import com.envimate.httpmate.client.SimpleHttpResponseObject;
+import com.envimate.httpmate.documentation.xx_usecases.calculation.domain.MultiplicationRequest;
+import com.envimate.httpmate.documentation.xx_usecases.calculation.usecases.DivisionUseCase;
+import com.envimate.httpmate.documentation.xx_usecases.calculation.usecases.MultiplicationUseCase;
 import com.envimate.mapmate.builder.MapMate;
 import com.google.gson.Gson;
 
 import static com.envimate.httpmate.HttpMate.anHttpMate;
-import static com.envimate.httpmate.client.HttpClientRequest.aPostRequestToThePath;
-import static com.envimate.httpmate.client.HttpMateClient.aHttpMateClientForTheHost;
-import static com.envimate.httpmate.purejavaendpoint.PureJavaEndpoint.pureJavaEndpointFor;
 import static com.envimate.httpmate.mapmate.MapMateConfigurator.toUseMapMate;
+import static com.envimate.httpmate.purejavaendpoint.PureJavaEndpoint.pureJavaEndpointFor;
 import static com.envimate.mapmate.builder.MapMate.aMapMate;
+import static com.envimate.mapmate.builder.recipes.primitives.BuiltInPrimitiveSerializedAsStringSupport.builtInPrimitiveSerializedAsStringSupport;
 
 public final class CalculationExample {
 
     public static void main(final String[] args) {
         final Gson gson = new Gson();
-        final MapMate mapMate = aMapMate("com.envimate.httpmate.documentation.xx_usecases.calculation")
+        final MapMate mapMate = aMapMate(MultiplicationRequest.class.getPackageName())
                 .usingJsonMarshaller(gson::toJson, gson::fromJson)
+                //.withExceptionIndicatingValidationError(IllegalArgumentException.class)
+                .usingRecipe(builtInPrimitiveSerializedAsStringSupport())
                 .build();
 
         final HttpMate httpMate = anHttpMate()
                 .post("/multiply", MultiplicationUseCase.class)
+                .post("/divide", DivisionUseCase.class)
                 .configured(toUseMapMate(mapMate))
                 .build();
         pureJavaEndpointFor(httpMate).listeningOnThePort(1337);
-
-
-        final HttpMateClient client = aHttpMateClientForTheHost("localhost").withThePort(1337).viaHttp().build();
-        final SimpleHttpResponseObject response = client.issue(aPostRequestToThePath("/multiply").withTheBody("" +
-                "{\n" +
-                "   \"factor1\": \"4\",\n" +
-                "   \"factor2\": \"5\"\n" +
-                "}"));
-        final String s = response.describe();
-        System.out.println(s);
     }
 }

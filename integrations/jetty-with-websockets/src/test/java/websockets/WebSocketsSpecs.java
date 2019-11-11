@@ -223,6 +223,7 @@ public final class WebSocketsSpecs {
                 .then().theQueriedNumberOfActiveConnectionsWas(1);
     }
 
+    @Ignore
     @Test
     public void testAWebSocketThatGetsClosedByTheClientWillGetCleanedUp() {
         given(theExampleHttpMateInstanceWithWebSocketsSupport())

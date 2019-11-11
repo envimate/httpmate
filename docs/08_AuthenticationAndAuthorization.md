@@ -1,10 +1,10 @@
 # Authentication and Authorization
 A recurring aspect of web applications is the concept of users that have certain
-rights.
+permissions.
 There are two requirements that arise from this goal:
 authentication and authorization. Authentication makes sure
 that users are who they claim they are, while authorization is the process that determines
-whether the users actually have the rights to do what they intend to do.
+whether the users actually have the permission to do what they intend to do.
 This chapter will explain how these requirements can be met with HttpMate. 
 
 ## The application
@@ -185,7 +185,7 @@ We now have a login form and can verify whether the provided username and passwo
 As indicated by the first `TODO` comment, we still lack a way of storing this result somewhere in the session.
 We could just set a cookie with the value `LoggedIn=true`, but this would be insecure for obvious reasons (any user could
 just set the cookie and we have no way of telling whether the cookie is legit).
-Luckily, so-called [Json Web Tokens (JWT)](https://jwt.io/) exist. They are short encrypted pieces of information that can only be created and read
+Luckily, so-called [Json Web Tokens (JWT)](https://jwt.io/) exist. They are short cryptographically signed pieces of information that can only be created and read
 by the owner of the used cryptographic key i.e. the webserver.
 They can store the username (refered to as `Subject`) and whether the user has administrator access (this is called a *claim*).
 If we store the username and the access rights in the JWT and set it as a cookie, we can
@@ -241,8 +241,8 @@ final HttpMate httpMate = anHttpMate()
                 })
                 .get("/normal", (request, response) -> response.setBody("The normal section"))
                 .get("/admin", (request, response) -> response.setBody("The admin section"))
-                .configured(toAuthenticateUsingCookie("jwt", jwt -> Optional.of(jwtParser.parseClaimsJws(jwt).getBody())))
-                .configured(toAuthorizeAllAuthenticatedRequests().exceptRequestsTo("/login"))
+                .configured(toAuthenticateUsingCookie("jwt", jwt -> Optional.of(jwtParser.parseClaimsJws(jwt).getBody()))
+                        .failingOnMissingAuthenticationOnlyForRequestsTo("/login"))
                 .configured(toAuthorizeRequestsUsing((authenticationInformation, request) -> authenticationInformation
                         .map(object -> (Claims) object)
                         .map(claims -> (Boolean) claims.get("admin"))
@@ -259,10 +259,8 @@ an `Optional<Object>`. If the returned `Optional<Object>` is empty, the request 
 If the JWT has successfully been decrypted, the body (containing the `admin` claim) will be set as authentication information by
 returning it wrapped as an `Optional<Object>`.
 
-Furthermore, this authenticator will not reject unauthenticated requests. In order to keep the
-`/normal` route only accessible to authenticated users, we added another authorizer (`toAuthorizeAllAuthenticatedRequests()`)
-that rejects all unauthenticated requests. In order to not reject unauthenticated requests to `/login`, we
-excluded that route with the `.exceptRequestsTo("/login")` line.
+Furthermore, this authenticator will reject all unauthenticated requests. In order to not reject unauthenticated requests to `/login`,
+we made authentication optional for that route with the `.failingOnMissingAuthenticationOnlyForRequestsTo("/login")` line.
 
 You can now start this application, login via http://localhost:1337/login, navigate to http://localhost:1337/normal
 or http://localhost:1337/admin and be allowed or rejected depending on the user you logged in with.
@@ -290,35 +288,41 @@ with the status code `401` (Unauthenticated) and the `WWW-Authenticate` header i
 with the supplied lambda, the authentication information is set to the authenticated username as `String`.
 
 - `toAuthenticateRequestsUsing()` - authenticates requests with a lambda that gets the whole `HttpRequest`.
-Does not reject unauthenticated requests.
 Sets the authentication information according to the returned lambda.
 
 - `toAuthenticateUsingOAuth2BearerToken()` - authenticates requests according to the OAuth2 standard by parsing the
 `Authorization` header with the type `Bearer`. Takes a lambda that processes the parsed bearer token.
-Does not reject unauthenticated requests.
 Sets the authentication information according to the returned lambda.
 
 - `toAuthenticateUsingCookie()` - authenticates requests based on the cookie with the supplied name.
 Takes a lambda that processes the cookie (if present).
-Does not reject unauthenticated requests.
 Sets the authentication information according to the returned lambda.
 
 - `toAuthenticateUsingHeader()` - authenticates requests based on the header with the supplied name.
 Takes a lambda that processes the header (if present).
-Does not reject unauthenticated requests.
 Sets the authentication information according to the returned lambda.
 
 - `toAuthenticateUsingQueryParameter()` - authenticates requests based on the query parameter with the supplied name.
 Takes a lambda that processes the query parameter (if present).
-Does not reject unauthenticated requests.
 Sets the authentication information according to the returned lambda.
 
 - `toAuthenticateUsingPathParameter()` - authenticates requests based on the path parameter with the supplied name.
 Takes a lambda that processes the path parameter (if present).
-Does not reject unauthenticated requests.
 Sets the authentication information according to the returned lambda.
 
 #### Configuration options
+
+- `notFailingOnMissingAuthentication()` - allows unauthenticated requests to not be rejected.
+
+- `notFailingOnMissingAuthenticationForRequestsThat()` - allows unauthenticated requests that pass the supplied filter to not be rejected.
+
+- `notFailingOnMissingAuthenticationForRequestsTo()` - allows unauthenticated requests whose route matches the supplied route specification to not be rejected.
+
+- `failingOnMissingAuthenticationOnlyForRequestsThat` - only rejects unauthenticated requests that pass the supplied filter.
+
+- `failingOnMissingAuthenticationOnlyForRequestsTo()` - only rejects unauthenticated requests whose route matches the supplied route specification.
+
+- `rejectingUnauthorizedRequestsUsing()` - calls the supplied handler on rejected requests.
 
 - `onlyRequestsThat()` - applies the authenticator only to requests that pass the supplied filter.
 

@@ -19,14 +19,34 @@
  * under the License.
  */
 
-package com.envimate.httpmate.tests.usecases.unmappedexception;
+package com.envimate.httpmate.logger;
 
+import lombok.AccessLevel;
+import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
+import lombok.ToString;
 
-@RequiredArgsConstructor
-public final class UnmappedExceptionUseCase {
+import static com.envimate.httpmate.util.Validators.validateNotNullNorEmpty;
 
-    public String unmappedException() {
-        throw new UnmappedException();
+@ToString
+@EqualsAndHashCode
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
+public final class LogLevel {
+    public static final LogLevel TRACE = logLevel("TRACE");
+    public static final LogLevel DEBUG = logLevel("DEBUG");
+    public static final LogLevel INFO = logLevel("INFO");
+    public static final LogLevel WARN = logLevel("WARN");
+    public static final LogLevel ERROR = logLevel("ERROR");
+    public static final LogLevel FATAL = logLevel("FATAL");
+
+    private final String level;
+
+    public static LogLevel logLevel(final String level) {
+        validateNotNullNorEmpty(level, "level");
+        return new LogLevel(level);
+    }
+
+    public String asString() {
+        return level;
     }
 }

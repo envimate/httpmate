@@ -32,7 +32,7 @@ import static com.envimate.httpmate.HttpMateChainKeys.*;
 import static com.envimate.httpmate.cors.CorsConfigurators.toActivateCORSWithAllAllowedOrigins;
 import static com.envimate.httpmate.http.Http.StatusCodes.OK;
 import static com.envimate.httpmate.http.HttpRequestMethod.GET;
-import static com.envimate.httpmate.logger.LoggerConfigurators.toLogUsing;
+import static com.envimate.httpmate.logger.LoggerConfigurators.toLogToStdout;
 import static com.envimate.httpmate.mapmate.MapMateConfigurator.toUseMapMate;
 import static com.envimate.httpmate.purejavaendpoint.PureJavaEndpoint.pureJavaEndpointFor;
 import static com.envimate.mapmate.builder.MapMate.aMapMate;
@@ -65,7 +65,7 @@ public final class Application {
                         .withAllowedMethods(GET)
                         .allowingCredentials())
                 .configured(toUseMapMate(mapMate))
-                .configured(toLogUsing((message, metaData) -> System.out.println(message)))
+                .configured(toLogToStdout())
                 .build();
 
         pureJavaEndpointFor(httpMate).listeningOnThePort(PORT);

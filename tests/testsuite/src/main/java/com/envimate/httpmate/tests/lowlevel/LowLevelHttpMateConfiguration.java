@@ -22,6 +22,7 @@
 package com.envimate.httpmate.tests.lowlevel;
 
 import com.envimate.httpmate.HttpMate;
+import com.envimate.httpmate.logger.LoggerImplementation;
 
 import static com.envimate.httpmate.HttpMate.anHttpMate;
 import static com.envimate.httpmate.debug.DebugConfigurator.toBeInDebugMode;
@@ -52,9 +53,15 @@ public final class LowLevelHttpMateConfiguration {
                 .get("/log", logHandler())
                 .get("/download", downloadHandler())
                 .get("/exception", exceptionThrowingHandler())
-                .get("/resource", (request, response) -> response.setJavaResourceAsBody("lowlevel/resource"))
-                .configured(toLogUsing((message, metaData) -> logger.append(message)))
+                .configured(toLogUsing(logger()))
                 .configured(toBeInDebugMode())
                 .build();
+    }
+
+    private static LoggerImplementation logger() {
+        return logMessage -> {
+            final String formattedMessage = logMessage.formattedMessage();
+            logger.append(formattedMessage);
+        };
     }
 }

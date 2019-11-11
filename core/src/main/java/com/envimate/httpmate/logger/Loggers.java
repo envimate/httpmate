@@ -21,28 +21,42 @@
 
 package com.envimate.httpmate.logger;
 
+import java.io.PrintStream;
+
 public final class Loggers {
 
     private Loggers() {
     }
 
-    public static SimpleLogger stderrLogger() {
-        return System.err::println;
+    public static LoggerImplementation stderrLogger() {
+        return logTo(System.err);
     }
 
-    public static SimpleLogger stdoutLogger() {
-        return System.out::println;
+    public static LoggerImplementation stdoutLogger() {
+        return logTo(System.out);
     }
 
-    public static SimpleLogger stdoutAndStderrLogger() {
+    public static LoggerImplementation logTo(final PrintStream printStream) {
+        return message -> writeTo(printStream, message);
+    }
+
+    public static LoggerImplementation stdoutAndStderrLogger() {
         return message -> {
-            System.out.println(message);
-            System.err.println(message);
+            if (message.hasException()) {
+                writeTo(System.err, message);
+            } else {
+                writeTo(System.out, message);
+            }
         };
     }
 
-    public static SimpleLogger noLogger() {
+    public static LoggerImplementation noLogger() {
         return message -> {
         };
+    }
+
+    private static void writeTo(final PrintStream printStream, final LogMessage message) {
+        final String formattedMessage = message.formattedMessage();
+        printStream.println(formattedMessage);
     }
 }

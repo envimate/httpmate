@@ -19,16 +19,30 @@
  * under the License.
  */
 
-package com.envimate.httpmate.logger;
+package com.envimate.httpmate.security.authentication;
 
-import com.envimate.httpmate.chains.MetaData;
+import lombok.AccessLevel;
+import lombok.EqualsAndHashCode;
+import lombok.RequiredArgsConstructor;
+import lombok.ToString;
 
-public interface SimpleLogger extends Logger {
+import java.util.UUID;
 
-    @Override
-    default void log(final String message, final MetaData metaData) {
-        log(message);
+import static com.envimate.httpmate.util.Validators.validateNotNullNorEmpty;
+
+@ToString
+@EqualsAndHashCode
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
+public final class AuthenticatorId {
+    private final String id;
+
+    public static AuthenticatorId authenticatorId(final String id) {
+        validateNotNullNorEmpty(id, "id");
+        return new AuthenticatorId(id);
     }
 
-    void log(String message);
+    public static AuthenticatorId uniqueAuthenticatorId() {
+        final UUID uuid = UUID.randomUUID();
+        return authenticatorId(uuid.toString());
+    }
 }

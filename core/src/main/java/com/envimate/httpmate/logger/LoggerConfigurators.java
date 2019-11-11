@@ -33,7 +33,7 @@ public final class LoggerConfigurators {
     private LoggerConfigurators() {
     }
 
-    public static Configurator toLogUsing(final Logger logger) {
+    public static Configurator toLogUsing(final LoggerImplementation logger) {
         validateNotNull(logger, "logger");
         return configuratorForType(CoreModule.class, coreModule -> coreModule.setLogger(logger));
     }

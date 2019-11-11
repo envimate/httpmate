@@ -43,6 +43,6 @@ public final class LogHandler implements Handler {
     @Override
     public void handle(final MetaData metaData) {
         final Logger logger = metaData.get(LOGGER);
-        logger.log("foobar", metaData);
+        logger.info("foobar");
     }
 }

@@ -133,7 +133,7 @@ public final class MarshallingModule implements ChainModule {
             });
 
         } catch (final MarshallingException e) {
-            if(metaData.getOptional(EXCEPTION).isEmpty()) {
+            if (metaData.getOptional(EXCEPTION).isEmpty()) {
                 failIfConfiguredToDoSo(() -> marshallingException(e));
             }
         }
@@ -157,11 +157,22 @@ public final class MarshallingModule implements ChainModule {
                 .filter(accept::contentTypeIsAccepted)
                 .collect(toList());
         if (candidates.isEmpty()) {
-            throw responseContentTypeCouldNotBeDeterminedException(metaData);
+            return defaultResponseContentType()
+                    .orElseThrow(() -> responseContentTypeCouldNotBeDeterminedException(metaData));
         }
         return metaData.getOptional(REQUEST_CONTENT_TYPE)
                 .filter(candidates::contains)
                 .orElseGet(() -> candidates.get(0));
+    }
+
+    private Optional<ContentType> defaultResponseContentType() {
+        if (marshallers.isEmpty()) {
+            return empty();
+        }
+        if (marshallers.containsKey(defaultContentType)) {
+            return ofNullable(defaultContentType);
+        }
+        return ofNullable(marshallers.keySet().iterator().next());
     }
 
     private static Optional<ContentType> responseContentType(final MetaData metaData) {

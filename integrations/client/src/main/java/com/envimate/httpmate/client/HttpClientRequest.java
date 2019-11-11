@@ -33,15 +33,13 @@ import java.util.Optional;
 import static com.envimate.httpmate.client.HeaderKey.headerKey;
 import static com.envimate.httpmate.client.HeaderValue.headerValue;
 import static com.envimate.httpmate.client.HttpClientRequestBuilder.httpClientRequestBuilderImplementation;
-import static com.envimate.httpmate.client.Query.parse;
 import static com.envimate.httpmate.http.Http.Headers.CONTENT_TYPE;
 
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class HttpClientRequest<T> {
-    private final String path;
+    private final RequestPath path;
     private final String method;
     private final Map<HeaderKey, HeaderValue> headers;
-    private final Map<QueryParameterKey, QueryParameterValue> queryParameters;
     private final InputStream body;
     private final Class<T> targetType;
 
@@ -71,18 +69,11 @@ public final class HttpClientRequest<T> {
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     static <T> HttpClientRequest<T> httpClientRequest(
-            final String pathWithEncodedQueryParameters,
+            final RequestPath requestPath,
             final String method,
             final Map<HeaderKey, HeaderValue> headers,
-            final Map<QueryParameterKey, QueryParameterValue> explicitQueryParameters,
             final Optional<Body> bodyOptional,
-            final Class<T> targetType
-    ) {
-        final Query query = parse(pathWithEncodedQueryParameters);
-        final Map<QueryParameterKey, QueryParameterValue> allQueryParameters = new HashMap<>();
-        allQueryParameters.putAll(query.encodedQueryParameters());
-        allQueryParameters.putAll(explicitQueryParameters);
-        final String pathWithoutEncodedQueryParameters = query.path();
+            final Class<T> targetType) {
         final Map<HeaderKey, HeaderValue> fixedHeaders = new HashMap<>(headers);
         final InputStream bodyStream;
         if (bodyOptional.isPresent()) {
@@ -95,11 +86,10 @@ public final class HttpClientRequest<T> {
             bodyStream = null;
         }
 
-        return new HttpClientRequest<>(pathWithoutEncodedQueryParameters,
-                method, fixedHeaders, allQueryParameters, bodyStream, targetType);
+        return new HttpClientRequest<>(requestPath, method, fixedHeaders, bodyStream, targetType);
     }
 
-    public String path() {
+    public RequestPath path() {
         return this.path;
     }
 
@@ -110,12 +100,6 @@ public final class HttpClientRequest<T> {
     public Map<String, String> headers() {
         final Map<String, String> stringMap = new HashMap<>();
         headers.forEach((key, value) -> stringMap.put(key.value(), value.value()));
-        return stringMap;
-    }
-
-    public Map<String, String> queryParameters() {
-        final Map<String, String> stringMap = new HashMap<>();
-        queryParameters.forEach((key, value) -> stringMap.put(key.value(), value.value()));
         return stringMap;
     }
 

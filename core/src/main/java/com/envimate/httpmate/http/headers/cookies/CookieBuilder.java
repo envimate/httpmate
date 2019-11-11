@@ -40,13 +40,15 @@ import static com.envimate.httpmate.http.headers.cookies.CookieValue.cookieValue
 import static com.envimate.httpmate.util.Validators.validateNotNull;
 import static com.envimate.httpmate.util.Validators.validateNotNullNorEmpty;
 import static java.lang.String.*;
+import static java.time.format.DateTimeFormatter.ofPattern;
 import static java.util.Arrays.asList;
+import static java.util.Locale.US;
 
 @ToString
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class CookieBuilder {
-    private final DateTimeFormatter httpDateTimeFormatter = DateTimeFormatter.ofPattern("EEE, dd MMM yyyy HH:mm:ss O");
+    private final DateTimeFormatter httpDateTimeFormatter = ofPattern("EEE, dd MMM yyyy HH:mm:ss O").localizedBy(US);
 
     private final List<String> elements;
 

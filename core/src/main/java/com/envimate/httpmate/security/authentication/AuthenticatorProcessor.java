@@ -23,12 +23,19 @@ package com.envimate.httpmate.security.authentication;
 
 import com.envimate.httpmate.chains.MetaData;
 import com.envimate.httpmate.chains.Processor;
+import com.envimate.httpmate.handler.http.HttpRequest;
+import com.envimate.httpmate.security.Filter;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
+import java.util.List;
+import java.util.Optional;
+
 import static com.envimate.httpmate.HttpMateChainKeys.AUTHENTICATION_INFORMATION;
+import static com.envimate.httpmate.handler.http.HttpRequest.httpRequest;
+import static com.envimate.httpmate.security.authentication.CouldNotAuthenticateException.couldNotAuthenticateException;
 import static com.envimate.httpmate.util.Validators.validateNotNull;
 
 @ToString
@@ -36,15 +43,33 @@ import static com.envimate.httpmate.util.Validators.validateNotNull;
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class AuthenticatorProcessor implements Processor {
     private final Authenticator<MetaData> authenticator;
+    private final AuthenticatorId authenticatorId;
+    private final List<Filter> optionalRequests;
 
-    public static AuthenticatorProcessor authenticatorProcessor(final Authenticator<MetaData> authenticator) {
+    public static AuthenticatorProcessor authenticatorProcessor(final Authenticator<MetaData> authenticator,
+                                                                final AuthenticatorId authenticatorId,
+                                                                final List<Filter> optionalRequests) {
         validateNotNull(authenticator, "authenticator");
-        return new AuthenticatorProcessor(authenticator);
+        validateNotNull(authenticatorId, "authenticatorId");
+        validateNotNull(optionalRequests, "optionalRequests");
+        return new AuthenticatorProcessor(authenticator, authenticatorId, optionalRequests);
     }
 
     @Override
     public void apply(final MetaData metaData) {
-        authenticator.authenticate(metaData).ifPresent(authenticationInformation ->
-                metaData.set(AUTHENTICATION_INFORMATION, authenticationInformation));
+        final Optional<?> authenticationInformation = authenticator.authenticate(metaData);
+        if (authenticationInformation.isEmpty()) {
+            failIfNotOptional(metaData);
+        } else {
+            authenticationInformation.ifPresent(information -> metaData.set(AUTHENTICATION_INFORMATION, information));
+        }
+    }
+
+    private void failIfNotOptional(final MetaData metaData) {
+        final HttpRequest request = httpRequest(metaData);
+        if (optionalRequests.stream()
+                .noneMatch(filter -> filter.filter(request))) {
+            throw couldNotAuthenticateException(metaData, authenticatorId);
+        }
     }
 }

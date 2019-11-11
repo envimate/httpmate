@@ -25,9 +25,6 @@ import com.envimate.httpmate.chains.MetaData;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
-
 import static com.envimate.httpmate.HttpMateChainKeys.LOGGER;
 import static com.envimate.httpmate.HttpMateChainKeys.RESPONSE_STATUS;
 import static com.envimate.httpmate.http.Http.StatusCodes.INTERNAL_SERVER_ERROR;
@@ -45,15 +42,7 @@ public final class DefaultExceptionMapper implements ExceptionMapper<Throwable> 
 
     @Override
     public void map(final Throwable exception, final MetaData metaData) {
-        final String stackTrace = stackTraceToString(exception);
-        metaData.get(LOGGER).log(stackTrace, metaData);
+        metaData.get(LOGGER).error(exception);
         metaData.set(RESPONSE_STATUS, INTERNAL_SERVER_ERROR);
-    }
-
-    private static String stackTraceToString(final Throwable throwable) {
-        final StringWriter stringWriter = new StringWriter();
-        final PrintWriter printWriter = new PrintWriter(stringWriter);
-        throwable.printStackTrace(printWriter);
-        return stringWriter.toString();
     }
 }

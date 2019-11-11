@@ -23,9 +23,7 @@ package com.envimate.httpmate.client.issuer.bypass;
 
 import com.envimate.httpmate.HttpMate;
 import com.envimate.httpmate.chains.MetaData;
-import com.envimate.httpmate.client.BasePath;
-import com.envimate.httpmate.client.HttpClientRequest;
-import com.envimate.httpmate.client.RawClientResponse;
+import com.envimate.httpmate.client.*;
 import com.envimate.httpmate.client.issuer.Issuer;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -39,6 +37,7 @@ import static com.envimate.httpmate.chains.MetaData.emptyMetaData;
 import static com.envimate.httpmate.client.RawClientResponse.rawClientResponse;
 import static com.envimate.httpmate.util.Maps.mapToMultiMap;
 import static com.envimate.httpmate.util.Validators.validateNotNull;
+import static java.util.stream.Collectors.toMap;
 
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class BypassIssuer implements Issuer {
@@ -51,15 +50,19 @@ public final class BypassIssuer implements Issuer {
 
     @Override
     public <T> T issue(final HttpClientRequest<T> request,
-                       final BasePath basePath,
                        final Function<RawClientResponse, T> responseMapper) {
-        final String fixedPath = basePath.concatenateWithStartingAndTrailingSlash(request.path());
-
         final MetaData metaData = emptyMetaData();
-        metaData.set(RAW_REQUEST_HEADERS, mapToMultiMap(request.headers()));
-        metaData.set(RAW_REQUEST_QUERY_PARAMETERS, request.queryParameters());
+        final RequestPath requestPath = request.path();
+        metaData.set(RAW_PATH, requestPath.path());
+        final Map<String, String> queryParameters = requestPath.queryParameters()
+                .stream()
+                .collect(toMap(
+                        queryParameter -> queryParameter.key().encoded(),
+                        queryParameter -> queryParameter.value().map(UriString::encoded).orElse(""))
+                );
+        metaData.set(RAW_REQUEST_QUERY_PARAMETERS, queryParameters);
         metaData.set(RAW_METHOD, request.method());
-        metaData.set(RAW_PATH, fixedPath);
+        metaData.set(RAW_REQUEST_HEADERS, mapToMultiMap(request.headers()));
         request.body().ifPresent(inputStream -> metaData.set(REQUEST_BODY_STREAM, inputStream));
         metaData.set(IS_HTTP_REQUEST, true);
 

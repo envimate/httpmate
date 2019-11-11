@@ -42,8 +42,4 @@ When you are serving http requests, you can easily clean up all resources like s
 ```java
 httpMate.close();
 ```
-or so:
-```java
-endpoint.close();
-```
-it doesn't really matter which one you call - both statements have the exact same effect.
+This will close all resources, including the endpoint.

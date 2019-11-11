@@ -37,8 +37,7 @@ import static java.util.Arrays.asList;
 public final class DeployerManager {
     //private static final Collection<Deployer> ACTIVE_DEPLOYERS =
     // asList(bypassedDeployer(), jettyDeployer(), sparkDeployer(), pureJavaDeployer(), servletDeployer(), awsDeployer());
-    private static final Collection<Deployer> ACTIVE_DEPLOYERS =
-            asList(jettyDeployer(), pureJavaDeployer(), servletDeployer());
+    private static final Collection<Deployer> ACTIVE_DEPLOYERS = asList(jettyDeployer(), pureJavaDeployer(), servletDeployer());
     //private static final Collection<Deployer> ACTIVE_DEPLOYERS = asList(pureJavaDeployer());
     //private static final Collection<Deployer> ACTIVE_DEPLOYERS = asList(jettyDeployer());
     private static DeployerAndClient currentDeployerAndClient;

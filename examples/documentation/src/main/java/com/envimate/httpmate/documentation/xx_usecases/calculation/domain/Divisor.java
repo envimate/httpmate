@@ -19,18 +19,30 @@
  * under the License.
  */
 
-package com.envimate.httpmate.documentation.xx_usecases.calculation;
+package com.envimate.httpmate.documentation.xx_usecases.calculation.domain;
 
-import com.envimate.httpmate.documentation.xx_usecases.calculation.domain.CalculationResponse;
-import com.envimate.httpmate.documentation.xx_usecases.calculation.domain.MultiplicationRequest;
-import com.envimate.httpmate.documentation.xx_usecases.calculation.domain.Number;
+import static java.lang.Integer.parseInt;
 
-public final class MultiplicationUseCase {
+public final class Divisor {
+    private final int value;
 
-    public CalculationResponse multiply(final MultiplicationRequest multiplicationRequest) {
-        final Number firstFactor = multiplicationRequest.getFactor1();
-        final Number secondFactor = multiplicationRequest.getFactor2();
-        final int result = firstFactor.value() * secondFactor.value();
-        return new CalculationResponse(new Number(result));
+    private Divisor(final int value) {
+        this.value = value;
+    }
+
+    public static Divisor parseDivisor(final String divisorAsString) {
+        final int value = parseInt(divisorAsString);
+        if (value == 0) {
+            throw new IllegalArgumentException("the divisor must not be 0");
+        }
+        return new Divisor(value);
+    }
+
+    public int value() {
+        return value;
+    }
+
+    public String stringValue() {
+        return String.valueOf(value);
     }
 }

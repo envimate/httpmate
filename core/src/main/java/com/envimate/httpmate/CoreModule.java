@@ -27,14 +27,14 @@ import com.envimate.httpmate.chains.DependencyRegistry;
 import com.envimate.httpmate.chains.MetaData;
 import com.envimate.httpmate.closing.ClosingAction;
 import com.envimate.httpmate.closing.ClosingActions;
-import com.envimate.httpmate.handler.distribution.HandlerDistributors;
 import com.envimate.httpmate.exceptions.ExceptionMapper;
 import com.envimate.httpmate.exceptions.ExceptionSerializer;
 import com.envimate.httpmate.filtermap.FilterMapBuilder;
 import com.envimate.httpmate.generator.GenerationCondition;
 import com.envimate.httpmate.generator.Generator;
 import com.envimate.httpmate.handler.Handler;
-import com.envimate.httpmate.logger.Logger;
+import com.envimate.httpmate.handler.distribution.HandlerDistributors;
+import com.envimate.httpmate.logger.LoggerImplementation;
 import com.envimate.httpmate.responsetemplate.ResponseTemplate;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
@@ -47,6 +47,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
 
+import static com.envimate.httpmate.HttpMateChainKeys.RESPONSE_STATUS;
 import static com.envimate.httpmate.HttpMateChains.*;
 import static com.envimate.httpmate.backchannel.BackChannelFactory.BACK_CHANNEL_FACTORY;
 import static com.envimate.httpmate.backchannel.LocalBackChannelFactory.localBackChannelFactory;
@@ -55,8 +56,6 @@ import static com.envimate.httpmate.chains.rules.Consume.consume;
 import static com.envimate.httpmate.chains.rules.Jump.jumpTo;
 import static com.envimate.httpmate.closing.ClosingActions.CLOSING_ACTIONS;
 import static com.envimate.httpmate.closing.ClosingActions.closingActions;
-import static com.envimate.httpmate.handler.distribution.HandlerDistributors.HANDLER_DISTRIBUTORS;
-import static com.envimate.httpmate.handler.distribution.HandlerDistributors.handlerDistributors;
 import static com.envimate.httpmate.exceptions.DefaultExceptionMapper.theDefaultExceptionMapper;
 import static com.envimate.httpmate.exceptions.ExceptionSerializer.exceptionSerializer;
 import static com.envimate.httpmate.filtermap.FilterMapBuilder.filterMapBuilder;
@@ -64,6 +63,9 @@ import static com.envimate.httpmate.generator.Generator.generator;
 import static com.envimate.httpmate.generator.Generators.generators;
 import static com.envimate.httpmate.handler.DetermineHandlerProcessor.determineHandlerProcessor;
 import static com.envimate.httpmate.handler.InvokeHandlerProcessor.invokeHandlerProcessor;
+import static com.envimate.httpmate.handler.distribution.HandlerDistributors.HANDLER_DISTRIBUTORS;
+import static com.envimate.httpmate.handler.distribution.HandlerDistributors.handlerDistributors;
+import static com.envimate.httpmate.http.Http.StatusCodes.INTERNAL_SERVER_ERROR;
 import static com.envimate.httpmate.logger.Loggers.stdoutAndStderrLogger;
 import static com.envimate.httpmate.logger.SetLoggerProcessor.setLoggerProcessor;
 import static com.envimate.httpmate.processors.MapExceptionProcessor.mapExceptionProcessor;
@@ -82,7 +84,7 @@ public final class CoreModule implements ChainModule {
     private final List<Generator<Handler>> lowLevelHandlers = new LinkedList<>();
     private ResponseTemplate responseTemplate = ResponseTemplate.EMPTY_RESPONSE_TEMPLATE;
     private final FilterMapBuilder<Throwable, ExceptionMapper<Throwable>> exceptionMappers = filterMapBuilder();
-    private Logger logger = stdoutAndStderrLogger();
+    private LoggerImplementation logger = stdoutAndStderrLogger();
     private final ClosingActions closingActions = closingActions();
 
     public static CoreModule coreModule() {
@@ -98,7 +100,7 @@ public final class CoreModule implements ChainModule {
         handlers.put(condition, handler);
     }
 
-    public void setLogger(final Logger logger) {
+    public void setLogger(final LoggerImplementation logger) {
         validateNotNull(logger, "logger");
         this.logger = logger;
     }
@@ -159,7 +161,9 @@ public final class CoreModule implements ChainModule {
 
         extendAChainWith(extender)
                 .append(EXCEPTION_OCCURRED)
-                .append(PREPARE_EXCEPTION_RESPONSE, initResponseProcessor())
+                .append(PREPARE_EXCEPTION_RESPONSE,
+                        initResponseProcessor(),
+                        metaData -> metaData.set(RESPONSE_STATUS, INTERNAL_SERVER_ERROR))
                 .append(MAP_EXCEPTION_TO_RESPONSE, mapExceptionProcessor(exceptionSerializer))
                 .withTheExceptionChain(ERROR)
                 .withTheFinalAction(jumpTo(POST_INVOKE));

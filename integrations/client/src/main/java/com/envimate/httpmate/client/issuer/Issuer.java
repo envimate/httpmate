@@ -21,12 +21,13 @@
 
 package com.envimate.httpmate.client.issuer;
 
-import com.envimate.httpmate.client.BasePath;
 import com.envimate.httpmate.client.HttpClientRequest;
 import com.envimate.httpmate.client.RawClientResponse;
 
 import java.util.function.Function;
 
 public interface Issuer {
-    <T> T issue(HttpClientRequest<T> request, BasePath basePath, Function<RawClientResponse, T> responseMapper);
+    <T> T issue(HttpClientRequest<T> request,
+                //BasePath basePath,
+                Function<RawClientResponse, T> responseMapper);
 }

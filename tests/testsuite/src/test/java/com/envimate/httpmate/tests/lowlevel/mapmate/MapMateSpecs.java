@@ -19,12 +19,15 @@
  * under the License.
  */
 
-package com.envimate.httpmate.tests.lowlevel;
+package com.envimate.httpmate.tests.lowlevel.mapmate;
 
 import com.envimate.httpmate.HttpMate;
 import com.envimate.httpmate.tests.givenwhenthen.DeployerAndClient;
+import com.envimate.httpmate.tests.lowlevel.mapmate.usecases.MyUseCase;
+import com.envimate.httpmate.tests.lowlevel.mapmate.usecases.domain.MyRequest;
 import com.envimate.mapmate.builder.MapMate;
 import com.envimate.mapmate.deserialization.Unmarshaller;
+import com.google.gson.Gson;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -34,6 +37,7 @@ import java.util.Map;
 
 import static com.envimate.httpmate.HttpMate.anHttpMate;
 import static com.envimate.httpmate.http.headers.ContentType.fromString;
+import static com.envimate.httpmate.mapmate.MapMateConfigurator.toUseMapMate;
 import static com.envimate.httpmate.mapmate.MapMateIntegration.toMarshalRequestAndResponseBodiesUsingMapMate;
 import static com.envimate.httpmate.tests.givenwhenthen.Given.given;
 import static com.envimate.httpmate.tests.givenwhenthen.deploy.DeployerManager.activeDeployers;
@@ -88,5 +92,46 @@ public final class MapMateSpecs {
                 .theStatusCodeWas(200)
                 .theResponseContentTypeWas("custom")
                 .theResponseBodyWas("custom_marshalled");
+    }
+
+    @Test
+    public void mapMateIntegrationCorrectlyUnmarshallsWithoutSpecifiedRequestContentType() {
+        final Gson gson = new Gson();
+        final MapMate mapMate = aMapMate(MyRequest.class.getPackageName())
+                .usingJsonMarshaller(gson::toJson, gson::fromJson)
+                .build();
+        given(
+                anHttpMate()
+                        .post("/", MyUseCase.class)
+                        .configured(toUseMapMate(mapMate))
+                        .build()
+        )
+                .when().aRequestToThePath("/").viaThePostMethod().withTheBody("{\"field1\": \"foo\", \"field2\": \"bar\"}").isIssued()
+                .theStatusCodeWas(200)
+                .theResponseBodyWas("{}");
+    }
+
+    @Test
+    public void mapMateIntegrationCanHelpWithValidation() {
+        final Gson gson = new Gson();
+        final MapMate mapMate = aMapMate(MyRequest.class.getPackageName())
+                .withExceptionIndicatingValidationError(IllegalArgumentException.class)
+                .usingJsonMarshaller(gson::toJson, gson::fromJson)
+                .build();
+        given(
+                anHttpMate()
+                        .post("/", MyUseCase.class)
+                        .configured(toUseMapMate(mapMate))
+                        .build()
+        )
+                .when().aRequestToThePath("/").viaThePostMethod().withTheBody("{\"field1\": \"wrong\", \"field2\": \"wrong\"}").withContentType("application/json").isIssued()
+                .theStatusCodeWas(500)
+                .theJsonResponseEquals("" +
+                        "{" +
+                        "\"errors\":[" +
+                        "{\"path\":\"field1\",\"message\":\"customPrimitive1 is wrong\"}," +
+                        "{\"path\":\"field2\",\"message\":\"customPrimitive2 is wrong\"}" +
+                        "]}");
+
     }
 }

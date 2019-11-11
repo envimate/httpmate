@@ -23,10 +23,13 @@ package com.envimate.httpmate;
 
 import com.envimate.httpmate.chains.MetaDataKey;
 import com.envimate.httpmate.handler.Handler;
+import com.envimate.httpmate.http.Headers;
+import com.envimate.httpmate.http.HttpRequestMethod;
+import com.envimate.httpmate.http.PathParameters;
+import com.envimate.httpmate.http.QueryParameters;
 import com.envimate.httpmate.http.headers.ContentType;
 import com.envimate.httpmate.logger.Logger;
 import com.envimate.httpmate.path.Path;
-import com.envimate.httpmate.http.*;
 
 import java.io.InputStream;
 import java.util.List;

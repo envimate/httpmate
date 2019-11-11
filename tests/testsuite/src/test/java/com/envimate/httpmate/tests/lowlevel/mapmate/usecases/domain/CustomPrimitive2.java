@@ -19,7 +19,27 @@
  * under the License.
  */
 
-package com.envimate.httpmate.tests.usecases.mappedexception;
+package com.envimate.httpmate.tests.lowlevel.mapmate.usecases.domain;
 
-public final class MappedException extends RuntimeException {
+import lombok.AccessLevel;
+import lombok.EqualsAndHashCode;
+import lombok.RequiredArgsConstructor;
+import lombok.ToString;
+
+@ToString
+@EqualsAndHashCode
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
+public final class CustomPrimitive2 {
+    private final String value;
+
+    public static CustomPrimitive2 customPrimitive2(final String value) {
+        if (value == null || value.equals("wrong")) {
+            throw new IllegalArgumentException("customPrimitive2 is wrong");
+        }
+        return new CustomPrimitive2(value);
+    }
+
+    public String stringValue() {
+        return value;
+    }
 }

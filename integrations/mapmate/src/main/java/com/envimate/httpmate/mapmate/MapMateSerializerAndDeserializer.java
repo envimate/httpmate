@@ -21,6 +21,7 @@
 
 package com.envimate.httpmate.mapmate;
 
+import com.envimate.httpmate.CoreModule;
 import com.envimate.httpmate.chains.ChainModule;
 import com.envimate.httpmate.chains.DependencyRegistry;
 import com.envimate.httpmate.http.headers.ContentType;
@@ -28,6 +29,7 @@ import com.envimate.httpmate.marshalling.MarshallingModule;
 import com.envimate.httpmate.usecases.UseCasesModule;
 import com.envimate.httpmate.usecases.serializing.SerializerAndDeserializer;
 import com.envimate.mapmate.builder.MapMate;
+import com.envimate.mapmate.deserialization.validation.AggregatedValidationException;
 import com.envimate.mapmate.marshalling.MarshallingType;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
@@ -38,12 +40,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.envimate.httpmate.HttpMateChainKeys.RESPONSE_BODY_MAP;
 import static com.envimate.httpmate.marshalling.MarshallingModule.emptyMarshallingModule;
 import static com.envimate.httpmate.util.Validators.validateNotNull;
 import static com.envimate.mapmate.builder.recipes.marshallers.urlencoded.UrlEncodedMarshallerRecipe.urlEncoded;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.Map.of;
+import static java.util.stream.Collectors.toList;
 
 @ToString
 @EqualsAndHashCode
@@ -60,8 +64,9 @@ public final class MapMateSerializerAndDeserializer implements SerializerAndDese
     private static final List<MarshallingType> DEFAULT_SUPPORTED_TYPES_FOR_MARSHALLING = asList(
             MarshallingType.json(), MarshallingType.xml(), MarshallingType.yaml());
 
-    private MapMate mapMate;
-    private ContentType defaultContentType;
+    private volatile MapMate mapMate;
+    private volatile ContentType defaultContentType;
+    private volatile boolean addAggregatedExceptionHandler = true;
 
     private final Map<ContentType, MarshallingType> contentTypeMappingsForUnmarshalling = new HashMap<>();
     private final Map<ContentType, MarshallingType> contentTypeMappingsForMarshalling = new HashMap<>();
@@ -82,6 +87,10 @@ public final class MapMateSerializerAndDeserializer implements SerializerAndDese
     public void setDefaultContentType(final ContentType defaultContentType) {
         validateNotNull(defaultContentType, "defaultContentType");
         this.defaultContentType = defaultContentType;
+    }
+
+    public void doNotAddAggregatedExceptionHandler() {
+        this.addAggregatedExceptionHandler = false;
     }
 
     public void addRequestContentTypeToUnmarshallingTypeMapping(final ContentType contentType,
@@ -138,5 +147,20 @@ public final class MapMateSerializerAndDeserializer implements SerializerAndDese
                 .addMarshaller(contentType, map -> mapMate.serializer().serializeFromMap(map, marshallingType)));
 
         dependencyRegistry.getDependency(UseCasesModule.class).setSerializerAndDeserializer(this);
+
+        if (addAggregatedExceptionHandler) {
+            final CoreModule coreModule = dependencyRegistry.getDependency(CoreModule.class);
+            coreModule.addExceptionMapper(throwable -> throwable instanceof AggregatedValidationException,
+                    (exception, metaData) -> {
+                        final AggregatedValidationException aggregatedException = (AggregatedValidationException) exception;
+                        final List<Object> errorsList = aggregatedException.getValidationErrors()
+                                .stream()
+                                .map(validationError -> Map.of(
+                                        "message", validationError.message,
+                                        "path", validationError.propertyPath))
+                                .collect(toList());
+                        metaData.set(RESPONSE_BODY_MAP, Map.of("errors", errorsList));
+                    });
+        }
     }
 }

@@ -22,24 +22,16 @@
 package com.envimate.httpmate.documentation.xx_usecases.calculation.domain;
 
 public final class MultiplicationRequest {
-    public final Number factor1;
-    public final Number factor2;
+    public final Integer factor1;
+    public final Integer factor2;
 
-    public MultiplicationRequest(final Number factor1, final Number factor2) {
+    public MultiplicationRequest(final Integer factor1, final Integer factor2) {
         this.factor1 = factor1;
         this.factor2 = factor2;
     }
 
-    public static MultiplicationRequest multiplicationRequest(final Number factor1,
-                                                              final Number factor2) {
+    public static MultiplicationRequest multiplicationRequest(final Integer factor1,
+                                                              final Integer factor2) {
         return new MultiplicationRequest(factor1, factor2);
-    }
-
-    public Number getFactor1() {
-        return factor1;
-    }
-
-    public Number getFactor2() {
-        return factor2;
     }
 }

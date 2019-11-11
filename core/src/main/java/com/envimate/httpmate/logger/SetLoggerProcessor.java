@@ -29,21 +29,23 @@ import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
 import static com.envimate.httpmate.HttpMateChainKeys.LOGGER;
+import static com.envimate.httpmate.logger.Logger.logger;
 import static com.envimate.httpmate.util.Validators.validateNotNull;
 
 @ToString
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class SetLoggerProcessor implements Processor {
-    private final Logger logger;
+    private final LoggerImplementation loggerImplementation;
 
-    public static Processor setLoggerProcessor(final Logger logger) {
-        validateNotNull(logger, "logger");
-        return new SetLoggerProcessor(logger);
+    public static Processor setLoggerProcessor(final LoggerImplementation loggerImplementation) {
+        validateNotNull(loggerImplementation, "loggerImplementation");
+        return new SetLoggerProcessor(loggerImplementation);
     }
 
     @Override
     public void apply(final MetaData metaData) {
+        final Logger logger = logger(loggerImplementation, metaData);
         metaData.set(LOGGER, logger);
     }
 }

@@ -63,11 +63,11 @@ public final class MultipartHttpMateConfiguration {
                         return extractUsername(content);
                     }
                     return empty();
-                }).afterBodyProcessing())
+                }).afterBodyProcessing().notFailingOnMissingAuthentication())
 
                 .configured(toAuthorizeRequestsUsing((authenticationInformation, request) -> {
                     if (request.path().matches("/authorized")) {
-                        return (boolean) authenticationInformation
+                        return authenticationInformation
                                 .map("admin"::equals)
                                 .orElse(false);
                     } else {

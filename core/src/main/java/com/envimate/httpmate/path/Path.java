@@ -28,6 +28,7 @@ import lombok.ToString;
 
 import static com.envimate.httpmate.path.PathTemplate.pathTemplate;
 import static com.envimate.httpmate.util.Validators.validateNotNull;
+import static java.lang.String.format;
 
 @ToString
 @EqualsAndHashCode
@@ -43,6 +44,20 @@ public class Path {
     public boolean matches(final String template) {
         final PathTemplate pathTemplate = pathTemplate(template);
         return pathTemplate.matches(this);
+    }
+
+    public Path cutPrefix(final String prefix) {
+        validateNotNull(prefix, "prefix");
+        if (!path.startsWith(prefix)) {
+            throw new IllegalArgumentException(format("Path '%s' does not start with '%s'", path, prefix));
+        }
+        final String cutPath = path.substring(prefix.length());
+        return new Path(cutPath);
+    }
+
+    public Path safelyRebaseTo(final String prefix) {
+        final String rebasedPath = PathResolver.resolvePath(prefix, path);
+        return path(rebasedPath);
     }
 
     public String raw() {

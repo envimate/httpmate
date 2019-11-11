@@ -16,7 +16,7 @@ you can use the configurator methods provided in the `LoggerConfigurators` class
 
 - `toLogToStderr()` - logs everything to `STDERR`
 
-- `toLogToStdoutAndStderr()` - logs everything to both `STDOUT` and `STDERR`
+- `toLogToStdoutAndStderr()` - logs messages to `STDOUT` and exceptions to `STDERR`
 
 - `toDropAllLogMessages()` - does not log at all
 

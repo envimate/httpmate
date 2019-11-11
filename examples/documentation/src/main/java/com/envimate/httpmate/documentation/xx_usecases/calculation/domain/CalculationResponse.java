@@ -22,13 +22,13 @@
 package com.envimate.httpmate.documentation.xx_usecases.calculation.domain;
 
 public final class CalculationResponse {
-    public final Number result;
+    public final Integer result;
 
-    public CalculationResponse(final Number result) {
+    public CalculationResponse(final Integer result) {
         this.result = result;
     }
 
-    public static CalculationResponse calculationResult(final Number result) {
+    public static CalculationResponse calculationResult(final Integer result) {
         return new CalculationResponse(result);
     }
 }

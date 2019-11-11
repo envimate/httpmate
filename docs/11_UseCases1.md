@@ -3,7 +3,7 @@
 This chapter assumes you understand basic http and HttpMate concepts,
 especially the mechanics of marshalling and unmarshalling.
 
-So far, we showed you how to handle requests in a very low-level fashion
+So far, we introduced you how to handling requests in a very low-level fashion
 using the `HttpHandler` interface in the examples.
 This way, you can directly access request and response features like headers and query
 parameters.

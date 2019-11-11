@@ -19,14 +19,16 @@
  * under the License.
  */
 
-package com.envimate.httpmate.tests.usecases.mappedexception;
+package com.envimate.httpmate.documentation.xx_usecases.calculation.usecases;
 
-import lombok.RequiredArgsConstructor;
+import com.envimate.httpmate.documentation.xx_usecases.calculation.domain.CalculationResponse;
+import com.envimate.httpmate.documentation.xx_usecases.calculation.domain.MultiplicationRequest;
+import com.envimate.httpmate.documentation.xx_usecases.calculation.domain.Number;
 
-@RequiredArgsConstructor
-public final class MappedExceptionUseCase {
+public final class MultiplicationUseCase {
 
-    public String mappedException() {
-        throw new MappedException();
+    public CalculationResponse multiply(final MultiplicationRequest multiplicationRequest) {
+        final int result = multiplicationRequest.factor1 * multiplicationRequest.factor2;
+        return new CalculationResponse(result);
     }
 }
