@@ -25,6 +25,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import static com.envimate.httpmate.util.Validators.validateNotNull;
+import static java.lang.String.format;
+import static java.util.Arrays.stream;
 
 final class PathResolver {
 
@@ -39,6 +41,7 @@ final class PathResolver {
         final String relativeUserProvidedAppendix = makeRelative(userProvidedAppendix);
         final Path userProvidedAppendixPath = Paths.get(relativeUserProvidedAppendix);
         final Path resolvedPath = basePath.resolve(userProvidedAppendixPath).normalize();
+        validateAbsolutePath(resolvedPath);
         if (!resolvedPath.startsWith(basePath)) {
             throw new IllegalArgumentException("User path escapes the base path");
         }
@@ -46,7 +49,7 @@ final class PathResolver {
     }
 
     private static String makeRelative(final String path) {
-        if(!path.startsWith("/")) {
+        if (!path.startsWith("/")) {
             return path;
         }
         final String withoutFirst = path.substring(1);
@@ -54,9 +57,24 @@ final class PathResolver {
     }
 
     private static String makeAbsolute(final String path) {
-        if(path.startsWith("/")) {
+        if (path.startsWith("/")) {
             return path;
         }
         return "/" + path;
+    }
+
+    private static void validateAbsolutePath(final Path path) {
+        validateNotNull(path, "path");
+        final String pathString = path.toString();
+        final String[] elements = pathString.split("/");
+        stream(elements)
+                .forEach(element -> {
+                    if ("..".equals(element)) {
+                        throw new RuntimeException(format("path '%s' is not absolute", pathString));
+                    }
+                    if (".".equals(element)) {
+                        throw new RuntimeException(format("path '%s' is not absolute", pathString));
+                    }
+                });
     }
 }

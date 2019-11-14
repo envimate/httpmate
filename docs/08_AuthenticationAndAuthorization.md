@@ -185,8 +185,8 @@ We now have a login form and can verify whether the provided username and passwo
 As indicated by the first `TODO` comment, we still lack a way of storing this result somewhere in the session.
 We could just set a cookie with the value `LoggedIn=true`, but this would be insecure for obvious reasons (any user could
 just set the cookie and we have no way of telling whether the cookie is legit).
-Luckily, so-called [Json Web Tokens (JWT)](https://jwt.io/) exist. They are short cryptographically signed pieces of information that can only be created and read
-by the owner of the used cryptographic key i.e. the webserver.
+Luckily, so-called [Json Web Tokens (JWT)](https://jwt.io/) exist. They are short cryptographically signed pieces of information that can only be created/signed
+by someone with access to the cryptographic private key i.e. the webserver.
 They can store the username (refered to as `Subject`) and whether the user has administrator access (this is called a *claim*).
 If we store the username and the access rights in the JWT and set it as a cookie, we can
 decrypt the token in every subsequent request and be sure that its contents are untampered and trustworthy.
@@ -316,7 +316,7 @@ Sets the authentication information according to the returned lambda.
 
 - `notFailingOnMissingAuthenticationForRequestsThat()` - allows unauthenticated requests that pass the supplied filter to not be rejected.
 
-- `notFailingOnMissingAuthenticationForRequestsTo()` - allows unauthenticated requests whose route matches the supplied route specification to not be rejected.
+- `notFailingOnMissingAuthenticationForRequestsTo()` - allows unauthenticated requests whose route matches the supplied route specification (may contain wildcards) to not be rejected.
 
 - `failingOnMissingAuthenticationOnlyForRequestsThat` - only rejects unauthenticated requests that pass the supplied filter.
 
@@ -326,11 +326,11 @@ Sets the authentication information according to the returned lambda.
 
 - `onlyRequestsThat()` - applies the authenticator only to requests that pass the supplied filter.
 
-- `onlyRequestsTo()` - applies the authenticator only to requests whose route matches the supplied route specification.
+- `onlyRequestsTo()` - applies the authenticator only to requests whose route matches the supplied route specification (may contain wildcards).
 
 - `exceptRequestsThat()` - does not apply the authenticator to requests that pass the supplied filter.
 
-- `exceptRequestsTo()` - does not apply the authenticator to requests whose route matches the supplied route specification.
+- `exceptRequestsTo()` - does not apply the authenticator to requests whose route matches the supplied route specification (may contain wildcards).
 
 - `beforeBodyProcessing()` - calls the authenticator before body processing (i.e. unmarshalling, map generation, etc.) takes place.
 
@@ -352,11 +352,11 @@ Rejects unauthorized requests by throwing a `NotAuthorizedException`.
 
 - `onlyRequestsThat()` - applies the authorizer only to requests that pass the supplied filter.
 
-- `onlyRequestsTo()` - applies the authorizer only to requests whose route matches the supplied route specification.
+- `onlyRequestsTo()` - applies the authorizer only to requests whose route matches the supplied route specification (may contain wildcards).
 
 - `exceptRequestsThat()` - does not apply the authorizer to requests that pass the supplied filter.
 
-- `exceptRequestsTo()` - does not apply the authorizer to requests whose route matches the supplied route specification.
+- `exceptRequestsTo()` - does not apply the authorizer to requests whose route matches the supplied route specification (may contain wildcards).
 
 - `beforeBodyProcessing()` - calls the authorizer before body processing (i.e. unmarshalling, map generation, etc.) takes place.
 
@@ -374,11 +374,11 @@ They offer a way to filter requests that might be deemed unsafe.
 
 - `onlyRequestsThat()` - applies the filter only to requests that pass the supplied filter.
 
-- `onlyRequestsTo()` - applies the filter only to requests whose route matches the supplied route specification.
+- `onlyRequestsTo()` - applies the filter only to requests whose route matches the supplied route specification (may contain wildcards).
 
 - `exceptRequestsThat()` - does not apply the filter to requests that pass the supplied filter.
 
-- `exceptRequestsTo()` - does not apply the filter to requests whose route matches the supplied route specification.
+- `exceptRequestsTo()` - does not apply the filter to requests whose route matches the supplied route specification (may contain wildcards).
 
 - `beforeBodyProcessing()` - calls the filter before body processing (i.e. unmarshalling, map generation, etc.) takes place.
 

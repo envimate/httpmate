@@ -29,7 +29,7 @@ import java.util.Optional;
 
 import static com.envimate.httpmate.HttpMate.anHttpMate;
 import static com.envimate.httpmate.HttpMateChainKeys.*;
-import static com.envimate.httpmate.cors.CorsConfigurators.toActivateCORSWithAllAllowedOrigins;
+import static com.envimate.httpmate.cors.CorsConfigurators.toActivateCORSWithoutValidatingTheOrigin;
 import static com.envimate.httpmate.http.Http.StatusCodes.OK;
 import static com.envimate.httpmate.http.HttpRequestMethod.GET;
 import static com.envimate.httpmate.logger.LoggerConfigurators.toLogToStdout;
@@ -61,7 +61,7 @@ public final class Application {
                     metaData.set(REQUEST_BODY_STRING, "Hello " + name.orElse("World!"));
                     metaData.set(RESPONSE_STATUS, OK);
                 })
-                .configured(toActivateCORSWithAllAllowedOrigins()
+                .configured(toActivateCORSWithoutValidatingTheOrigin()
                         .withAllowedMethods(GET)
                         .allowingCredentials())
                 .configured(toUseMapMate(mapMate))

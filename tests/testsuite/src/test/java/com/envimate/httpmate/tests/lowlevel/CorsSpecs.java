@@ -29,7 +29,7 @@ import org.junit.runners.Parameterized;
 import java.util.Collection;
 
 import static com.envimate.httpmate.HttpMate.anHttpMate;
-import static com.envimate.httpmate.cors.CorsConfigurators.toActivateCORSWithAllAllowedOrigins;
+import static com.envimate.httpmate.cors.CorsConfigurators.toActivateCORSWithoutValidatingTheOrigin;
 import static com.envimate.httpmate.exceptions.ExceptionConfigurators.toMapExceptionsByDefaultUsing;
 import static com.envimate.httpmate.exceptions.ExceptionConfigurators.toMapExceptionsOfType;
 import static com.envimate.httpmate.http.HttpRequestMethod.*;
@@ -53,7 +53,7 @@ public final class CorsSpecs {
     public void corsHeadersAreSetForNormalRequests() {
         given(
                 anHttpMate().get("/test", (request, response) -> response.setBody("qwer"))
-                        .configured(toActivateCORSWithAllAllowedOrigins()
+                        .configured(toActivateCORSWithoutValidatingTheOrigin()
                                 .exposingTheResponseHeaders("Some-Header", "Another-Header", "Yet-Another-Header")
                                 .allowingCredentials())
                         .build()
@@ -74,7 +74,7 @@ public final class CorsSpecs {
                         })
                         .configured(toMapExceptionsOfType(IllegalArgumentException.class, (exception, response) -> response.setStatus(501)))
                         .configured(toMapExceptionsByDefaultUsing((exception, response) -> response.setStatus(500)))
-                        .configured(toActivateCORSWithAllAllowedOrigins()
+                        .configured(toActivateCORSWithoutValidatingTheOrigin()
                                 .exposingTheResponseHeaders("Some-Header", "Another-Header", "Yet-Another-Header")
                                 .allowingCredentials())
                         .build()
@@ -90,7 +90,7 @@ public final class CorsSpecs {
     public void testCorsPreflightRequest() {
         given(
                 anHttpMate()
-                        .configured(toActivateCORSWithAllAllowedOrigins()
+                        .configured(toActivateCORSWithoutValidatingTheOrigin()
                                 .withAllowedMethods(GET, POST, PUT, DELETE)
                                 .withAllowedHeaders("X-Custom-Header", "Upgrade-Insecure-Requests"))
                         .build()

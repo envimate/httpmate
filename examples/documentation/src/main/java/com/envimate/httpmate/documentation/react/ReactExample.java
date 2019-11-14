@@ -34,7 +34,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import static com.envimate.httpmate.HttpMate.anHttpMate;
-import static com.envimate.httpmate.cors.CorsConfigurators.toActivateCORSWithAllAllowedOrigins;
+import static com.envimate.httpmate.cors.CorsConfigurators.toActivateCORSWithoutValidatingTheOrigin;
 import static com.envimate.httpmate.documentation.react.LoginException.loginException;
 import static com.envimate.httpmate.exceptions.ExceptionConfigurators.toMapExceptionsOfType;
 import static com.envimate.httpmate.http.Http.StatusCodes.BAD_REQUEST;
@@ -77,7 +77,7 @@ public final class ReactExample {
                 })
                 .get("/dashboard", (request, response) -> response.setBody(Map.of("message", new Date().toString())))
                 .configured(toUseMapMate(mapMate))
-                .configured(toActivateCORSWithAllAllowedOrigins())
+                .configured(toActivateCORSWithoutValidatingTheOrigin())
                 .configured(toAuthenticateUsingOAuth2BearerToken(ReactExample::checkJwt))
                 .configured(toAuthorizeAllAuthenticatedRequests().exceptRequestsTo("/login"))
                 .configured(toMapExceptionsOfType(LoginException.class, (exception, response) -> {

@@ -26,6 +26,7 @@ import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
+import static com.envimate.httpmate.path.PathResolver.resolvePath;
 import static com.envimate.httpmate.path.PathTemplate.pathTemplate;
 import static com.envimate.httpmate.util.Validators.validateNotNull;
 import static java.lang.String.format;
@@ -56,7 +57,7 @@ public class Path {
     }
 
     public Path safelyRebaseTo(final String prefix) {
-        final String rebasedPath = PathResolver.resolvePath(prefix, path);
+        final String rebasedPath = resolvePath(prefix, path);
         return path(rebasedPath);
     }
 

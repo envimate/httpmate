@@ -21,8 +21,6 @@
 
 package com.envimate.httpmate.handler.http.files;
 
-import com.envimate.httpmate.util.Validators;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -68,7 +66,7 @@ public final class FileLoader {
     private static boolean isDirectory(final ClassLoader classLoader,
                                        final MultiformatPath path,
                                        final URL properlyLoadedResource) {
-        Validators.validateNotNull(properlyLoadedResource, "properlyLoadedResource");
+        validateNotNull(properlyLoadedResource, "properlyLoadedResource");
         final String protocol = properlyLoadedResource.getProtocol();
         if ("file".equals(protocol)) {
             final File file = new File(properlyLoadedResource.getPath());

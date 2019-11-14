@@ -9,12 +9,12 @@ explains how to configure HttpMate accordingly.
 To add CORS to your HttpMate instance, the class `CorsConfigurators`
 offers two configurator methods:
 - `toActivateCORSWithAllowedOrigins()`
-- `toActivateCORSWithAllAllowedOrigins()`
+- `toActivateCORSWithoutValidatingTheOrigin()`
 
 They both return a `CorsConfigurator` object for futher configuration
 and differ only in the hosts they accept cross-origin requests from.
 `toActivateCORSWithAllowedOrigins()` takes an arbitrary number of allowed
-hostnames as parameters while `toActivateCORSWithAllAllowedOrigins()` simply
+hostnames as parameters while `toActivateCORSWithoutValidatingTheOrigin()` simply
 allows all hosts to perform cross-origin requests (use with caution).
 Both configurations set the `Access-Control-Allow-Origin` header
 accordingly - see [here](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Origin) for more information.

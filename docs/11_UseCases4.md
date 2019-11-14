@@ -108,7 +108,8 @@ As stated above, we can now change the multiplication example to use take its
 input from the query parameters instead of the request body:
 ```java
 final HttpMate httpMate = anHttpMate()
-                .get("/multiply", MultiplicationUseCase.class)
+                .post("/multiply", MultiplicationUseCase.class)
+                .post("/divide", DivisionUseCase.class)
                 .configured(toEnrichTheIntermediateMapWithAllQueryParameters())
                 .configured(toUseMapMate(mapMate))
                 .build();
@@ -117,6 +118,11 @@ You can point a browser to http://localhost:1337/multiply?factor1=3&factor2=4 an
 is indeed the multiplication of 3 and 4:
 ```json
 {"result":"12"}
+```
+
+Also the division of 12 by 4 should work via the url http://localhost:1337/divide?dividend=12&divisor=4:
+```json
+{"result":"3"}
 ```
 
 ## Dependency Injection
@@ -137,13 +143,3 @@ anHttpMate()
         .configured(toCreateUseCaseInstancesUsing(injector::getInstance))
         .build();
 ```
-
-<!--
-## Object mapping without MapMate
-Not all projects might want to use MapMate, which is perfectly fine with
-HttpMate. In order to create usecase objects without it, you have several options.
-
-### Default serializer and deserializer
-
-### Specialized serializer and deserializer
--->

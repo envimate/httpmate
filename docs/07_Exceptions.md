@@ -37,7 +37,7 @@ If you now navigate to `http://localhost:1337/exception`, you should see
 the message `Something went wrong`.
 
 In addition to specifying the default behaviour, you can define custom responses
-for specific types of exceptions.
+for specific types (and subtypes) of exceptions.
 To do this, you would use the `toMapExceptionsOfType()` configurator method
 (again in `ExceptionConfigurators`).
 So let's change the type of the exception to something more specific and

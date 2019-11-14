@@ -40,7 +40,7 @@ public final class CalculationExample {
         final Gson gson = new Gson();
         final MapMate mapMate = aMapMate(MultiplicationRequest.class.getPackageName())
                 .usingJsonMarshaller(gson::toJson, gson::fromJson)
-                //.withExceptionIndicatingValidationError(IllegalArgumentException.class)
+                .withExceptionIndicatingValidationError(IllegalArgumentException.class)
                 .usingRecipe(builtInPrimitiveSerializedAsStringSupport())
                 .build();
 

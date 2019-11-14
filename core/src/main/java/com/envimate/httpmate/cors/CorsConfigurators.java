@@ -43,7 +43,7 @@ public final class CorsConfigurators {
         return corsConfigurator(allowedOrigins::contains);
     }
 
-    public static CorsConfigurator toActivateCORSWithAllAllowedOrigins() {
+    public static CorsConfigurator toActivateCORSWithoutValidatingTheOrigin() {
         return corsConfigurator(origin -> true);
     }
 }

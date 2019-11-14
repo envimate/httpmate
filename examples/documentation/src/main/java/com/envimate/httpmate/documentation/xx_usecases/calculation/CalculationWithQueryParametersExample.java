@@ -23,6 +23,7 @@ package com.envimate.httpmate.documentation.xx_usecases.calculation;
 
 import com.envimate.httpmate.HttpMate;
 import com.envimate.httpmate.documentation.xx_usecases.calculation.domain.MultiplicationRequest;
+import com.envimate.httpmate.documentation.xx_usecases.calculation.usecases.DivisionUseCase;
 import com.envimate.httpmate.documentation.xx_usecases.calculation.usecases.MultiplicationUseCase;
 import com.envimate.mapmate.builder.MapMate;
 import com.google.gson.Gson;
@@ -40,11 +41,13 @@ public final class CalculationWithQueryParametersExample {
         final Gson gson = new Gson();
         final MapMate mapMate = aMapMate(MultiplicationRequest.class.getPackageName())
                 .usingJsonMarshaller(gson::toJson, gson::fromJson)
+                .withExceptionIndicatingValidationError(IllegalArgumentException.class)
                 .usingRecipe(builtInPrimitiveSerializedAsStringSupport())
                 .build();
 
         final HttpMate httpMate = anHttpMate()
                 .get("/multiply", MultiplicationUseCase.class)
+                .get("/divide", DivisionUseCase.class)
                 .configured(toEnrichTheIntermediateMapWithAllQueryParameters())
                 .configured(toUseMapMate(mapMate))
                 .build();
