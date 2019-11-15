@@ -21,33 +21,19 @@
 
 package com.envimate.httpmate.tests.lowlevel.events;
 
-import com.envimate.httpmate.tests.givenwhenthen.DeployerAndClient;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import com.envimate.httpmate.tests.givenwhenthen.TestEnvironment;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
-import java.util.Collection;
-
+import static com.envimate.httpmate.tests.givenwhenthen.TestEnvironment.ALL_ENVIRONMENTS;
 import static com.envimate.httpmate.tests.lowlevel.events.EventsHttpMateConfiguration.theEventsHttpMateInstanceUsedForTesting;
-import static com.envimate.httpmate.tests.givenwhenthen.Given.given;
-import static com.envimate.httpmate.tests.givenwhenthen.deploy.DeployerManager.activeDeployers;
-import static com.envimate.httpmate.tests.givenwhenthen.deploy.DeployerManager.setCurrentDeployerAndClient;
 
-@RunWith(Parameterized.class)
 public final class EventSpecs {
 
-    public EventSpecs(final DeployerAndClient deployerAndClient) {
-        setCurrentDeployerAndClient(deployerAndClient);
-    }
-
-    @Parameterized.Parameters(name = "{0}")
-    public static Collection<DeployerAndClient> deployers() {
-        return activeDeployers();
-    }
-
-    @Test
-    public void testEventsCanBeTriggered() {
-        given(theEventsHttpMateInstanceUsedForTesting())
+    @ParameterizedTest
+    @MethodSource(ALL_ENVIRONMENTS)
+    public void testEventsCanBeTriggered(final TestEnvironment testEnvironment) {
+        testEnvironment.given(theEventsHttpMateInstanceUsedForTesting())
                 .when().aRequestToThePath("/trigger").viaTheGetMethod().withAnEmptyBody().isIssued()
                 .theStatusCodeWas(200)
                 .theResponseBodyWas("");

@@ -26,7 +26,9 @@ import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
-import java.util.function.BiConsumer;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.function.BiFunction;
 
 import static com.envimate.httpmate.tests.givenwhenthen.RequestLog.requestLog;
 
@@ -34,10 +36,13 @@ import static com.envimate.httpmate.tests.givenwhenthen.RequestLog.requestLog;
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class Given {
+    private static final int PORT = 1337;
+    private static final List<AutoCloseable> CLOSEABLES = new LinkedList<>();
+
     private final int port;
     private final RequestLog requestLog;
 
-    public static Given givenAHttpServer() {
+    public static Given givenAnHttpServer() {
         return given(Server::start);
     }
 
@@ -45,14 +50,33 @@ public final class Given {
         return given(SocketServer::start);
     }
 
-    private static Given given(final BiConsumer<Integer, RequestLog> server) {
-        final int port = 1337;
+    private static Given given(final BiFunction<Integer, RequestLog, AutoCloseable> server) {
+        cleanUp();
+        final int port = port();
         final RequestLog requestLog = requestLog();
-        server.accept(port, requestLog);
+        final AutoCloseable autoCloseable = server.apply(port, requestLog);
+        CLOSEABLES.add(autoCloseable);
         return new Given(port, requestLog);
     }
 
     public When when() {
         return When.when(port, requestLog);
+    }
+
+    private static int port() {
+        return PORT;
+    }
+
+    private static void cleanUp() {
+        if (CLOSEABLES.isEmpty()) {
+            return;
+        }
+        final AutoCloseable closeable = CLOSEABLES.remove(0);
+        try {
+            closeable.close();
+        } catch (final Exception e) {
+            throw new RuntimeException(e);
+        }
+        cleanUp();
     }
 }

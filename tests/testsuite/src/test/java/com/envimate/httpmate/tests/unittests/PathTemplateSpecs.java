@@ -23,7 +23,7 @@ package com.envimate.httpmate.tests.unittests;
 
 import com.envimate.httpmate.path.Path;
 import com.envimate.httpmate.path.PathTemplate;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.Map;
 

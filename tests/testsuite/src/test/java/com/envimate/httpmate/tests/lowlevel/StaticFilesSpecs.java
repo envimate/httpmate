@@ -22,32 +22,27 @@
 package com.envimate.httpmate.tests.lowlevel;
 
 import com.envimate.httpmate.handler.http.files.FileDoesNotExistException;
-import com.envimate.httpmate.tests.givenwhenthen.DeployerAndClient;
+import com.envimate.httpmate.tests.givenwhenthen.TestEnvironment;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 import org.apache.http.impl.auth.UnsupportedDigestAlgorithmException;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.net.URL;
 import java.nio.file.Paths;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.stream.Stream;
 
 import static com.envimate.httpmate.HttpMate.anHttpMate;
 import static com.envimate.httpmate.exceptions.ExceptionConfigurators.toMapExceptionsOfType;
-import static com.envimate.httpmate.tests.givenwhenthen.Given.given;
-import static com.envimate.httpmate.tests.givenwhenthen.deploy.DeployerManager.activeDeployers;
-import static com.envimate.httpmate.tests.givenwhenthen.deploy.DeployerManager.setCurrentDeployerAndClient;
+import static com.envimate.httpmate.tests.givenwhenthen.TestEnvironment.ALL_ENVIRONMENTS;
 import static java.util.Objects.isNull;
 import static java.util.stream.Collectors.toList;
 
-@RunWith(Parameterized.class)
 public final class StaticFilesSpecs {
     private static final String BASE_PATH = locateBasePath();
 
@@ -57,18 +52,10 @@ public final class StaticFilesSpecs {
 
     private static final List<String> INCORRECT_FILES = Arrays.asList("/not_a_file", "/subdirectory", "~", "~root");
 
-    public StaticFilesSpecs(final DeployerAndClient deployerAndClient) {
-        setCurrentDeployerAndClient(deployerAndClient);
-    }
-
-    @Parameterized.Parameters(name = "{0}")
-    public static Collection<DeployerAndClient> deployers() {
-        return activeDeployers();
-    }
-
-    @Test
-    public void aFileCanBeServed() {
-        given(
+    @ParameterizedTest
+    @MethodSource(ALL_ENVIRONMENTS)
+    public void aFileCanBeServed(final TestEnvironment testEnvironment) {
+        testEnvironment.given(
                 anHttpMate()
                         .get("/file", (request, response) -> response.setFileAsBody(BASE_PATH + "/file1"))
                         .build()
@@ -78,9 +65,10 @@ public final class StaticFilesSpecs {
                 .theResponseBodyWas("this is file1");
     }
 
-    @Test
-    public void aNonExistentFileLeadsToAnException() {
-        given(
+    @ParameterizedTest
+    @MethodSource(ALL_ENVIRONMENTS)
+    public void aNonExistentFileLeadsToAnException(final TestEnvironment testEnvironment) {
+        testEnvironment.given(
                 anHttpMate()
                         .get("/file", (request, response) -> response.setFileAsBody(BASE_PATH + "/not_a_file"))
                         .configured(toMapExceptionsOfType(FileDoesNotExistException.class, (exception, response) -> response.setStatus(404)))
@@ -91,9 +79,10 @@ public final class StaticFilesSpecs {
                 .theResponseBodyWas("");
     }
 
-    @Test
-    public void aDirectoryLeadsToAnException() {
-        given(
+    @ParameterizedTest
+    @MethodSource(ALL_ENVIRONMENTS)
+    public void aDirectoryLeadsToAnException(final TestEnvironment testEnvironment) {
+        testEnvironment.given(
                 anHttpMate()
                         .get("/file", (request, response) -> response.setFileAsBody(BASE_PATH + "/directory"))
                         .configured(toMapExceptionsOfType(FileDoesNotExistException.class, (exception, response) -> response.setStatus(404)))
@@ -104,9 +93,10 @@ public final class StaticFilesSpecs {
                 .theResponseBodyWas("");
     }
 
-    @Test
-    public void aJavaResourceCanBeServed() {
-        given(
+    @ParameterizedTest
+    @MethodSource(ALL_ENVIRONMENTS)
+    public void aJavaResourceCanBeServed(final TestEnvironment testEnvironment) {
+        testEnvironment.given(
                 anHttpMate()
                         .get("/resource", (request, response) -> response.setJavaResourceAsBody("staticfiles/directory/file1"))
                         .build()
@@ -116,9 +106,10 @@ public final class StaticFilesSpecs {
                 .theResponseBodyWas("this is file1");
     }
 
-    @Test
-    public void aNonExistentJavaResourceLeadsToAnException() {
-        given(
+    @ParameterizedTest
+    @MethodSource(ALL_ENVIRONMENTS)
+    public void aNonExistentJavaResourceLeadsToAnException(final TestEnvironment testEnvironment) {
+        testEnvironment.given(
                 anHttpMate()
                         .get("/resource", (request, response) -> response.setJavaResourceAsBody("staticfiles/directory/not_a_file"))
                         .configured(toMapExceptionsOfType(FileDoesNotExistException.class, (exception, response) -> response.setStatus(404)))
@@ -129,9 +120,10 @@ public final class StaticFilesSpecs {
                 .theResponseBodyWas("");
     }
 
-    @Test
-    public void aJavaResourceDirectoryLeadsToAnException() {
-        given(
+    @ParameterizedTest
+    @MethodSource(ALL_ENVIRONMENTS)
+    public void aJavaResourceDirectoryLeadsToAnException(final TestEnvironment testEnvironment) {
+        testEnvironment.given(
                 anHttpMate()
                         .get("/resource", (request, response) -> response.setJavaResourceAsBody("staticfiles/directory"))
                         .configured(toMapExceptionsOfType(FileDoesNotExistException.class, (exception, response) -> response.setStatus(404)))
@@ -142,9 +134,10 @@ public final class StaticFilesSpecs {
                 .theResponseBodyWas("");
     }
 
-    @Test
-    public void aJavaResourceDirectoryInAJarFileLeadsToAnException() {
-        given(
+    @ParameterizedTest
+    @MethodSource(ALL_ENVIRONMENTS)
+    public void aJavaResourceDirectoryInAJarFileLeadsToAnException(final TestEnvironment testEnvironment) {
+        testEnvironment.given(
                 anHttpMate()
                         .get("/resource", (request, response) -> response.setJavaResourceAsBody("com/envimate/messageMate/channel"))
                         .configured(toMapExceptionsOfType(FileDoesNotExistException.class, (exception, response) -> response.setStatus(404)))
@@ -155,10 +148,11 @@ public final class StaticFilesSpecs {
                 .theResponseBodyWas("");
     }
 
-    @Test
-    public void aFileSystemDirectoryCanBeServed() {
+    @ParameterizedTest
+    @MethodSource(ALL_ENVIRONMENTS)
+    public void aFileSystemDirectoryCanBeServed(final TestEnvironment testEnvironment) {
         for (final FileDescriptor file : CORRECT_FILES) {
-            given(
+            testEnvironment.given(
                     anHttpMate()
                             .get("*", (request, response) -> response.mapPathToFileInDirectory(BASE_PATH))
                             .build()
@@ -169,10 +163,11 @@ public final class StaticFilesSpecs {
         }
     }
 
-    @Test
-    public void aFileSystemDirectoryCanBeServedWithAPrefix() {
+    @ParameterizedTest
+    @MethodSource(ALL_ENVIRONMENTS)
+    public void aFileSystemDirectoryCanBeServedWithAPrefix(final TestEnvironment testEnvironment) {
         for (final FileDescriptor file : CORRECT_FILES) {
-            given(
+            testEnvironment.given(
                     anHttpMate()
                             .get("/static/*", (request, response) -> response.mapPathToFileInDirectory(BASE_PATH, "/static/"))
                             .build()
@@ -183,10 +178,11 @@ public final class StaticFilesSpecs {
         }
     }
 
-    @Test
-    public void aNonExistentFileInAServedFileSystemDirectoryLeadsToAnException() {
+    @ParameterizedTest
+    @MethodSource(ALL_ENVIRONMENTS)
+    public void aNonExistentFileInAServedFileSystemDirectoryLeadsToAnException(final TestEnvironment testEnvironment) {
         for (final String file : INCORRECT_FILES) {
-            given(
+            testEnvironment.given(
                     anHttpMate()
                             .get("*", (request, response) -> response.mapPathToFileInDirectory(BASE_PATH))
                             .configured(toMapExceptionsOfType(FileDoesNotExistException.class, (exception, response) -> response.setStatus(404)))
@@ -198,10 +194,11 @@ public final class StaticFilesSpecs {
         }
     }
 
-    @Test
-    public void aJavaResourcesDirectoryCanBeServed() {
+    @ParameterizedTest
+    @MethodSource(ALL_ENVIRONMENTS)
+    public void aJavaResourcesDirectoryCanBeServed(final TestEnvironment testEnvironment) {
         for (final FileDescriptor file : CORRECT_FILES) {
-            given(
+            testEnvironment.given(
                     anHttpMate()
                             .get("*", (request, response) -> response.mapPathToJavaResourceInDirectory("staticfiles/directory"))
                             .build()
@@ -212,10 +209,11 @@ public final class StaticFilesSpecs {
         }
     }
 
-    @Test
-    public void aJavaResourcesDirectoryCanBeServedWithPrefix() {
+    @ParameterizedTest
+    @MethodSource(ALL_ENVIRONMENTS)
+    public void aJavaResourcesDirectoryCanBeServedWithPrefix(final TestEnvironment testEnvironment) {
         for (final FileDescriptor file : CORRECT_FILES) {
-            given(
+            testEnvironment.given(
                     anHttpMate()
                             .get("/static/*", (request, response) -> response.mapPathToJavaResourceInDirectory("staticfiles/directory", "/static"))
                             .build()
@@ -226,10 +224,11 @@ public final class StaticFilesSpecs {
         }
     }
 
-    @Test
-    public void aNonExistentFileInAServedJavaResourcesDirectoryLeadsToAnException() {
+    @ParameterizedTest
+    @MethodSource(ALL_ENVIRONMENTS)
+    public void aNonExistentFileInAServedJavaResourcesDirectoryLeadsToAnException(final TestEnvironment testEnvironment) {
         for (final String file : INCORRECT_FILES) {
-            given(
+            testEnvironment.given(
                     anHttpMate()
                             .get("*", (request, response) -> response.mapPathToJavaResourceInDirectory("staticfiles/directory"))
                             .configured(toMapExceptionsOfType(FileDoesNotExistException.class, (exception, response) -> response.setStatus(404)))

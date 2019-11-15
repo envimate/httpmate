@@ -22,7 +22,7 @@
 package com.envimate.httpmate.tests.givenwhenthen.deploy;
 
 import com.envimate.httpmate.tests.givenwhenthen.DeployerAndClient;
-import com.envimate.httpmate.tests.givenwhenthen.client.ClientFactory;
+import com.envimate.httpmate.tests.givenwhenthen.client.shitty.ShittyClientFactory;
 
 import java.util.Collection;
 import java.util.LinkedList;
@@ -33,43 +33,27 @@ import static com.envimate.httpmate.tests.givenwhenthen.deploy.jetty.JettyDeploy
 import static com.envimate.httpmate.tests.givenwhenthen.deploy.purejava.PureJavaDeployer.pureJavaDeployer;
 import static com.envimate.httpmate.tests.givenwhenthen.deploy.servlet.ServletDeployer.servletDeployer;
 import static java.util.Arrays.asList;
+import static java.util.stream.Collectors.toList;
 
 public final class DeployerManager {
-    //private static final Collection<Deployer> ACTIVE_DEPLOYERS =
-    // asList(bypassedDeployer(), jettyDeployer(), sparkDeployer(), pureJavaDeployer(), servletDeployer(), awsDeployer());
     private static final Collection<Deployer> ACTIVE_DEPLOYERS = asList(jettyDeployer(), pureJavaDeployer(), servletDeployer());
-    //private static final Collection<Deployer> ACTIVE_DEPLOYERS = asList(pureJavaDeployer());
-    //private static final Collection<Deployer> ACTIVE_DEPLOYERS = asList(jettyDeployer());
-    private static DeployerAndClient currentDeployerAndClient;
 
     private DeployerManager() {
     }
 
     public static Collection<DeployerAndClient> activeDeployers() {
-        final List<DeployerAndClient> deployerAndClients = new LinkedList<>();
-        ACTIVE_DEPLOYERS.forEach(deployer -> deployer.supportedClients().forEach(clientFactory -> {
-            final DeployerAndClient deployerAndClient = deployerAndClient(deployer, clientFactory);
-            deployerAndClients.add(deployerAndClient);
-        }));
-        return deployerAndClients;
+        return ACTIVE_DEPLOYERS.stream()
+                .flatMap(deployer -> deployer.supportedClients().stream()
+                        .map(clientFactory -> deployerAndClient(deployer, clientFactory)))
+                .collect(toList());
     }
 
-    public static void setCurrentDeployerAndClient(final DeployerAndClient currentDeployerAndClient) {
-        DeployerManager.currentDeployerAndClient = currentDeployerAndClient;
-    }
-
-    public static Deployer currentDeployer() {
-        if (currentDeployerAndClient == null) {
-            throw new RuntimeException("Deployer has not been set.");
-        }
-        return currentDeployerAndClient.deployer();
-    }
-
-    public static ClientFactory currentClientFactory() {
-        if (currentDeployerAndClient == null) {
-            throw new RuntimeException("Deployer has not been set.");
-        }
-        return currentDeployerAndClient.clientFactory();
+    public static Collection<DeployerAndClient> activeDeployersWithOnlyShittyClient() {
+        return ACTIVE_DEPLOYERS.stream()
+                .flatMap(deployer -> deployer.supportedClients().stream()
+                        .filter(clientFactory -> clientFactory instanceof ShittyClientFactory)
+                        .map(clientFactory -> deployerAndClient(deployer, clientFactory)))
+                .collect(toList());
     }
 
     public static void cleanUpAllDeployers() {

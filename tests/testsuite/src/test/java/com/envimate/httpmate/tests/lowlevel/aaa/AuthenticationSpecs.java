@@ -21,36 +21,23 @@
 
 package com.envimate.httpmate.tests.lowlevel.aaa;
 
-import com.envimate.httpmate.tests.givenwhenthen.DeployerAndClient;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import com.envimate.httpmate.tests.givenwhenthen.TestEnvironment;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
-import java.util.Collection;
 import java.util.Optional;
 
 import static com.envimate.httpmate.HttpMate.anHttpMate;
 import static com.envimate.httpmate.security.SecurityConfigurators.*;
-import static com.envimate.httpmate.tests.givenwhenthen.Given.given;
-import static com.envimate.httpmate.tests.givenwhenthen.deploy.DeployerManager.activeDeployers;
-import static com.envimate.httpmate.tests.givenwhenthen.deploy.DeployerManager.setCurrentDeployerAndClient;
+import static com.envimate.httpmate.tests.givenwhenthen.TestEnvironment.ALL_ENVIRONMENTS;
 import static java.util.Optional.of;
 
-@RunWith(Parameterized.class)
 public final class AuthenticationSpecs {
 
-    public AuthenticationSpecs(final DeployerAndClient deployerAndClient) {
-        setCurrentDeployerAndClient(deployerAndClient);
-    }
-
-    @Parameterized.Parameters(name = "{0}")
-    public static Collection<DeployerAndClient> deployers() {
-        return activeDeployers();
-    }
-
-    @Test
-    public void requestsCanBeAuthenticatedWithHeader() {
-        given(
+    @ParameterizedTest
+    @MethodSource(ALL_ENVIRONMENTS)
+    public void requestsCanBeAuthenticatedWithHeader(final TestEnvironment testEnvironment) {
+        testEnvironment.given(
                 anHttpMate()
                         .get("/username", (request, response) -> {
                             final String username = request.authenticationInformationAs(String.class).orElseThrow();
@@ -63,9 +50,10 @@ public final class AuthenticationSpecs {
                 .theResponseBodyWas("asdf");
     }
 
-    @Test
-    public void requestsCanBeAuthenticatedWithCookie() {
-        given(
+    @ParameterizedTest
+    @MethodSource(ALL_ENVIRONMENTS)
+    public void requestsCanBeAuthenticatedWithCookie(final TestEnvironment testEnvironment) {
+        testEnvironment.given(
                 anHttpMate()
                         .get("/username", (request, response) -> {
                             final String username = request.authenticationInformationAs(String.class).orElseThrow();
@@ -78,9 +66,10 @@ public final class AuthenticationSpecs {
                 .theResponseBodyWas("asdf");
     }
 
-    @Test
-    public void requestsCanBeAuthenticatedWithQueryParameter() {
-        given(
+    @ParameterizedTest
+    @MethodSource(ALL_ENVIRONMENTS)
+    public void requestsCanBeAuthenticatedWithQueryParameter(final TestEnvironment testEnvironment) {
+        testEnvironment.given(
                 anHttpMate()
                         .get("/username", (request, response) -> {
                             final String username = request.authenticationInformationAs(String.class).orElseThrow();
@@ -93,9 +82,10 @@ public final class AuthenticationSpecs {
                 .theResponseBodyWas("asdf");
     }
 
-    @Test
-    public void requestsCanBeAuthenticatedWithPathParameter() {
-        given(
+    @ParameterizedTest
+    @MethodSource(ALL_ENVIRONMENTS)
+    public void requestsCanBeAuthenticatedWithPathParameter(final TestEnvironment testEnvironment) {
+        testEnvironment.given(
                 anHttpMate()
                         .get("/username/<username>", (request, response) -> {
                             final String username = request.authenticationInformationAs(String.class).orElseThrow();
@@ -108,9 +98,10 @@ public final class AuthenticationSpecs {
                 .theResponseBodyWas("asdf");
     }
 
-    @Test
-    public void requestsCanBeAuthenticatedWithBody() {
-        given(
+    @ParameterizedTest
+    @MethodSource(ALL_ENVIRONMENTS)
+    public void requestsCanBeAuthenticatedWithBody(final TestEnvironment testEnvironment) {
+        testEnvironment.given(
                 anHttpMate()
                         .post("/username", (request, response) -> {
                             final String username = request.authenticationInformationAs(String.class).orElseThrow();
@@ -123,9 +114,10 @@ public final class AuthenticationSpecs {
                 .theResponseBodyWas("asdf");
     }
 
-    @Test
-    public void requestsCanBeAuthenticatedWithOAuth2BearerToken() {
-        given(
+    @ParameterizedTest
+    @MethodSource(ALL_ENVIRONMENTS)
+    public void requestsCanBeAuthenticatedWithOAuth2BearerToken(final TestEnvironment testEnvironment) {
+        testEnvironment.given(
                 anHttpMate()
                         .get("/username", (request, response) -> {
                             final String username = request.authenticationInformationAs(String.class).orElseThrow();
@@ -138,9 +130,10 @@ public final class AuthenticationSpecs {
                 .theResponseBodyWas("asdf");
     }
 
-    @Test
-    public void routesCanBeExcludedFromAuthentication() {
-        given(
+    @ParameterizedTest
+    @MethodSource(ALL_ENVIRONMENTS)
+    public void routesCanBeExcludedFromAuthentication(final TestEnvironment testEnvironment) {
+        testEnvironment.given(
                 anHttpMate()
                         .get("/username", (request, response) -> {
                             final String username = request.authenticationInformationAs(String.class).orElse("guest");
@@ -153,9 +146,10 @@ public final class AuthenticationSpecs {
                 .theResponseBodyWas("guest");
     }
 
-    @Test
-    public void authenticationCanBeLimitedToCertainRoutes() {
-        given(
+    @ParameterizedTest
+    @MethodSource(ALL_ENVIRONMENTS)
+    public void authenticationCanBeLimitedToCertainRoutes(final TestEnvironment testEnvironment) {
+        testEnvironment.given(
                 anHttpMate()
                         .get("/username", (request, response) -> {
                             final String username = request.authenticationInformationAs(String.class).orElse("guest");

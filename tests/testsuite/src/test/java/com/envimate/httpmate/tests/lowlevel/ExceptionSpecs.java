@@ -21,34 +21,20 @@
 
 package com.envimate.httpmate.tests.lowlevel;
 
-import com.envimate.httpmate.tests.givenwhenthen.DeployerAndClient;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-
-import java.util.Collection;
+import com.envimate.httpmate.tests.givenwhenthen.TestEnvironment;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import static com.envimate.httpmate.HttpMate.anHttpMate;
 import static com.envimate.httpmate.exceptions.ExceptionConfigurators.toMapExceptionsOfType;
-import static com.envimate.httpmate.tests.givenwhenthen.Given.given;
-import static com.envimate.httpmate.tests.givenwhenthen.deploy.DeployerManager.activeDeployers;
-import static com.envimate.httpmate.tests.givenwhenthen.deploy.DeployerManager.setCurrentDeployerAndClient;
+import static com.envimate.httpmate.tests.givenwhenthen.TestEnvironment.ALL_ENVIRONMENTS;
 
-@RunWith(Parameterized.class)
 public final class ExceptionSpecs {
 
-    public ExceptionSpecs(final DeployerAndClient deployerAndClient) {
-        setCurrentDeployerAndClient(deployerAndClient);
-    }
-
-    @Parameterized.Parameters(name = "{0}")
-    public static Collection<DeployerAndClient> deployers() {
-        return activeDeployers();
-    }
-
-    @Test
-    public void unmappedExceptionHasStatusCode500AsDefault() {
-        given(
+    @ParameterizedTest
+    @MethodSource(ALL_ENVIRONMENTS)
+    public void unmappedExceptionHasStatusCode500AsDefault(final TestEnvironment testEnvironment) {
+        testEnvironment.given(
                 anHttpMate()
                         .get("/exception", (request, response) -> {
                             throw new UnsupportedOperationException();
@@ -60,9 +46,10 @@ public final class ExceptionSpecs {
                 .theResponseBodyWas("");
     }
 
-    @Test
-    public void mappedExceptionsHaveStatusCode500AsDefault() {
-        given(
+    @ParameterizedTest
+    @MethodSource(ALL_ENVIRONMENTS)
+    public void mappedExceptionsHaveStatusCode500AsDefault(final TestEnvironment testEnvironment) {
+        testEnvironment.given(
                 anHttpMate()
                         .get("/exception", (request, response) -> {
                             throw new UnsupportedOperationException();
@@ -75,9 +62,10 @@ public final class ExceptionSpecs {
                 .theStatusCodeWas(500);
     }
 
-    @Test
-    public void checkedExceptionsCanBeMapped() {
-        given(
+    @ParameterizedTest
+    @MethodSource(ALL_ENVIRONMENTS)
+    public void checkedExceptionsCanBeMapped(final TestEnvironment testEnvironment) {
+        testEnvironment.given(
                 anHttpMate()
                         .get("/test", (request, response) -> {
                             throw (RuntimeException) new Exception();
@@ -89,9 +77,10 @@ public final class ExceptionSpecs {
                 .theStatusCodeWas(501);
     }
 
-    @Test
-    public void subtypesOfMappedExceptionsGetMapped() {
-        given(
+    @ParameterizedTest
+    @MethodSource(ALL_ENVIRONMENTS)
+    public void subtypesOfMappedExceptionsGetMapped(final TestEnvironment testEnvironment) {
+        testEnvironment.given(
                 anHttpMate()
                         .get("/test", (request, response) -> {
                             throw new UnsupportedOperationException();

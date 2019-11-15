@@ -21,41 +21,31 @@
 
 package com.envimate.httpmate.tests;
 
-import org.apache.commons.codec.binary.Hex;
-import org.junit.Test;
 
-import static com.envimate.httpmate.tests.givenwhenthen.Given.givenAHttpServer;
-import static com.envimate.httpmate.tests.givenwhenthen.Given.givenAnOpenSocketThatCanInterpretHttpValues;
+import org.junit.jupiter.api.Test;
 
-public final class ClientTests {
-    private static final String uppercaseLetters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    private static final String lowercaseLetters = "abcdefghijklmnopqrstuvwxyz";
-    private static final String numbers = "0123456789";
-    private static final String specialCharacters = "/-._~!$&'()*+,;=:@";
-    private static final String escapeCharacter = "%";
+import static com.envimate.httpmate.tests.givenwhenthen.Given.givenAnHttpServer;
 
+public final class ClientSpecs {
     private static final String charactersThatNeedEncoding = "[]{}\"§#";
-    //private static final String charactersThatNeedEncoding = "[";
-
-    private static final String allowedCharactersInPath = uppercaseLetters + lowercaseLetters + numbers + specialCharacters /*+ escapeCharacter*/;
 
     @Test
     public void clientDoesNotAppendATrailingSlashToPath() {
-        givenAHttpServer()
+        givenAnHttpServer()
                 .when().aRequestIsMadeToThePath("/qwer")
                 .theServerReceivedARequestToThePath("/qwer");
     }
 
     @Test
     public void clientKeepsAnAppendedTrailingSlashInPath() {
-        givenAHttpServer()
+        givenAnHttpServer()
                 .when().aRequestIsMadeToThePath("/qwer/")
                 .theServerReceivedARequestToThePath("/qwer/");
     }
 
     @Test
     public void clientEncodesPath() {
-        givenAHttpServer()
+        givenAnHttpServer()
                 .when().aRequestIsMadeToThePath("/" + charactersThatNeedEncoding)
                 .theServerReceivedARequestToThePath("/%5B%5D%7B%7D%22%C2%A7%23");
     }

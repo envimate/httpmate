@@ -21,35 +21,21 @@
 
 package com.envimate.httpmate.tests.lowlevel.aaa;
 
-import com.envimate.httpmate.tests.givenwhenthen.DeployerAndClient;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-
-import java.util.Collection;
+import com.envimate.httpmate.tests.givenwhenthen.TestEnvironment;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import static com.envimate.httpmate.HttpMate.anHttpMate;
 import static com.envimate.httpmate.http.Http.StatusCodes.BAD_REQUEST;
 import static com.envimate.httpmate.security.SecurityConfigurators.toFilterRequestsThat;
-import static com.envimate.httpmate.tests.givenwhenthen.Given.given;
-import static com.envimate.httpmate.tests.givenwhenthen.deploy.DeployerManager.activeDeployers;
-import static com.envimate.httpmate.tests.givenwhenthen.deploy.DeployerManager.setCurrentDeployerAndClient;
+import static com.envimate.httpmate.tests.givenwhenthen.TestEnvironment.ALL_ENVIRONMENTS;
 
-@RunWith(Parameterized.class)
 public final class FilterSpecs {
 
-    public FilterSpecs(final DeployerAndClient deployerAndClient) {
-        setCurrentDeployerAndClient(deployerAndClient);
-    }
-
-    @Parameterized.Parameters(name = "{0}")
-    public static Collection<DeployerAndClient> deployers() {
-        return activeDeployers();
-    }
-
-    @Test
-    public void requestsCanBeFiltered() {
-        given(
+    @ParameterizedTest
+    @MethodSource(ALL_ENVIRONMENTS)
+    public void requestsCanBeFiltered(final TestEnvironment testEnvironment) {
+        testEnvironment.given(
                 anHttpMate()
                         .get("/test", (request, response) -> response.setBody("test"))
                         .configured(toFilterRequestsThat(request -> request.headers().getOptionalHeader("illegal_header").isPresent())

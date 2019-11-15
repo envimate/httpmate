@@ -21,37 +21,23 @@
 
 package com.envimate.httpmate.tests.lowlevel.aaa;
 
-import com.envimate.httpmate.tests.givenwhenthen.DeployerAndClient;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-
-import java.util.Collection;
+import com.envimate.httpmate.tests.givenwhenthen.TestEnvironment;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import static com.envimate.httpmate.HttpMate.anHttpMate;
 import static com.envimate.httpmate.security.SecurityConfigurators.toDoBasicAuthWith;
-import static com.envimate.httpmate.tests.givenwhenthen.Given.given;
-import static com.envimate.httpmate.tests.givenwhenthen.deploy.DeployerManager.activeDeployers;
-import static com.envimate.httpmate.tests.givenwhenthen.deploy.DeployerManager.setCurrentDeployerAndClient;
+import static com.envimate.httpmate.tests.givenwhenthen.TestEnvironment.ALL_ENVIRONMENTS;
 import static java.lang.String.format;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Base64.getEncoder;
 
-@RunWith(Parameterized.class)
 public final class BasicAuthSpecs {
 
-    public BasicAuthSpecs(final DeployerAndClient deployerAndClient) {
-        setCurrentDeployerAndClient(deployerAndClient);
-    }
-
-    @Parameterized.Parameters(name = "{0}")
-    public static Collection<DeployerAndClient> deployers() {
-        return activeDeployers();
-    }
-
-    @Test
-    public void unauthenticatedRequestsAreRejected() {
-        given(
+    @ParameterizedTest
+    @MethodSource(ALL_ENVIRONMENTS)
+    public void unauthenticatedRequestsAreRejected(final TestEnvironment testEnvironment) {
+        testEnvironment.given(
                 anHttpMate()
                         .get("/secret", (request, response) -> response.setBody("the_secret"))
                         .configured(toDoBasicAuthWith((username, password) -> "asdf".equals(password)))
@@ -62,9 +48,10 @@ public final class BasicAuthSpecs {
                 .theReponseContainsTheHeader("WWW-Authenticate", "Basic");
     }
 
-    @Test
-    public void requestWithWrongCredentialsGetsRejected() {
-        given(
+    @ParameterizedTest
+    @MethodSource(ALL_ENVIRONMENTS)
+    public void requestWithWrongCredentialsGetsRejected(final TestEnvironment testEnvironment) {
+        testEnvironment.given(
                 anHttpMate()
                         .get("/secret", (request, response) -> response.setBody("the_secret"))
                         .configured(toDoBasicAuthWith((username, password) -> "asdf".equals(password)))
@@ -76,9 +63,10 @@ public final class BasicAuthSpecs {
                 .theReponseContainsTheHeader("WWW-Authenticate", "Basic");
     }
 
-    @Test
-    public void requestWithCorrectCredentialsDoNotGetRejected() {
-        given(
+    @ParameterizedTest
+    @MethodSource(ALL_ENVIRONMENTS)
+    public void requestWithCorrectCredentialsDoNotGetRejected(final TestEnvironment testEnvironment) {
+        testEnvironment.given(
                 anHttpMate()
                         .get("/secret", (request, response) -> response.setBody("the_secret"))
                         .configured(toDoBasicAuthWith((username, password) -> "asdf".equals(password)))
@@ -90,9 +78,10 @@ public final class BasicAuthSpecs {
                 .theResponseBodyWas("the_secret");
     }
 
-    @Test
-    public void messageCanBeSet() {
-        given(
+    @ParameterizedTest
+    @MethodSource(ALL_ENVIRONMENTS)
+    public void messageCanBeSet(final TestEnvironment testEnvironment) {
+        testEnvironment.given(
                 anHttpMate()
                         .get("/secret", (request, response) -> response.setBody("the_secret"))
                         .configured(toDoBasicAuthWith((username, password) -> "asdf".equals(password)).withMessage("my message"))

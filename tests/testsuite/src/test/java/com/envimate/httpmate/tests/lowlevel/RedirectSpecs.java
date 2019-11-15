@@ -21,33 +21,19 @@
 
 package com.envimate.httpmate.tests.lowlevel;
 
-import com.envimate.httpmate.tests.givenwhenthen.DeployerAndClient;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-
-import java.util.Collection;
+import com.envimate.httpmate.tests.givenwhenthen.TestEnvironment;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import static com.envimate.httpmate.HttpMate.anHttpMate;
-import static com.envimate.httpmate.tests.givenwhenthen.Given.given;
-import static com.envimate.httpmate.tests.givenwhenthen.deploy.DeployerManager.activeDeployers;
-import static com.envimate.httpmate.tests.givenwhenthen.deploy.DeployerManager.setCurrentDeployerAndClient;
+import static com.envimate.httpmate.tests.givenwhenthen.TestEnvironment.ALL_ENVIRONMENTS;
 
-@RunWith(Parameterized.class)
 public final class RedirectSpecs {
 
-    public RedirectSpecs(final DeployerAndClient deployerAndClient) {
-        setCurrentDeployerAndClient(deployerAndClient);
-    }
-
-    @Parameterized.Parameters(name = "{0}")
-    public static Collection<DeployerAndClient> deployers() {
-        return activeDeployers();
-    }
-
-    @Test
-    public void aRedirectIsPossible() {
-        given(anHttpMate()
+    @ParameterizedTest
+    @MethodSource(ALL_ENVIRONMENTS)
+    public void aRedirectIsPossible(final TestEnvironment testEnvironment) {
+        testEnvironment.given(anHttpMate()
                 .get("/toBeRedirected", (request, response) -> response.redirectTo("example.org"))
                 .build())
                 .when().aRequestToThePath("/toBeRedirected").viaTheGetMethod().withAnEmptyBody().isIssued()

@@ -35,7 +35,7 @@ final class Server {
     private Server() {
     }
 
-    static void start(final int port, final RequestLog requestLog) {
+    static AutoCloseable start(final int port, final RequestLog requestLog) {
         final HttpServer httpServer;
         try {
             httpServer = HttpServer.create(new InetSocketAddress(port), 0);
@@ -51,5 +51,6 @@ final class Server {
         } catch (final IOException e) {
             throw new RuntimeException(e);
         }
+        return () -> httpServer.stop(0);
     }
 }

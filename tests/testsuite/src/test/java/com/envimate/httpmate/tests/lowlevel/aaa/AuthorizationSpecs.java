@@ -21,35 +21,21 @@
 
 package com.envimate.httpmate.tests.lowlevel.aaa;
 
-import com.envimate.httpmate.tests.givenwhenthen.DeployerAndClient;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-
-import java.util.Collection;
+import com.envimate.httpmate.tests.givenwhenthen.TestEnvironment;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import static com.envimate.httpmate.HttpMate.anHttpMate;
 import static com.envimate.httpmate.http.Http.StatusCodes.UNAUTHORIZED;
 import static com.envimate.httpmate.security.SecurityConfigurators.toAuthorizeRequestsUsing;
-import static com.envimate.httpmate.tests.givenwhenthen.Given.given;
-import static com.envimate.httpmate.tests.givenwhenthen.deploy.DeployerManager.activeDeployers;
-import static com.envimate.httpmate.tests.givenwhenthen.deploy.DeployerManager.setCurrentDeployerAndClient;
+import static com.envimate.httpmate.tests.givenwhenthen.TestEnvironment.ALL_ENVIRONMENTS;
 
-@RunWith(Parameterized.class)
 public final class AuthorizationSpecs {
 
-    public AuthorizationSpecs(final DeployerAndClient deployerAndClient) {
-        setCurrentDeployerAndClient(deployerAndClient);
-    }
-
-    @Parameterized.Parameters(name = "{0}")
-    public static Collection<DeployerAndClient> deployers() {
-        return activeDeployers();
-    }
-
-    @Test
-    public void unauthorizedRequestsCanBeRejected() {
-        given(
+    @ParameterizedTest
+    @MethodSource(ALL_ENVIRONMENTS)
+    public void unauthorizedRequestsCanBeRejected(final TestEnvironment testEnvironment) {
+        testEnvironment.given(
                 anHttpMate()
                         .get("/secret", (request, response) -> response.setBody("the secret"))
                         .configured(toAuthorizeRequestsUsing((authenticationInformation, request) -> false))
@@ -60,9 +46,10 @@ public final class AuthorizationSpecs {
                 .theResponseBodyWas("");
     }
 
-    @Test
-    public void rejectionCanBeConfigured() {
-        given(
+    @ParameterizedTest
+    @MethodSource(ALL_ENVIRONMENTS)
+    public void rejectionCanBeConfigured(final TestEnvironment testEnvironment) {
+        testEnvironment.given(
                 anHttpMate()
                         .get("/secret", (request, response) -> response.setBody("the secret"))
                         .configured(toAuthorizeRequestsUsing((authenticationInformation, request) -> false)
@@ -77,9 +64,10 @@ public final class AuthorizationSpecs {
                 .theResponseBodyWas("You have been rejected");
     }
 
-    @Test
-    public void routesCanBeExcludedFromAuthorization() {
-        given(
+    @ParameterizedTest
+    @MethodSource(ALL_ENVIRONMENTS)
+    public void routesCanBeExcludedFromAuthorization(final TestEnvironment testEnvironment) {
+        testEnvironment.given(
                 anHttpMate()
                         .get("/secret", (request, response) -> response.setBody("the secret"))
                         .configured(toAuthorizeRequestsUsing((authenticationInformation, request) -> false).exceptRequestsTo("/secret"))
@@ -90,9 +78,10 @@ public final class AuthorizationSpecs {
                 .theResponseBodyWas("the secret");
     }
 
-    @Test
-    public void authorizationCanBeLimitedToCertainRoutes() {
-        given(
+    @ParameterizedTest
+    @MethodSource(ALL_ENVIRONMENTS)
+    public void authorizationCanBeLimitedToCertainRoutes(final TestEnvironment testEnvironment) {
+        testEnvironment.given(
                 anHttpMate()
                         .get("/secret", (request, response) -> response.setBody("the secret"))
                         .configured(toAuthorizeRequestsUsing((authenticationInformation, request) -> false).onlyRequestsTo("/somethingElse"))

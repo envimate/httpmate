@@ -21,109 +21,98 @@
 
 package com.envimate.httpmate.tests.lowlevel;
 
-import com.envimate.httpmate.tests.givenwhenthen.DeployerAndClient;
-import org.junit.AfterClass;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-
-import java.util.Collection;
+import com.envimate.httpmate.tests.givenwhenthen.TestEnvironment;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import static com.envimate.httpmate.tests.HttpMateTestConfigurations.theHttpMateInstanceUsedForTesting;
-import static com.envimate.httpmate.tests.givenwhenthen.Given.given;
-import static com.envimate.httpmate.tests.givenwhenthen.deploy.DeployerManager.*;
+import static com.envimate.httpmate.tests.givenwhenthen.TestEnvironment.ALL_ENVIRONMENTS;
 
-@RunWith(Parameterized.class)
 public final class HttpMateSpecs {
 
-    public HttpMateSpecs(final DeployerAndClient deployerAndClient) {
-        setCurrentDeployerAndClient(deployerAndClient);
-    }
-
-    @Parameterized.Parameters(name = "{0}")
-    public static Collection<DeployerAndClient> deployers() {
-        return activeDeployers();
-    }
-
-    @AfterClass
-    public static void cleanUp() {
-        cleanUpAllDeployers();
-    }
-
-    @Test
-    public void testGetRequest() {
-        given(theHttpMateInstanceUsedForTesting())
+    @ParameterizedTest
+    @MethodSource(ALL_ENVIRONMENTS)
+    public void testGetRequest(final TestEnvironment testEnvironment) {
+        testEnvironment.given(theHttpMateInstanceUsedForTesting())
                 .when().aRequestToThePath("/test").viaTheGetMethod().withAnEmptyBody().isIssued()
                 .theStatusCodeWas(200)
                 .theResponseContentTypeWas("application/json")
                 .theResponseBodyWas("{\"response\":\"foo\"}");
     }
 
-    @Test
-    public void testPostRequest() {
-        given(theHttpMateInstanceUsedForTesting())
+    @ParameterizedTest
+    @MethodSource(ALL_ENVIRONMENTS)
+    public void testPostRequest(final TestEnvironment testEnvironment) {
+        testEnvironment.given(theHttpMateInstanceUsedForTesting())
                 .when().aRequestToThePath("/test").viaThePostMethod().withAnEmptyBody().isIssued()
                 .theStatusCodeWas(200)
                 .theResponseContentTypeWas("application/json")
                 .theResponseBodyWas("{\"response\":\"foo\"}");
     }
 
-    @Test
-    public void testPutRequest() {
-        given(theHttpMateInstanceUsedForTesting())
+    @ParameterizedTest
+    @MethodSource(ALL_ENVIRONMENTS)
+    public void testPutRequest(final TestEnvironment testEnvironment) {
+        testEnvironment.given(theHttpMateInstanceUsedForTesting())
                 .when().aRequestToThePath("/test").viaThePutMethod().withAnEmptyBody().isIssued()
                 .theStatusCodeWas(200)
                 .theResponseContentTypeWas("application/json")
                 .theResponseBodyWas("{\"response\":\"foo\"}");
     }
 
-    @Test
-    public void testDeleteRequest() {
-        given(theHttpMateInstanceUsedForTesting())
+    @ParameterizedTest
+    @MethodSource(ALL_ENVIRONMENTS)
+    public void testDeleteRequest(final TestEnvironment testEnvironment) {
+        testEnvironment.given(theHttpMateInstanceUsedForTesting())
                 .when().aRequestToThePath("/test").viaTheDeleteMethod().withAnEmptyBody().isIssued()
                 .theStatusCodeWas(200)
                 .theResponseContentTypeWas("application/json")
                 .theResponseBodyWas("{\"response\":\"foo\"}");
     }
 
-    @Test
-    public void testUseCaseWithParameters() {
-        given(theHttpMateInstanceUsedForTesting())
+    @ParameterizedTest
+    @MethodSource(ALL_ENVIRONMENTS)
+    public void testUseCaseWithParameters(final TestEnvironment testEnvironment) {
+        testEnvironment.given(theHttpMateInstanceUsedForTesting())
                 .when().aRequestToThePath("/parameterized").viaTheGetMethod().withAnEmptyBody().isIssued()
                 .theStatusCodeWas(200)
                 .theResponseContentTypeWas("application/json")
                 .theResponseBodyWas("{\"response\":\"parameter\"}");
     }
 
-    @Test
-    public void testHeadersInRequest() {
-        given(theHttpMateInstanceUsedForTesting())
+    @ParameterizedTest
+    @MethodSource(ALL_ENVIRONMENTS)
+    public void testHeadersInRequest(final TestEnvironment testEnvironment) {
+        testEnvironment.given(theHttpMateInstanceUsedForTesting())
                 .when().aRequestToThePath("/headers").viaTheGetMethod().withAnEmptyBody().withTheHeader("testheader", "foo").isIssued()
                 .theStatusCodeWas(200)
                 .theResponseContentTypeWas("application/json")
                 .theResponseBodyWas("{\"response\":\"foo\"}");
     }
 
-    @Test
-    public void testWildcardRoute() {
-        given(theHttpMateInstanceUsedForTesting())
+    @ParameterizedTest
+    @MethodSource(ALL_ENVIRONMENTS)
+    public void testWildcardRoute(final TestEnvironment testEnvironment) {
+        testEnvironment.given(theHttpMateInstanceUsedForTesting())
                 .when().aRequestToThePath("/wild/foo/card").viaTheGetMethod().withAnEmptyBody().isIssued()
                 .theStatusCodeWas(200)
                 .theResponseContentTypeWas("application/json")
                 .theResponseBodyWas("{\"response\":\"foo\"}");
     }
 
-    @Test
-    public void testWildcardRouteWithEmptyMiddleWildcard() {
-        given(theHttpMateInstanceUsedForTesting())
+    @ParameterizedTest
+    @MethodSource(ALL_ENVIRONMENTS)
+    public void testWildcardRouteWithEmptyMiddleWildcard(final TestEnvironment testEnvironment) {
+        testEnvironment.given(theHttpMateInstanceUsedForTesting())
                 .when().aRequestToThePath("/wild/card").viaTheGetMethod().withAnEmptyBody().isIssued()
                 .theStatusCodeWas(405)
                 .theResponseBodyWas("No use case found.");
     }
 
-    @Test
-    public void testQueryParameters() {
-        given(theHttpMateInstanceUsedForTesting())
+    @ParameterizedTest
+    @MethodSource(ALL_ENVIRONMENTS)
+    public void testQueryParameters(final TestEnvironment testEnvironment) {
+        testEnvironment.given(theHttpMateInstanceUsedForTesting())
                 .when().aRequestToThePath("/queryparameters?param1=derp&param2=").viaTheGetMethod().withAnEmptyBody().isIssued()
                 .theStatusCodeWas(200)
                 .theResponseContentTypeWas("application/json")
@@ -131,9 +120,10 @@ public final class HttpMateSpecs {
                 .theResponseBodyContains("param2\\u003d");
     }
 
-    @Test
-    public void testQueryParametersAndPathParameters() {
-        given(theHttpMateInstanceUsedForTesting())
+    @ParameterizedTest
+    @MethodSource(ALL_ENVIRONMENTS)
+    public void testQueryParametersAndPathParameters(final TestEnvironment testEnvironment) {
+        testEnvironment.given(theHttpMateInstanceUsedForTesting())
                 .when().aRequestToThePath("/echo_path_and_query_parameters/foo?test=bar").viaTheGetMethod().withAnEmptyBody().isIssued()
                 .theStatusCodeWas(200)
                 .theResponseContentTypeWas("application/json")
@@ -141,17 +131,19 @@ public final class HttpMateSpecs {
                 .theResponseBodyContains("wildcard\\u003dfoo");
     }
 
-    @Test
-    public void testUseCaseNotFoundExceptionHandler() {
-        given(theHttpMateInstanceUsedForTesting())
+    @ParameterizedTest
+    @MethodSource(ALL_ENVIRONMENTS)
+    public void testUseCaseNotFoundExceptionHandler(final TestEnvironment testEnvironment) {
+        testEnvironment.given(theHttpMateInstanceUsedForTesting())
                 .when().aRequestToThePath("/this_has_no_usecase").viaTheGetMethod().withAnEmptyBody().isIssued()
                 .theStatusCodeWas(405)
                 .theResponseBodyWas("No use case found.");
     }
 
-    @Test
-    public void testMapMate() {
-        given(theHttpMateInstanceUsedForTesting())
+    @ParameterizedTest
+    @MethodSource(ALL_ENVIRONMENTS)
+    public void testMapMate(final TestEnvironment testEnvironment) {
+        testEnvironment.given(theHttpMateInstanceUsedForTesting())
                 .when().aRequestToThePath("/mapmate/derp").viaThePostMethod().withTheBody("{value1=derp,value2=merp,value3=herp,value4=qerp}").withContentType("application/json").isIssued()
                 .theStatusCodeWas(200)
                 .theResponseContentTypeWas("application/json")
@@ -165,9 +157,10 @@ public final class HttpMateSpecs {
                 );
     }
 
-    @Test
-    public void testMapMateWithInjection() {
-        given(theHttpMateInstanceUsedForTesting())
+    @ParameterizedTest
+    @MethodSource(ALL_ENVIRONMENTS)
+    public void testMapMateWithInjection(final TestEnvironment testEnvironment) {
+        testEnvironment.given(theHttpMateInstanceUsedForTesting())
                 .when().aRequestToThePath("/mapmate/derp?value2=merp").viaThePostMethod().withTheBody("{value4=qerp}").withTheHeader("value3", "herp").withContentType("application/json").isIssued()
                 .theStatusCodeWas(200)
                 .theResponseContentTypeWas("application/json")
@@ -181,9 +174,10 @@ public final class HttpMateSpecs {
                 );
     }
 
-    @Test
-    public void testMapMateOnlyWithInjectionAndWithoutBody() {
-        given(theHttpMateInstanceUsedForTesting())
+    @ParameterizedTest
+    @MethodSource(ALL_ENVIRONMENTS)
+    public void testMapMateOnlyWithInjectionAndWithoutBody(final TestEnvironment testEnvironment) {
+        testEnvironment.given(theHttpMateInstanceUsedForTesting())
                 .when().aRequestToThePath("/mapmate/derp").viaTheGetMethod().withAnEmptyBody()
                 .withTheHeader("value2", "merp").withTheHeader("value3", "herp").withTheHeader("value4", "qerp").isIssued()
                 .theStatusCodeWas(200)
@@ -198,26 +192,29 @@ public final class HttpMateSpecs {
                 );
     }
 
-    @Test
-    public void testTwoUseCaseParameters() {
-        given(theHttpMateInstanceUsedForTesting())
+    @ParameterizedTest
+    @MethodSource(ALL_ENVIRONMENTS)
+    public void testTwoUseCaseParameters(final TestEnvironment testEnvironment) {
+        testEnvironment.given(theHttpMateInstanceUsedForTesting())
                 .when().aRequestToThePath("/twoparameters").viaTheGetMethod().withAnEmptyBody().withTheHeader("param1", "Hello").withTheHeader("param2", "World").isIssued()
                 .theStatusCodeWas(200)
                 .theResponseContentTypeWas("application/json")
                 .theResponseBodyWas("{\"response\":\"Hello World\"}");
     }
 
-    @Test
-    public void testVoidUseCase() {
-        given(theHttpMateInstanceUsedForTesting())
+    @ParameterizedTest
+    @MethodSource(ALL_ENVIRONMENTS)
+    public void testVoidUseCase(final TestEnvironment testEnvironment) {
+        testEnvironment.given(theHttpMateInstanceUsedForTesting())
                 .when().aRequestToThePath("/void").viaTheGetMethod().withAnEmptyBody().isIssued()
                 .theStatusCodeWas(200)
                 .theResponseContentTypeWas("application/json");
     }
 
-    @Test
-    public void testContentTypeCanContainParameters() {
-        given(theHttpMateInstanceUsedForTesting())
+    @ParameterizedTest
+    @MethodSource(ALL_ENVIRONMENTS)
+    public void testContentTypeCanContainParameters(final TestEnvironment testEnvironment) {
+        testEnvironment.given(theHttpMateInstanceUsedForTesting())
                 .when().aRequestToThePath("/void").viaTheGetMethod().withAnEmptyBody().withContentType("application/json; charset=iso-8859-1").isIssued()
                 .theStatusCodeWas(200)
                 .theResponseContentTypeWas("application/json");

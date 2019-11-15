@@ -21,100 +21,94 @@
 
 package com.envimate.httpmate.tests.lowlevel;
 
-import com.envimate.httpmate.tests.givenwhenthen.DeployerAndClient;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-
-import java.util.Collection;
+import com.envimate.httpmate.tests.givenwhenthen.TestEnvironment;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import static com.envimate.httpmate.Configurators.toCustomizeResponsesUsing;
 import static com.envimate.httpmate.HttpMate.anHttpMate;
-import static com.envimate.httpmate.tests.givenwhenthen.Given.given;
-import static com.envimate.httpmate.tests.givenwhenthen.deploy.DeployerManager.activeDeployers;
-import static com.envimate.httpmate.tests.givenwhenthen.deploy.DeployerManager.setCurrentDeployerAndClient;
+import static com.envimate.httpmate.tests.givenwhenthen.TestEnvironment.ALL_ENVIRONMENTS;
 import static com.envimate.httpmate.tests.lowlevel.LowLevelHttpMateConfiguration.theLowLevelHttpMateInstanceUsedForTesting;
 
-@RunWith(Parameterized.class)
 public final class LowLevelSpecs {
 
-    public LowLevelSpecs(final DeployerAndClient deployerAndClient) {
-        setCurrentDeployerAndClient(deployerAndClient);
-    }
-
-    @Parameterized.Parameters(name = "{0}")
-    public static Collection<DeployerAndClient> deployers() {
-        return activeDeployers();
-    }
-
-    @Test
-    public void testBodyOfAPostRequest() {
-        given(theLowLevelHttpMateInstanceUsedForTesting())
+    @ParameterizedTest
+    @MethodSource(ALL_ENVIRONMENTS)
+    public void testBodyOfAPostRequest(final TestEnvironment testEnvironment) {
+        testEnvironment.given(theLowLevelHttpMateInstanceUsedForTesting())
                 .when().aRequestToThePath("/echo").viaThePostMethod().withTheBody("This is a post request.").isIssued()
                 .theStatusCodeWas(200)
                 .theResponseBodyWas("This is a post request.");
     }
 
-    @Test
-    public void testBodyOfAPutRequest() {
-        given(theLowLevelHttpMateInstanceUsedForTesting())
+    @ParameterizedTest
+    @MethodSource(ALL_ENVIRONMENTS)
+    public void testBodyOfAPutRequest(final TestEnvironment testEnvironment) {
+        testEnvironment.given(theLowLevelHttpMateInstanceUsedForTesting())
                 .when().aRequestToThePath("/echo").viaThePutMethod().withTheBody("This is a put request.").isIssued()
                 .theStatusCodeWas(200)
                 .theResponseBodyWas("This is a put request.");
     }
 
-    @Test
-    public void testBodyOfADeleteRequest() {
-        given(theLowLevelHttpMateInstanceUsedForTesting())
+    @ParameterizedTest
+    @MethodSource(ALL_ENVIRONMENTS)
+    public void testBodyOfADeleteRequest(final TestEnvironment testEnvironment) {
+        testEnvironment.given(theLowLevelHttpMateInstanceUsedForTesting())
                 .when().aRequestToThePath("/echo").viaTheDeleteMethod().withTheBody("This is a delete request.").isIssued()
                 .theStatusCodeWas(200)
                 .theResponseBodyWas("This is a delete request.");
     }
 
-    @Test
-    public void testContentTypeInRequest() {
-        given(theLowLevelHttpMateInstanceUsedForTesting())
+    @ParameterizedTest
+    @MethodSource(ALL_ENVIRONMENTS)
+    public void testContentTypeInRequest(final TestEnvironment testEnvironment) {
+        testEnvironment.given(theLowLevelHttpMateInstanceUsedForTesting())
                 .when().aRequestToThePath("/echo_contenttype").viaTheGetMethod().withAnEmptyBody().withContentType("foobar").isIssued()
                 .theStatusCodeWas(200)
                 .theResponseBodyWas("foobar");
     }
 
-    @Test
-    public void testRequestContentTypeIsCaseInsensitive() {
-        given(theLowLevelHttpMateInstanceUsedForTesting())
+    @ParameterizedTest
+    @MethodSource(ALL_ENVIRONMENTS)
+    public void testRequestContentTypeIsCaseInsensitive(final TestEnvironment testEnvironment) {
+        testEnvironment.given(theLowLevelHttpMateInstanceUsedForTesting())
                 .when().aRequestToThePath("/echo_contenttype").viaTheGetMethod().withAnEmptyBody()
                 .withTheHeader("CONTENT-TYPE", "foo").isIssued()
                 .theStatusCodeWas(200)
                 .theResponseBodyWas("foo");
     }
 
-    @Test
-    public void testContentTypeInResponse() {
-        given(theLowLevelHttpMateInstanceUsedForTesting())
+    @ParameterizedTest
+    @MethodSource(ALL_ENVIRONMENTS)
+    public void testContentTypeInResponse(final TestEnvironment testEnvironment) {
+        testEnvironment.given(theLowLevelHttpMateInstanceUsedForTesting())
                 .when().aRequestToThePath("/set_contenttype_in_response").viaTheGetMethod().withAnEmptyBody().isIssued()
                 .theStatusCodeWas(200)
                 .theResponseContentTypeWas("foobar");
     }
 
-    @Test
-    public void testHeadersInResponse() {
-        given(theLowLevelHttpMateInstanceUsedForTesting())
+    @ParameterizedTest
+    @MethodSource(ALL_ENVIRONMENTS)
+    public void testHeadersInResponse(final TestEnvironment testEnvironment) {
+        testEnvironment.given(theLowLevelHttpMateInstanceUsedForTesting())
                 .when().aRequestToThePath("/headers_response").viaTheGetMethod().withAnEmptyBody().isIssued()
                 .theStatusCodeWas(200)
                 .theReponseContainsTheHeader("foo", "bar");
     }
 
-    @Test
-    public void testLoggerCanBeSet() {
-        given(theLowLevelHttpMateInstanceUsedForTesting())
+    @ParameterizedTest
+    @MethodSource(ALL_ENVIRONMENTS)
+    public void testLoggerCanBeSet(final TestEnvironment testEnvironment) {
+        testEnvironment.given(theLowLevelHttpMateInstanceUsedForTesting())
                 .when().aRequestToThePath("/log").viaTheGetMethod().withAnEmptyBody().isIssued()
                 .theStatusCodeWas(200)
                 .theLogOutputStartedWith("INFO: foobar");
     }
 
-    @Test
-    public void testFileDownload() {
-        given(theLowLevelHttpMateInstanceUsedForTesting())
+    @ParameterizedTest
+    @MethodSource(ALL_ENVIRONMENTS)
+    public void testFileDownload(final TestEnvironment testEnvironment) {
+        testEnvironment.given(theLowLevelHttpMateInstanceUsedForTesting())
                 .when().aRequestToThePath("/download").viaTheGetMethod().withAnEmptyBody().isIssued()
                 .theStatusCodeWas(200)
                 .theResponseContentTypeWas("application/x-msdownload")
@@ -122,17 +116,19 @@ public final class LowLevelSpecs {
                 .theReponseContainsTheHeader("Content-Disposition", "attachment; filename=\"foo.txt\"");
     }
 
-    @Test
-    public void testDebugModule() {
-        given(theLowLevelHttpMateInstanceUsedForTesting())
+    @ParameterizedTest
+    @MethodSource(ALL_ENVIRONMENTS)
+    public void testDebugModule(final TestEnvironment testEnvironment) {
+        testEnvironment.given(theLowLevelHttpMateInstanceUsedForTesting())
                 .when().aRequestToThePath("/internals").viaTheGetMethod().withAnEmptyBody().isIssued()
                 .theStatusCodeWas(200)
                 .theResponseBodyContains("digraph");
     }
 
-    @Test
-    public void testEmptyTemplate() {
-        given(
+    @ParameterizedTest
+    @MethodSource(ALL_ENVIRONMENTS)
+    public void testEmptyTemplate(final TestEnvironment testEnvironment) {
+        testEnvironment.given(
                 anHttpMate()
                         .get("/test", (request, response) -> response.setBody("OK"))
                         .configured(toCustomizeResponsesUsing(metaData -> {

@@ -21,8 +21,8 @@
 
 package websockets;
 
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import static websockets.givenwhenthen.Given.*;
 import static websockets.givenwhenthen.configurations.artificial.ArtificialConfiguration.theExampleHttpMateInstanceWithWebSocketsSupport;
@@ -179,7 +179,7 @@ public final class WebSocketsSpecs {
                 .then().exactlyOneWebSocketReceivedMessage("{\"stringValue\":\"mmm\"}");
     }
 
-    @Ignore
+    @Disabled
     @Test
     public void testAWebSocketCanReceiveArbitraryMessagesFromUseCases() {
         given(theExampleChatServerHttpMateInstance())
@@ -190,7 +190,7 @@ public final class WebSocketsSpecs {
                 .exactlyOneWebSocketReceivedMessage("{\"recipient\":\"elefant\",\"content\":\"hallo\"}");
     }
 
-    @Ignore
+    @Disabled
     @Test
     public void testAMultiBrowsertabAwareChatServerCanBeImplemented() {
         given(theExampleChatServerHttpMateInstance())
@@ -203,7 +203,7 @@ public final class WebSocketsSpecs {
                 .exactlyTwoDifferentWebSocketsReceivedTheMessage("{\"content\":\"hallo\",\"recipient\":\"elefant\"}");
     }
 
-    @Ignore
+    @Disabled
     @Test
     public void testASendingUseCaseCanDistinguishBetweenDifferentGroupsOfWebSockets() {
         given(theExampleChatServerHttpMateInstance())
@@ -223,7 +223,7 @@ public final class WebSocketsSpecs {
                 .then().theQueriedNumberOfActiveConnectionsWas(1);
     }
 
-    @Ignore
+    @Disabled
     @Test
     public void testAWebSocketThatGetsClosedByTheClientWillGetCleanedUp() {
         given(theExampleHttpMateInstanceWithWebSocketsSupport())

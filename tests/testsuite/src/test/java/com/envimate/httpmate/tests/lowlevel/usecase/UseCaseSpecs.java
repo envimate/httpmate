@@ -21,46 +21,33 @@
 
 package com.envimate.httpmate.tests.lowlevel.usecase;
 
-import com.envimate.httpmate.tests.givenwhenthen.DeployerAndClient;
+import com.envimate.httpmate.tests.givenwhenthen.TestEnvironment;
 import com.envimate.httpmate.tests.lowlevel.usecase.usecases.FailInInitializerUseCase;
 import com.envimate.httpmate.tests.lowlevel.usecase.usecases.VoidUseCase;
 import com.envimate.messageMate.useCases.useCaseAdapter.usecaseInstantiating.ZeroArgumentsConstructorUseCaseInstantiatorException;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-
-import java.util.Collection;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import static com.envimate.httpmate.HttpMate.anHttpMate;
 import static com.envimate.httpmate.exceptions.ExceptionConfigurators.toMapExceptionsByDefaultUsing;
 import static com.envimate.httpmate.exceptions.ExceptionConfigurators.toMapExceptionsOfType;
-import static com.envimate.httpmate.tests.givenwhenthen.Given.given;
-import static com.envimate.httpmate.tests.givenwhenthen.deploy.DeployerManager.activeDeployers;
-import static com.envimate.httpmate.tests.givenwhenthen.deploy.DeployerManager.setCurrentDeployerAndClient;
+import static com.envimate.httpmate.tests.givenwhenthen.TestEnvironment.ALL_ENVIRONMENTS;
 
-@RunWith(Parameterized.class)
 public final class UseCaseSpecs {
 
-    public UseCaseSpecs(final DeployerAndClient deployerAndClient) {
-        setCurrentDeployerAndClient(deployerAndClient);
-    }
-
-    @Parameterized.Parameters(name = "{0}")
-    public static Collection<DeployerAndClient> deployers() {
-        return activeDeployers();
-    }
-
-    @Test
-    public void aUseCaseWithNoParametersAndVoidReturnTypeCanBeInvokedWithoutConfiguringAnySerializers() {
-        given(anHttpMate().get("/", VoidUseCase.class).build())
+    @ParameterizedTest
+    @MethodSource(ALL_ENVIRONMENTS)
+    public void aUseCaseWithNoParametersAndVoidReturnTypeCanBeInvokedWithoutConfiguringAnySerializers(final TestEnvironment testEnvironment) {
+        testEnvironment.given(anHttpMate().get("/", VoidUseCase.class).build())
                 .when().aRequestToThePath("/").viaTheGetMethod().withAnEmptyBody().isIssued()
                 .theStatusCodeWas(200)
                 .theResponseBodyWas("");
     }
 
-    @Test
-    public void exceptionInInitializerCanBeCaughtInSpecializedHandler() {
-        given(
+    @ParameterizedTest
+    @MethodSource(ALL_ENVIRONMENTS)
+    public void exceptionInInitializerCanBeCaughtInSpecializedHandler(final TestEnvironment testEnvironment) {
+        testEnvironment.given(
                 anHttpMate()
                         .get("/", FailInInitializerUseCase.class)
                         .configured(toMapExceptionsOfType(ZeroArgumentsConstructorUseCaseInstantiatorException.class, (exception, response) -> {
@@ -78,9 +65,10 @@ public final class UseCaseSpecs {
                 .theResponseBodyWas("The correct exception has been thrown");
     }
 
-    @Test
-    public void exceptionInInitializerCanBeCaughtInDefaultHandler() {
-        given(
+    @ParameterizedTest
+    @MethodSource(ALL_ENVIRONMENTS)
+    public void exceptionInInitializerCanBeCaughtInDefaultHandler(final TestEnvironment testEnvironment) {
+        testEnvironment.given(
                 anHttpMate()
                         .get("/", FailInInitializerUseCase.class)
                         .build()

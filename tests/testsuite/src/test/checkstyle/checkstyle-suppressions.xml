@@ -28,14 +28,13 @@
     <suppress checks="LineLength" files="HttpMateTestConfigurations.java|LowLevelTestSuite.java" />
     <suppress checks="MethodLength" files="HttpMateTestConfigurations.java" />
     <suppress checks="UnnecessaryParentheses" files="HttpMateTestConfigurations.java" />
-    <suppress checks="MagicNumber" files="HttpMateTestConfigurations.java|HttpMateSpecs.java|LowLevelTestSuite.java|AwsDeployer.java|MultipartSpecs|EventSpecs|LowLevelSpecs|Util|EventsHttpMateConfiguration|CorsSpecs|MarshallingSpecs|UseCaseSpecs|MapMateSpecs" />
+    <suppress checks="MagicNumber" files="HttpMateTestConfigurations|AwsDeployer|Util|EventsHttpMateConfiguration" />
     <suppress checks="VisibilityModifier" files="DataTransferObject.java" />
     <suppress checks="VisibilityModifier" files="Parameter1.java" />
     <suppress checks="VisibilityModifier" files="Parameter2.java" />
     <suppress checks="VisibilityModifier" files="HeadersInResponseReturnValue.java" />
     <suppress checks="VisibilityModifier" files="SetContentTypeInResponseValue.java" />
     <suppress checks="VisibilityModifier" files="EventsHttpMateConfiguration|LowLevelHttpMateConfiguration" />
-    <suppress checks="LineLength" files="EchoAuthenticationInformationUseCase.java|HttpMateSpecs.java|MultipartSpecs|LowLevelSpecs|CorsSpecs|MarshallingSpecs|UseCaseSpecs|MapMateSpecs" />
     <suppress checks="ClassDataAbstractionCoupling" files="HttpMateTestConfigurations.java" />
     <suppress checks="IllegalSystemOutPrintln" files="AwsDeployer.java" />
     <suppress checks="Regexp" files="AwsDeployer.java|LambdaStatus.java" />

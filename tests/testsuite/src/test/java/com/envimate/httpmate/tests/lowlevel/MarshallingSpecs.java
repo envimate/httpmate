@@ -24,12 +24,10 @@ package com.envimate.httpmate.tests.lowlevel;
 import com.envimate.httpmate.marshalling.MarshallingException;
 import com.envimate.httpmate.marshalling.MarshallingModule;
 import com.envimate.httpmate.marshalling.UnsupportedContentTypeException;
-import com.envimate.httpmate.tests.givenwhenthen.DeployerAndClient;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import com.envimate.httpmate.tests.givenwhenthen.TestEnvironment;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
-import java.util.Collection;
 import java.util.Map;
 
 import static com.envimate.httpmate.HttpMate.anHttpMate;
@@ -37,25 +35,14 @@ import static com.envimate.httpmate.chains.Configurator.configuratorForType;
 import static com.envimate.httpmate.exceptions.ExceptionConfigurators.toMapExceptionsOfType;
 import static com.envimate.httpmate.http.headers.ContentType.fromString;
 import static com.envimate.httpmate.marshalling.MarshallingModule.toMarshallBodiesBy;
-import static com.envimate.httpmate.tests.givenwhenthen.Given.given;
-import static com.envimate.httpmate.tests.givenwhenthen.deploy.DeployerManager.activeDeployers;
-import static com.envimate.httpmate.tests.givenwhenthen.deploy.DeployerManager.setCurrentDeployerAndClient;
+import static com.envimate.httpmate.tests.givenwhenthen.TestEnvironment.ALL_ENVIRONMENTS;
 
-@RunWith(Parameterized.class)
 public final class MarshallingSpecs {
 
-    public MarshallingSpecs(final DeployerAndClient deployerAndClient) {
-        setCurrentDeployerAndClient(deployerAndClient);
-    }
-
-    @Parameterized.Parameters(name = "{0}")
-    public static Collection<DeployerAndClient> deployers() {
-        return activeDeployers();
-    }
-
-    @Test
-    public void unmarshallerCanBeSet() {
-        given(
+    @ParameterizedTest
+    @MethodSource(ALL_ENVIRONMENTS)
+    public void unmarshallerCanBeSet(final TestEnvironment testEnvironment) {
+        testEnvironment.given(
                 anHttpMate()
                         .post("/", (request, response) -> request.optionalBodyMap().ifPresent(map -> {
                             final Object value = map.get("a");
@@ -71,9 +58,10 @@ public final class MarshallingSpecs {
                 .theResponseBodyWas("b");
     }
 
-    @Test
-    public void marshallerCanBeSet() {
-        given(
+    @ParameterizedTest
+    @MethodSource(ALL_ENVIRONMENTS)
+    public void marshallerCanBeSet(final TestEnvironment testEnvironment) {
+        testEnvironment.given(
                 anHttpMate()
                         .post("/", (request, response) -> request.optionalBodyMap().ifPresent(response::setBody))
                         .configured(toMarshallBodiesBy()
@@ -87,9 +75,10 @@ public final class MarshallingSpecs {
                 .theResponseBodyWas("b");
     }
 
-    @Test
-    public void requestUsesContentTypeHeaderForUnmarshalling() {
-        given(
+    @ParameterizedTest
+    @MethodSource(ALL_ENVIRONMENTS)
+    public void requestUsesContentTypeHeaderForUnmarshalling(final TestEnvironment testEnvironment) {
+        testEnvironment.given(
                 anHttpMate()
                         .post("/", (request, response) -> request.optionalBodyMap().ifPresent(map -> {
                             final Object value = map.get("a");
@@ -106,9 +95,10 @@ public final class MarshallingSpecs {
                 .theResponseBodyWas("right");
     }
 
-    @Test
-    public void defaultContentTypeIsUsedForUnmarshallingIfNoContentTypeIsSpecified() {
-        given(
+    @ParameterizedTest
+    @MethodSource(ALL_ENVIRONMENTS)
+    public void defaultContentTypeIsUsedForUnmarshallingIfNoContentTypeIsSpecified(final TestEnvironment testEnvironment) {
+        testEnvironment.given(
                 anHttpMate()
                         .post("/", (request, response) -> request.optionalBodyMap().ifPresent(map -> {
                             final Object value = map.get("a");
@@ -125,9 +115,10 @@ public final class MarshallingSpecs {
                 .theResponseBodyWas("right");
     }
 
-    @Test
-    public void responseUsesContentTypeOfAcceptHeader() {
-        given(
+    @ParameterizedTest
+    @MethodSource(ALL_ENVIRONMENTS)
+    public void responseUsesContentTypeOfAcceptHeader(final TestEnvironment testEnvironment) {
+        testEnvironment.given(
                 anHttpMate()
                         .post("/", (request, response) -> request.optionalBodyMap().ifPresent(response::setBody))
                         .configured(toMarshallBodiesBy()
@@ -144,9 +135,10 @@ public final class MarshallingSpecs {
                 .theResponseBodyWas("the right marshaller");
     }
 
-    @Test
-    public void responseIsMarshalledUsingContentTypeIfNoAcceptHeaderIsSet() {
-        given(
+    @ParameterizedTest
+    @MethodSource(ALL_ENVIRONMENTS)
+    public void responseIsMarshalledUsingContentTypeIfNoAcceptHeaderIsSet(final TestEnvironment testEnvironment) {
+        testEnvironment.given(
                 anHttpMate()
                         .post("/", (request, response) -> request.optionalBodyMap().ifPresent(response::setBody))
                         .configured(toMarshallBodiesBy()
@@ -163,9 +155,10 @@ public final class MarshallingSpecs {
                 .theResponseBodyWas("the right marshaller");
     }
 
-    @Test
-    public void wildcardsInAcceptHeaderCanBeUsedToSpecifyResponseContentType() {
-        given(
+    @ParameterizedTest
+    @MethodSource(ALL_ENVIRONMENTS)
+    public void wildcardsInAcceptHeaderCanBeUsedToSpecifyResponseContentType(final TestEnvironment testEnvironment) {
+        testEnvironment.given(
                 anHttpMate()
                         .post("/", (request, response) -> request.optionalBodyMap().ifPresent(response::setBody))
                         .configured(toMarshallBodiesBy()
@@ -182,9 +175,10 @@ public final class MarshallingSpecs {
                 .theResponseBodyWas("the right marshaller");
     }
 
-    @Test
-    public void responseIsMarshalledUsingContentTypeIfAcceptHeaderAllowsMultipleMarshallers() {
-        given(
+    @ParameterizedTest
+    @MethodSource(ALL_ENVIRONMENTS)
+    public void responseIsMarshalledUsingContentTypeIfAcceptHeaderAllowsMultipleMarshallers(final TestEnvironment testEnvironment) {
+        testEnvironment.given(
                 anHttpMate()
                         .post("/", (request, response) -> request.optionalBodyMap().ifPresent(response::setBody))
                         .configured(toMarshallBodiesBy()
@@ -202,9 +196,10 @@ public final class MarshallingSpecs {
                 .theResponseBodyWas("the right marshaller");
     }
 
-    @Test
-    public void responseIsMarshalledUsingDefaultContentTypeIfAcceptAndContentTypeHeaderCannotBeUsed() {
-        given(
+    @ParameterizedTest
+    @MethodSource(ALL_ENVIRONMENTS)
+    public void responseIsMarshalledUsingDefaultContentTypeIfAcceptAndContentTypeHeaderCannotBeUsed(final TestEnvironment testEnvironment) {
+        testEnvironment.given(
                 anHttpMate()
                         .post("/", (request, response) -> request.optionalBodyMap().ifPresent(response::setBody))
                         .configured(toMarshallBodiesBy()
@@ -219,9 +214,10 @@ public final class MarshallingSpecs {
                 .theResponseBodyWas("right");
     }
 
-    @Test
-    public void unknownUnmarshallerCanThrowException() {
-        given(
+    @ParameterizedTest
+    @MethodSource(ALL_ENVIRONMENTS)
+    public void unknownUnmarshallerCanThrowException(final TestEnvironment testEnvironment) {
+        testEnvironment.given(
                 anHttpMate()
                         .post("/", (request, response) -> request.optionalBodyMap().ifPresent(response::setBody))
                         .configured(toMarshallBodiesBy()
@@ -240,9 +236,10 @@ public final class MarshallingSpecs {
                 .theResponseBodyWas("Content type 'asdf' is not supported; supported content types are: 'qwer'");
     }
 
-    @Test
-    public void unknownMarshallerCanThrowException() {
-        given(
+    @ParameterizedTest
+    @MethodSource(ALL_ENVIRONMENTS)
+    public void unknownMarshallerCanThrowException(final TestEnvironment testEnvironment) {
+        testEnvironment.given(
                 anHttpMate()
                         .post("/", (request, response) -> request.optionalBodyMap().ifPresent(response::setBody))
                         .configured(toMarshallBodiesBy()

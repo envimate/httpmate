@@ -22,45 +22,32 @@
 package com.envimate.httpmate.tests.lowlevel;
 
 import com.envimate.httpmate.http.headers.cookies.SameSitePolicy;
-import com.envimate.httpmate.tests.givenwhenthen.DeployerAndClient;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-
-import java.util.Collection;
+import com.envimate.httpmate.tests.givenwhenthen.TestEnvironment;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import static com.envimate.httpmate.HttpMate.anHttpMate;
 import static com.envimate.httpmate.http.headers.cookies.CookieBuilder.cookie;
-import static com.envimate.httpmate.tests.givenwhenthen.Given.given;
-import static com.envimate.httpmate.tests.givenwhenthen.deploy.DeployerManager.activeDeployers;
-import static com.envimate.httpmate.tests.givenwhenthen.deploy.DeployerManager.setCurrentDeployerAndClient;
+import static com.envimate.httpmate.tests.givenwhenthen.TestEnvironment.ALL_ENVIRONMENTS;
 import static java.time.Instant.ofEpochMilli;
 import static java.util.concurrent.TimeUnit.HOURS;
 
-@RunWith(Parameterized.class)
 public final class CookieSpecs {
 
-    public CookieSpecs(final DeployerAndClient deployerAndClient) {
-        setCurrentDeployerAndClient(deployerAndClient);
-    }
-
-    @Parameterized.Parameters(name = "{0}")
-    public static Collection<DeployerAndClient> deployers() {
-        return activeDeployers();
-    }
-
-    @Test
-    public void cookieCanBeSet() {
-        given(anHttpMate()
+    @ParameterizedTest
+    @MethodSource(ALL_ENVIRONMENTS)
+    public void cookieCanBeSet(final TestEnvironment testEnvironment) {
+        testEnvironment.given(anHttpMate()
                 .get("/cookie", (request, response) -> response.setCookie("asdf", "qwer"))
                 .build())
                 .when().aRequestToThePath("/cookie").viaTheGetMethod().withAnEmptyBody().isIssued()
                 .theReponseContainsTheHeader("Set-Cookie", "asdf=\"qwer\"");
     }
 
-    @Test
-    public void cookieCanBeSetWithExpirationDate() {
-        given(anHttpMate()
+    @ParameterizedTest
+    @MethodSource(ALL_ENVIRONMENTS)
+    public void cookieCanBeSetWithExpirationDate(final TestEnvironment testEnvironment) {
+        testEnvironment.given(anHttpMate()
                 .get("/cookie", (request, response) ->
                         response.setCookie(cookie("asdf", "qwer").withExpiration(ofEpochMilli(123456789))))
                 .build())
@@ -68,9 +55,10 @@ public final class CookieSpecs {
                 .theReponseContainsTheHeader("Set-Cookie", "asdf=\"qwer\"; Expires=Fri, 02 Jan 1970 10:17:36 GMT");
     }
 
-    @Test
-    public void cookieCanBeSetWithMaxAge() {
-        given(anHttpMate()
+    @ParameterizedTest
+    @MethodSource(ALL_ENVIRONMENTS)
+    public void cookieCanBeSetWithMaxAge(final TestEnvironment testEnvironment) {
+        testEnvironment.given(anHttpMate()
                 .get("/cookie", (request, response) ->
                         response.setCookie(cookie("asdf", "qwer").withMaxAge(1, HOURS)))
                 .build())
@@ -78,9 +66,10 @@ public final class CookieSpecs {
                 .theReponseContainsTheHeader("Set-Cookie", "asdf=\"qwer\"; Max-Age=3600");
     }
 
-    @Test
-    public void cookieCanBeSetWithDomainScope() {
-        given(anHttpMate()
+    @ParameterizedTest
+    @MethodSource(ALL_ENVIRONMENTS)
+    public void cookieCanBeSetWithDomainScope(final TestEnvironment testEnvironment) {
+        testEnvironment.given(anHttpMate()
                 .get("/cookie", (request, response) ->
                         response.setCookie(cookie("asdf", "qwer").exposedToAllSubdomainsOf("example.org", "foo.com")))
                 .build())
@@ -88,9 +77,10 @@ public final class CookieSpecs {
                 .theReponseContainsTheHeader("Set-Cookie", "asdf=\"qwer\"; Domain=example.org,foo.com");
     }
 
-    @Test
-    public void cookieCanBeSetWithPathScope() {
-        given(anHttpMate()
+    @ParameterizedTest
+    @MethodSource(ALL_ENVIRONMENTS)
+    public void cookieCanBeSetWithPathScope(final TestEnvironment testEnvironment) {
+        testEnvironment.given(anHttpMate()
                 .get("/cookie", (request, response) ->
                         response.setCookie(cookie("asdf", "qwer").exposedOnlyToSubpathsOf("/docs", "/img")))
                 .build())
@@ -98,9 +88,10 @@ public final class CookieSpecs {
                 .theReponseContainsTheHeader("Set-Cookie", "asdf=\"qwer\"; Path=/docs,/img");
     }
 
-    @Test
-    public void secureCookieCanBeSet() {
-        given(anHttpMate()
+    @ParameterizedTest
+    @MethodSource(ALL_ENVIRONMENTS)
+    public void secureCookieCanBeSet(final TestEnvironment testEnvironment) {
+        testEnvironment.given(anHttpMate()
                 .get("/cookie", (request, response) ->
                         response.setCookie(cookie("asdf", "qwer").thatIsOnlySentViaHttps()))
                 .build())
@@ -108,9 +99,10 @@ public final class CookieSpecs {
                 .theReponseContainsTheHeader("Set-Cookie", "asdf=\"qwer\"; Secure");
     }
 
-    @Test
-    public void httpOnlyCookieCanBeSet() {
-        given(anHttpMate()
+    @ParameterizedTest
+    @MethodSource(ALL_ENVIRONMENTS)
+    public void httpOnlyCookieCanBeSet(final TestEnvironment testEnvironment) {
+        testEnvironment.given(anHttpMate()
                 .get("/cookie", (request, response) ->
                         response.setCookie(cookie("asdf", "qwer").thatIsNotAccessibleFromJavaScript()))
                 .build())
@@ -118,9 +110,10 @@ public final class CookieSpecs {
                 .theReponseContainsTheHeader("Set-Cookie", "asdf=\"qwer\"; HttpOnly");
     }
 
-    @Test
-    public void cookieCanBeSetWithStrictSameSitePolicy() {
-        given(anHttpMate()
+    @ParameterizedTest
+    @MethodSource(ALL_ENVIRONMENTS)
+    public void cookieCanBeSetWithStrictSameSitePolicy(final TestEnvironment testEnvironment) {
+        testEnvironment.given(anHttpMate()
                 .get("/cookie", (request, response) ->
                         response.setCookie(cookie("asdf", "qwer").withSameSitePolicy(SameSitePolicy.STRICT)))
                 .build())
@@ -128,9 +121,10 @@ public final class CookieSpecs {
                 .theReponseContainsTheHeader("Set-Cookie", "asdf=\"qwer\"; SameSite=Strict");
     }
 
-    @Test
-    public void cookieCanBeSetWithLaxSameSitePolicy() {
-        given(anHttpMate()
+    @ParameterizedTest
+    @MethodSource(ALL_ENVIRONMENTS)
+    public void cookieCanBeSetWithLaxSameSitePolicy(final TestEnvironment testEnvironment) {
+        testEnvironment.given(anHttpMate()
                 .get("/cookie", (request, response) ->
                         response.setCookie(cookie("asdf", "qwer").withSameSitePolicy(SameSitePolicy.LAX)))
                 .build())
@@ -138,9 +132,10 @@ public final class CookieSpecs {
                 .theReponseContainsTheHeader("Set-Cookie", "asdf=\"qwer\"; SameSite=Lax");
     }
 
-    @Test
-    public void cookieCanBeSetWithNoneSameSitePolicy() {
-        given(anHttpMate()
+    @ParameterizedTest
+    @MethodSource(ALL_ENVIRONMENTS)
+    public void cookieCanBeSetWithNoneSameSitePolicy(final TestEnvironment testEnvironment) {
+        testEnvironment.given(anHttpMate()
                 .get("/cookie", (request, response) ->
                         response.setCookie(cookie("asdf", "qwer").withSameSitePolicy(SameSitePolicy.NONE)))
                 .build())
@@ -148,9 +143,10 @@ public final class CookieSpecs {
                 .theReponseContainsTheHeader("Set-Cookie", "asdf=\"qwer\"; SameSite=None");
     }
 
-    @Test
-    public void cookieCanBeInvalidated() {
-        given(anHttpMate()
+    @ParameterizedTest
+    @MethodSource(ALL_ENVIRONMENTS)
+    public void cookieCanBeInvalidated(final TestEnvironment testEnvironment) {
+        testEnvironment.given(anHttpMate()
                 .get("/cookie", (request, response) ->
                         response.invalidateCookie("asdf"))
                 .build())
@@ -158,9 +154,10 @@ public final class CookieSpecs {
                 .theReponseContainsTheHeader("Set-Cookie", "asdf=\"\"; Expires=Thu, 01 Jan 1970 00:00:00 GMT");
     }
 
-    @Test
-    public void cookieCanBeReceived() {
-        given(anHttpMate()
+    @ParameterizedTest
+    @MethodSource(ALL_ENVIRONMENTS)
+    public void cookieCanBeReceived(final TestEnvironment testEnvironment) {
+        testEnvironment.given(anHttpMate()
                 .get("/cookie", (request, response) -> {
                     final String cookie = request.cookies().getCookie("myCookie");
                     response.setBody(cookie);
@@ -171,9 +168,10 @@ public final class CookieSpecs {
                 .theResponseBodyWas("qwer");
     }
 
-    @Test
-    public void cookieWrappedInDoubleQuotesCanBeReceived() {
-        given(anHttpMate()
+    @ParameterizedTest
+    @MethodSource(ALL_ENVIRONMENTS)
+    public void cookieWrappedInDoubleQuotesCanBeReceived(final TestEnvironment testEnvironment) {
+        testEnvironment.given(anHttpMate()
                 .get("/cookie", (request, response) -> {
                     final String cookie = request.cookies().getCookie("myCookie");
                     response.setBody(cookie);
@@ -184,9 +182,10 @@ public final class CookieSpecs {
                 .theResponseBodyWas("qwer");
     }
 
-    @Test
-    public void multipleCookiesInSameHeaderCanBeReceived() {
-        given(anHttpMate()
+    @ParameterizedTest
+    @MethodSource(ALL_ENVIRONMENTS)
+    public void multipleCookiesInSameHeaderCanBeReceived(final TestEnvironment testEnvironment) {
+        testEnvironment.given(anHttpMate()
                 .get("/cookie", (request, response) -> {
                     final String cookie1 = request.cookies().getCookie("cookie1");
                     final String cookie2 = request.cookies().getCookie("cookie2");

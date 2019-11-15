@@ -26,24 +26,21 @@ import com.envimate.httpmate.tests.givenwhenthen.builders.PathBuilder;
 import com.envimate.httpmate.tests.givenwhenthen.client.ClientFactory;
 import com.envimate.httpmate.tests.givenwhenthen.client.HttpClientWrapper;
 import com.envimate.httpmate.tests.givenwhenthen.deploy.Deployer;
-import com.envimate.httpmate.tests.givenwhenthen.deploy.DeployerManager;
 import com.envimate.httpmate.tests.givenwhenthen.deploy.Deployment;
 import lombok.RequiredArgsConstructor;
-
-import static com.envimate.httpmate.tests.givenwhenthen.deploy.DeployerManager.currentDeployer;
 
 @RequiredArgsConstructor
 public final class Given {
     private final HttpMate httpMate;
+    private final Deployer deployer;
+    private final ClientFactory clientFactory;
 
-    public static Given given(final HttpMate httpMate) {
-        return new Given(httpMate);
+    public static Given given(final HttpMate httpMate, final Deployer deployer, final ClientFactory clientFactory) {
+        return new Given(httpMate, deployer, clientFactory);
     }
 
     public PathBuilder when() {
-        final Deployer deployer = currentDeployer();
         final Deployment deployment = deployer.deploy(httpMate);
-        final ClientFactory clientFactory = DeployerManager.currentClientFactory();
         final HttpClientWrapper clientWrapper = clientFactory.createClient(deployment);
         return When.theWhen(clientWrapper);
     }

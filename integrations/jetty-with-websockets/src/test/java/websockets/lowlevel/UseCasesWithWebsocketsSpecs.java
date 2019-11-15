@@ -21,8 +21,8 @@
 
 package websockets.lowlevel;
 
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import static com.envimate.httpmate.HttpMate.anHttpMate;
 import static com.envimate.httpmate.websockets.WebSocketsConfigurator.toUseWebSockets;
@@ -31,7 +31,7 @@ import static websockets.givenwhenthen.Given.given;
 
 public final class UseCasesWithWebsocketsSpecs {
 
-    @Ignore
+    @Disabled
     @Test
     public void useCaseCanBeCalledOnWebSocketMessage() {
         given(anHttpMate()

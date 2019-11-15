@@ -21,37 +21,23 @@
 
 package com.envimate.httpmate.tests.lowlevel;
 
-import com.envimate.httpmate.tests.givenwhenthen.DeployerAndClient;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-
-import java.util.Collection;
+import com.envimate.httpmate.tests.givenwhenthen.TestEnvironment;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import static com.envimate.httpmate.HttpMate.anHttpMate;
 import static com.envimate.httpmate.cors.CorsConfigurators.toActivateCORSWithoutValidatingTheOrigin;
 import static com.envimate.httpmate.exceptions.ExceptionConfigurators.toMapExceptionsByDefaultUsing;
 import static com.envimate.httpmate.exceptions.ExceptionConfigurators.toMapExceptionsOfType;
 import static com.envimate.httpmate.http.HttpRequestMethod.*;
-import static com.envimate.httpmate.tests.givenwhenthen.Given.given;
-import static com.envimate.httpmate.tests.givenwhenthen.deploy.DeployerManager.activeDeployers;
-import static com.envimate.httpmate.tests.givenwhenthen.deploy.DeployerManager.setCurrentDeployerAndClient;
+import static com.envimate.httpmate.tests.givenwhenthen.TestEnvironment.ALL_ENVIRONMENTS;
 
-@RunWith(Parameterized.class)
 public final class CorsSpecs {
 
-    public CorsSpecs(final DeployerAndClient deployerAndClient) {
-        setCurrentDeployerAndClient(deployerAndClient);
-    }
-
-    @Parameterized.Parameters(name = "{0}")
-    public static Collection<DeployerAndClient> deployers() {
-        return activeDeployers();
-    }
-
-    @Test
-    public void corsHeadersAreSetForNormalRequests() {
-        given(
+    @ParameterizedTest
+    @MethodSource(ALL_ENVIRONMENTS)
+    public void corsHeadersAreSetForNormalRequests(final TestEnvironment testEnvironment) {
+        testEnvironment.given(
                 anHttpMate().get("/test", (request, response) -> response.setBody("qwer"))
                         .configured(toActivateCORSWithoutValidatingTheOrigin()
                                 .exposingTheResponseHeaders("Some-Header", "Another-Header", "Yet-Another-Header")
@@ -65,9 +51,10 @@ public final class CorsSpecs {
                 .theReponseContainsTheHeader("Access-Control-Expose-Headers", "some-header,another-header,yet-another-header");
     }
 
-    @Test
-    public void corsHeadersAreSetWhenAnMappedExceptionOccurs() {
-        given(
+    @ParameterizedTest
+    @MethodSource(ALL_ENVIRONMENTS)
+    public void corsHeadersAreSetWhenAnMappedExceptionOccurs(final TestEnvironment testEnvironment) {
+        testEnvironment.given(
                 anHttpMate()
                         .get("/test", (request, response) -> {
                             throw new IllegalArgumentException();
@@ -86,9 +73,10 @@ public final class CorsSpecs {
                 .theReponseContainsTheHeader("Access-Control-Expose-Headers", "some-header,another-header,yet-another-header");
     }
 
-    @Test
-    public void testCorsPreflightRequest() {
-        given(
+    @ParameterizedTest
+    @MethodSource(ALL_ENVIRONMENTS)
+    public void testCorsPreflightRequest(final TestEnvironment testEnvironment) {
+        testEnvironment.given(
                 anHttpMate()
                         .configured(toActivateCORSWithoutValidatingTheOrigin()
                                 .withAllowedMethods(GET, POST, PUT, DELETE)

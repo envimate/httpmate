@@ -44,9 +44,11 @@ public final class SocketServer {
     private final int port;
     private final RequestLog requestLog;
 
-    static void start(final int port, final RequestLog requestLog) {
+    static AutoCloseable start(final int port, final RequestLog requestLog) {
         final SocketServer socketServer = new SocketServer(port, requestLog);
-        new Thread(socketServer::run).start();
+        final Thread thread = new Thread(socketServer::run);
+        thread.start();
+        return () -> stopThread(thread);
     }
 
     private void run() {
@@ -76,5 +78,14 @@ public final class SocketServer {
 
         final PrintWriter writer = new PrintWriter(socket.getOutputStream(), true, UTF_8);
         writer.println("HTTP/1.1 200 OK\n");
+    }
+
+    private static void stopThread(final Thread thread) {
+        thread.interrupt();
+        try {
+            thread.join();
+        } catch (final InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

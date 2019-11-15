@@ -25,6 +25,7 @@
         "http://www.puppycrawl.com/dtds/suppressions_1_1.dtd">
 <suppressions>
     <suppress checks="FinalParameters" files="SynchronizationWrapper" />
-    <suppress checks=".*" files="ClientTests" />
+    <suppress checks=".*" files="ClientSpecs" />
     <suppress checks="ClassFanOutComplexity" files="RealIssuer" />
+    <suppress checks="IllegalCatch" files="Given" />
 </suppressions>

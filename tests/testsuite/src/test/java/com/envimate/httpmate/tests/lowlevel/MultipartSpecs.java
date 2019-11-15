@@ -21,81 +21,72 @@
 
 package com.envimate.httpmate.tests.lowlevel;
 
-import com.envimate.httpmate.tests.givenwhenthen.DeployerAndClient;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import com.envimate.httpmate.tests.givenwhenthen.TestEnvironment;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
-import java.util.Collection;
-
-import static com.envimate.httpmate.tests.givenwhenthen.Given.given;
 import static com.envimate.httpmate.tests.givenwhenthen.MultipartBuilder.startingWith;
 import static com.envimate.httpmate.tests.givenwhenthen.builders.MultipartElement.aFile;
 import static com.envimate.httpmate.tests.givenwhenthen.builders.MultipartElement.aFormControl;
-import static com.envimate.httpmate.tests.givenwhenthen.deploy.DeployerManager.activeDeployers;
-import static com.envimate.httpmate.tests.givenwhenthen.deploy.DeployerManager.setCurrentDeployerAndClient;
+import static com.envimate.httpmate.tests.givenwhenthen.TestEnvironment.ALL_ENVIRONMENTS;
 import static com.envimate.httpmate.tests.multipart.MultipartHttpMateConfiguration.theMultipartHttpMateInstanceUsedForTesting;
 
-@RunWith(Parameterized.class)
 public final class MultipartSpecs {
 
-    public MultipartSpecs(final DeployerAndClient deployerAndClient) {
-        setCurrentDeployerAndClient(deployerAndClient);
-    }
-
-    @Parameterized.Parameters(name = "{0}")
-    public static Collection<DeployerAndClient> deployers() {
-        return activeDeployers();
-    }
-
-    @Test
-    public void testMultipartFileUploadWithGet() {
-        given(theMultipartHttpMateInstanceUsedForTesting())
+    @ParameterizedTest
+    @MethodSource(ALL_ENVIRONMENTS)
+    public void testMultipartFileUploadWithGet(final TestEnvironment testEnvironment) {
+        testEnvironment.given(theMultipartHttpMateInstanceUsedForTesting())
                 .when().aRequestToThePath("/dump").viaTheGetMethod()
                 .withTheMultipartBody(startingWith(aFile("myfile", "asdf.txt", "foooo"))).isIssued()
                 .theStatusCodeWas(200)
                 .theResponseBodyWas("[{controlname=myfile,filename=asdf.txt,content=foooo}]");
     }
 
-    @Test
-    public void testMultipartFileUploadWithPost() {
-        given(theMultipartHttpMateInstanceUsedForTesting())
+    @ParameterizedTest
+    @MethodSource(ALL_ENVIRONMENTS)
+    public void testMultipartFileUploadWithPost(final TestEnvironment testEnvironment) {
+        testEnvironment.given(theMultipartHttpMateInstanceUsedForTesting())
                 .when().aRequestToThePath("/dump").viaThePostMethod()
                 .withTheMultipartBody(startingWith(aFile("myfile", "asdf.txt", "foooo"))).isIssued()
                 .theStatusCodeWas(200)
                 .theResponseBodyWas("[{controlname=myfile,filename=asdf.txt,content=foooo}]");
     }
 
-    @Test
-    public void testMultipartFileUploadWithPut() {
-        given(theMultipartHttpMateInstanceUsedForTesting())
+    @ParameterizedTest
+    @MethodSource(ALL_ENVIRONMENTS)
+    public void testMultipartFileUploadWithPut(final TestEnvironment testEnvironment) {
+        testEnvironment.given(theMultipartHttpMateInstanceUsedForTesting())
                 .when().aRequestToThePath("/dump").viaThePutMethod()
                 .withTheMultipartBody(startingWith(aFile("myfile", "asdf.txt", "foooo"))).isIssued()
                 .theStatusCodeWas(200)
                 .theResponseBodyWas("[{controlname=myfile,filename=asdf.txt,content=foooo}]");
     }
 
-    @Test
-    public void testMultipartFileUploadWithDelete() {
-        given(theMultipartHttpMateInstanceUsedForTesting())
+    @ParameterizedTest
+    @MethodSource(ALL_ENVIRONMENTS)
+    public void testMultipartFileUploadWithDelete(final TestEnvironment testEnvironment) {
+        testEnvironment.given(theMultipartHttpMateInstanceUsedForTesting())
                 .when().aRequestToThePath("/dump").viaTheDeleteMethod()
                 .withTheMultipartBody(startingWith(aFile("myfile", "asdf.txt", "foooo"))).isIssued()
                 .theStatusCodeWas(200)
                 .theResponseBodyWas("[{controlname=myfile,filename=asdf.txt,content=foooo}]");
     }
 
-    @Test
-    public void testMultipartWithoutFile() {
-        given(theMultipartHttpMateInstanceUsedForTesting())
+    @ParameterizedTest
+    @MethodSource(ALL_ENVIRONMENTS)
+    public void testMultipartWithoutFile(final TestEnvironment testEnvironment) {
+        testEnvironment.given(theMultipartHttpMateInstanceUsedForTesting())
                 .when().aRequestToThePath("/dump").viaThePostMethod()
                 .withTheMultipartBody(startingWith(aFormControl("foo", "bar"))).isIssued()
                 .theStatusCodeWas(200)
                 .theResponseBodyWas("[{controlname=foo,content=bar}]");
     }
 
-    @Test
-    public void testMultipartWithFieldsBeforeTheFileUpload() {
-        given(theMultipartHttpMateInstanceUsedForTesting())
+    @ParameterizedTest
+    @MethodSource(ALL_ENVIRONMENTS)
+    public void testMultipartWithFieldsBeforeTheFileUpload(final TestEnvironment testEnvironment) {
+        testEnvironment.given(theMultipartHttpMateInstanceUsedForTesting())
                 .when().aRequestToThePath("/dump").viaThePostMethod()
                 .withTheMultipartBody(startingWith(aFormControl("control1", "content1"))
                         .followedBy(aFormControl("control2", "content2"))
@@ -104,9 +95,10 @@ public final class MultipartSpecs {
                 .theResponseBodyWas("[{controlname=control1,content=content1}, {controlname=control2,content=content2}, {controlname=myfile,filename=asdf.txt,content=foooo}]");
     }
 
-    @Test
-    public void testMultipartFieldsAfterTheFileUpload() {
-        given(theMultipartHttpMateInstanceUsedForTesting())
+    @ParameterizedTest
+    @MethodSource(ALL_ENVIRONMENTS)
+    public void testMultipartFieldsAfterTheFileUpload(final TestEnvironment testEnvironment) {
+        testEnvironment.given(theMultipartHttpMateInstanceUsedForTesting())
                 .when().aRequestToThePath("/dump").viaThePostMethod()
                 .withTheMultipartBody(startingWith(aFile("myfile", "asdf.txt", "foooooooo"))
                         .followedBy(aFormControl("ignoredcontrol1", "ignoredcontent1"))
@@ -116,9 +108,10 @@ public final class MultipartSpecs {
                 .theResponseBodyWas("[{controlname=myfile,filename=asdf.txt,content=foooooooo}, {controlname=ignoredcontrol1,content=ignoredcontent1}, {controlname=ignoredcontrol2,content=ignoredcontent2}, {controlname=myfile,filename=ignoredfile.txt,content=ignoredfilecontent}]");
     }
 
-    @Test
-    public void testMultipartWithMultipleFiles() {
-        given(theMultipartHttpMateInstanceUsedForTesting())
+    @ParameterizedTest
+    @MethodSource(ALL_ENVIRONMENTS)
+    public void testMultipartWithMultipleFiles(final TestEnvironment testEnvironment) {
+        testEnvironment.given(theMultipartHttpMateInstanceUsedForTesting())
                 .when().aRequestToThePath("/dump").viaThePostMethod()
                 .withTheMultipartBody(startingWith(aFile("file1", "file1.pdf", "content1"))
                         .followedBy(aFile("file2", "file2.pdf", "content2"))
@@ -127,9 +120,10 @@ public final class MultipartSpecs {
                 .theResponseBodyWas("[{controlname=file1,filename=file1.pdf,content=content1}, {controlname=file2,filename=file2.pdf,content=content2}, {controlname=file3,filename=file3.pdf,content=content3}]");
     }
 
-    @Test
-    public void testAuthenticationByFirstMultipartPart() {
-        given(theMultipartHttpMateInstanceUsedForTesting())
+    @ParameterizedTest
+    @MethodSource(ALL_ENVIRONMENTS)
+    public void testAuthenticationByFirstMultipartPart(final TestEnvironment testEnvironment) {
+        testEnvironment.given(theMultipartHttpMateInstanceUsedForTesting())
                 .when().aRequestToThePath("/authenticated").viaThePostMethod()
                 .withTheMultipartBody(startingWith(aFormControl("authentication", "username=bob"))
                         .followedBy(aFormControl("control1", "foo"))).isIssued()
@@ -137,18 +131,20 @@ public final class MultipartSpecs {
                 .theResponseBodyWas("Authenticated as: bob");
     }
 
-    @Test
-    public void testWrongAuthorizationGetsRejectedBeforeProcessingFile() {
-        given(theMultipartHttpMateInstanceUsedForTesting())
+    @ParameterizedTest
+    @MethodSource(ALL_ENVIRONMENTS)
+    public void testWrongAuthorizationGetsRejectedBeforeProcessingFile(final TestEnvironment testEnvironment) {
+        testEnvironment.given(theMultipartHttpMateInstanceUsedForTesting())
                 .when().aRequestToThePath("/authorized").viaThePostMethod().withTheMultipartBody(startingWith(aFormControl("authentication", "username=normaluser"))
                 .followedBy(aFile("file", "file.txt", "content"))).isIssued()
                 .theStatusCodeWas(403)
                 .theResponseBodyWas("Access denied!");
     }
 
-    @Test
-    public void testAuthorizationBeforeProcessingFile() {
-        given(theMultipartHttpMateInstanceUsedForTesting())
+    @ParameterizedTest
+    @MethodSource(ALL_ENVIRONMENTS)
+    public void testAuthorizationBeforeProcessingFile(final TestEnvironment testEnvironment) {
+        testEnvironment.given(theMultipartHttpMateInstanceUsedForTesting())
                 .when().aRequestToThePath("/authorized").viaThePostMethod().withTheMultipartBody(startingWith(aFormControl("authentication", "username=admin"))
                 .followedBy(aFile("file", "file.txt", "content"))).isIssued()
                 .theStatusCodeWas(200)

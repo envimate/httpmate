@@ -22,41 +22,27 @@
 package com.envimate.httpmate.tests.lowlevel.mapmate;
 
 import com.envimate.httpmate.HttpMate;
-import com.envimate.httpmate.tests.givenwhenthen.DeployerAndClient;
+import com.envimate.httpmate.tests.givenwhenthen.TestEnvironment;
 import com.envimate.httpmate.tests.lowlevel.mapmate.usecases.MyUseCase;
 import com.envimate.httpmate.tests.lowlevel.mapmate.usecases.domain.MyRequest;
 import com.envimate.mapmate.builder.MapMate;
 import com.envimate.mapmate.deserialization.Unmarshaller;
 import com.google.gson.Gson;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
-import java.util.Collection;
 import java.util.Map;
 
 import static com.envimate.httpmate.HttpMate.anHttpMate;
 import static com.envimate.httpmate.http.headers.ContentType.fromString;
 import static com.envimate.httpmate.mapmate.MapMateConfigurator.toUseMapMate;
 import static com.envimate.httpmate.mapmate.MapMateIntegration.toMarshalRequestAndResponseBodiesUsingMapMate;
-import static com.envimate.httpmate.tests.givenwhenthen.Given.given;
-import static com.envimate.httpmate.tests.givenwhenthen.deploy.DeployerManager.activeDeployers;
-import static com.envimate.httpmate.tests.givenwhenthen.deploy.DeployerManager.setCurrentDeployerAndClient;
+import static com.envimate.httpmate.tests.givenwhenthen.TestEnvironment.ALL_ENVIRONMENTS;
 import static com.envimate.mapmate.builder.MapMate.aMapMate;
 import static com.envimate.mapmate.builder.recipes.marshallers.urlencoded.UrlEncodedMarshallerRecipe.urlEncodedMarshaller;
 import static com.envimate.mapmate.marshalling.MarshallingType.marshallingType;
 
-@RunWith(Parameterized.class)
 public final class MapMateSpecs {
-
-    public MapMateSpecs(final DeployerAndClient deployerAndClient) {
-        setCurrentDeployerAndClient(deployerAndClient);
-    }
-
-    @Parameterized.Parameters(name = "{0}")
-    public static Collection<DeployerAndClient> deployers() {
-        return activeDeployers();
-    }
 
     private static HttpMate httpMate() {
         final MapMate mapMate = aMapMate()
@@ -76,31 +62,34 @@ public final class MapMateSpecs {
                 .build();
     }
 
-    @Test
-    public void mapMateIntegrationCanUnmarshalCustomFormat() {
-        given(httpMate())
+    @ParameterizedTest
+    @MethodSource(ALL_ENVIRONMENTS)
+    public void mapMateIntegrationCanUnmarshalCustomFormat(final TestEnvironment testEnvironment) {
+        testEnvironment.given(httpMate())
                 .when().aRequestToThePath("/").viaThePostMethod().withTheBody("x").withContentType("custom").isIssued()
                 .theStatusCodeWas(200)
                 .theResponseContentTypeWas("custom")
                 .theResponseBodyWas("custom_marshalled");
     }
 
-    @Test
-    public void mapMateIntegrationCanUnmarshalFormEncodedButDoesNotMarshalFormEncodedByDefault() {
-        given(httpMate())
+    @ParameterizedTest
+    @MethodSource(ALL_ENVIRONMENTS)
+    public void mapMateIntegrationCanUnmarshalFormEncodedButDoesNotMarshalFormEncodedByDefault(final TestEnvironment testEnvironment) {
+        testEnvironment.given(httpMate())
                 .when().aRequestToThePath("/").viaThePostMethod().withTheBody("a=b").withContentType("application/x-www-form-urlencoded").isIssued()
                 .theStatusCodeWas(200)
                 .theResponseContentTypeWas("custom")
                 .theResponseBodyWas("custom_marshalled");
     }
 
-    @Test
-    public void mapMateIntegrationCorrectlyUnmarshallsWithoutSpecifiedRequestContentType() {
+    @ParameterizedTest
+    @MethodSource(ALL_ENVIRONMENTS)
+    public void mapMateIntegrationCorrectlyUnmarshallsWithoutSpecifiedRequestContentType(final TestEnvironment testEnvironment) {
         final Gson gson = new Gson();
         final MapMate mapMate = aMapMate(MyRequest.class.getPackageName())
                 .usingJsonMarshaller(gson::toJson, gson::fromJson)
                 .build();
-        given(
+        testEnvironment.given(
                 anHttpMate()
                         .post("/", MyUseCase.class)
                         .configured(toUseMapMate(mapMate))
@@ -111,14 +100,15 @@ public final class MapMateSpecs {
                 .theResponseBodyWas("{}");
     }
 
-    @Test
-    public void mapMateIntegrationCanHelpWithValidation() {
+    @ParameterizedTest
+    @MethodSource(ALL_ENVIRONMENTS)
+    public void mapMateIntegrationCanHelpWithValidation(final TestEnvironment testEnvironment) {
         final Gson gson = new Gson();
         final MapMate mapMate = aMapMate(MyRequest.class.getPackageName())
                 .withExceptionIndicatingValidationError(IllegalArgumentException.class)
                 .usingJsonMarshaller(gson::toJson, gson::fromJson)
                 .build();
-        given(
+        testEnvironment.given(
                 anHttpMate()
                         .post("/", MyUseCase.class)
                         .configured(toUseMapMate(mapMate))

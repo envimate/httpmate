@@ -48,7 +48,6 @@ final class EventsHttpMateConfiguration {
 
         final HttpMate httpMate = anHttpMate()
                 .get("/trigger", eventTypeFromString("trigger"))
-                //.configured(toUseModules(eventModule()))
                 .configured(toUseTheMessageBus(messageBus))
                 .build();
 
