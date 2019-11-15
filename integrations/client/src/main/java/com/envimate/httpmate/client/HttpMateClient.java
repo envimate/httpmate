@@ -87,7 +87,7 @@ public final class HttpMateClient implements AutoCloseable {
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() {
         issuer.close();
     }
 }

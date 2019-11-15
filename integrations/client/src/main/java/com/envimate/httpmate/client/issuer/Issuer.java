@@ -29,4 +29,8 @@ import java.util.function.Function;
 public interface Issuer extends AutoCloseable {
     <T> T issue(HttpClientRequest<T> request,
                 Function<RawClientResponse, T> responseMapper);
+
+    @Override
+    default void close() {
+    }
 }

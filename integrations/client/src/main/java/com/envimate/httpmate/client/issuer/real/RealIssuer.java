@@ -101,7 +101,7 @@ public final class RealIssuer implements Issuer {
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() {
         connectionFactory.close();
     }
 }

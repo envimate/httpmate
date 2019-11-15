@@ -35,4 +35,8 @@ public interface HttpClientWrapper extends AutoCloseable {
 
     HttpClientResponse issueRequestWithMultipartBody(
             String path, String method, Map<String, String> headers, List<MultipartElement> parts);
+
+    @Override
+    default void close() {
+    }
 }

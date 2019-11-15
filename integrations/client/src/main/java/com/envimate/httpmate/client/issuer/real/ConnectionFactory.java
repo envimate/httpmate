@@ -23,4 +23,8 @@ package com.envimate.httpmate.client.issuer.real;
 
 interface ConnectionFactory extends AutoCloseable {
     Connection getConnectionTo(Endpoint endpoint);
+
+    @Override
+    default void close() {
+    }
 }

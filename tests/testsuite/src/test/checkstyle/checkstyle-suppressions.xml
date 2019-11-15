@@ -41,4 +41,6 @@
     <suppress checks="IllegalCatch" files="ServletDeployer.java|DeployerManager.java|JettyDeployer.java" />
     <suppress checks="ClassFanOutComplexity|ClassDataAbstractionCoupling" files="ShittyHttpClientWrapper.java" />
     <suppress checks="MagicNumber|LineLength" files=".*Specs" />
+    <suppress checks="Regexp" files="FreePortPool" />
+    <suppress checks="Regexp" files="ResourceDeallocationSpecs" />
 </suppressions>

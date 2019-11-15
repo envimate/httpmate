@@ -62,6 +62,7 @@ import static org.apache.http.protocol.HttpProcessorBuilder.create;
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class ShittyHttpClientWrapper implements HttpClientWrapper {
     private static final String MULTIPART_BOUNDARY = "abcdefggggg";
+    private static final int BUFFER_SIZE = 8 * 1024;
 
     private final Deployment deployment;
 
@@ -126,8 +127,8 @@ public final class ShittyHttpClientWrapper implements HttpClientWrapper {
         final HttpEntityEnclosingRequest request = new BasicHttpEntityEnclosingRequest(method, url);
         headers.forEach(request::addHeader);
         bodyAppender.accept(request);
-        try (final DefaultBHttpClientConnection connection = new DefaultBHttpClientConnection(8 * 1024);
-             final Socket socket = createSocket(deployment)) {
+        try (DefaultBHttpClientConnection connection = new DefaultBHttpClientConnection(BUFFER_SIZE);
+             Socket socket = createSocket(deployment)) {
             connection.bind(socket);
             final HttpProcessor httpProcessor = create()
                     .add(new RequestContent())

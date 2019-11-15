@@ -41,7 +41,7 @@ public final class ResourceDeallocationSpecs {
         final Boolean runThisTest = Optional.ofNullable(System.getProperty("testMode")).map(s -> s.equals("RELEASE")).orElse(false);
         if (runThisTest) {
             final Instant start = Instant.now();
-            int max = 100000;
+            final int max = 100000;
             Instant partStart = Instant.now();
             for (int i = 0; i < max; i++) {
                 if (i % 100 == 0) {
@@ -49,7 +49,7 @@ public final class ResourceDeallocationSpecs {
                     System.out.println(i + "/" + max + ", " + durationPerTest.toNanos() / 1000000d + "ms/testCall");
                     partStart = Instant.now();
                 }
-                try (final HttpMate httpMate = anHttpMate()
+                try (HttpMate httpMate = anHttpMate()
                         .get("/hello", (request, response) -> response.setBody("World"))
                         .build()) {
                     testEnvironment.given(httpMate)

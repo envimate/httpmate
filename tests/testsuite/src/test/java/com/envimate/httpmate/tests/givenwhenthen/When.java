@@ -123,8 +123,6 @@ public final class When implements PathBuilder, MethodBuilder, BodyBuilder, Head
                 response = clientWrapper.issueRequestWithMultipartBody(path, method, headers, (List<MultipartElement>) body);
             }
             return then(response);
-        } catch (Exception e) {
-            throw new RuntimeException("Could not close client", e);
         }
     }
 }

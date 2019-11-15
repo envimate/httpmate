@@ -27,6 +27,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public final class FreePortPool {
     private static final int START_PORT = 9000;
+    private static final int HIGHEST_PORT = 65535;
     private static AtomicInteger currentPort = new AtomicInteger(START_PORT);
 
     private FreePortPool() {
@@ -34,7 +35,7 @@ public final class FreePortPool {
 
     public static int freePort() {
         final int port = currentPort.incrementAndGet();
-        if (port >= 65535) {
+        if (port >= HIGHEST_PORT) {
             currentPort.set(START_PORT);
             return freePort();
         } else {

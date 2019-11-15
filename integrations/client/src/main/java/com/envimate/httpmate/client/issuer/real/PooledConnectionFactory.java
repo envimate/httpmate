@@ -27,6 +27,7 @@ import org.apache.http.HttpHost;
 import org.apache.http.impl.pool.BasicConnPool;
 import org.apache.http.impl.pool.BasicPoolEntry;
 
+import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
@@ -56,12 +57,17 @@ final class PooledConnectionFactory implements ConnectionFactory {
             throw new RuntimeException(e);
         } catch (final InterruptedException e) {
             currentThread().interrupt();
+            this.close();
+            throw new UnsupportedOperationException("Got interrupted acquiring connection from pool", e);
         }
-        throw new RuntimeException("This should never happen");
     }
 
     @Override
-    public void close() throws Exception {
-        connectionPool.shutdown();
+    public void close() {
+        try {
+            connectionPool.shutdown();
+        } catch (final IOException e) {
+            throw new UnsupportedOperationException(e);
+        }
     }
 }
