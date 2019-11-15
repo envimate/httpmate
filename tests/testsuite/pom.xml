@@ -102,13 +102,13 @@
         <dependency>
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-java-sdk-lambda</artifactId>
-            <version>1.11.645</version>
+            <version>1.11.675</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-java-sdk-s3</artifactId>
-            <version>1.11.645</version>
+            <version>1.11.675</version>
             <scope>test</scope>
         </dependency>
         <dependency>
