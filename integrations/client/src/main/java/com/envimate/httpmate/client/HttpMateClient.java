@@ -36,7 +36,7 @@ import static com.envimate.httpmate.util.Validators.validateNotNull;
 import static com.envimate.httpmate.util.Validators.validateNotNullNorEmpty;
 
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-public final class HttpMateClient {
+public final class HttpMateClient implements AutoCloseable {
     private final Issuer issuer;
     private final BasePath basePath;
     private final FilterMap<Class<?>, ClientResponseMapper<?>> responseMappers;
@@ -84,5 +84,10 @@ public final class HttpMateClient {
             final ClientResponseMapper<T> responseMapper = (ClientResponseMapper<T>) responseMappers.get(targetType);
             return responseMapper.map(response, targetType);
         });
+    }
+
+    @Override
+    public void close() throws Exception {
+        issuer.close();
     }
 }

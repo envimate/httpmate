@@ -21,12 +21,8 @@
 
 package com.envimate.httpmate.tests.givenwhenthen;
 
-import com.envimate.httpmate.tests.givenwhenthen.builders.BodyBuilder;
-import com.envimate.httpmate.tests.givenwhenthen.builders.HeaderBuilder;
-import com.envimate.httpmate.tests.givenwhenthen.builders.MethodBuilder;
-import com.envimate.httpmate.tests.givenwhenthen.builders.PathBuilder;
+import com.envimate.httpmate.tests.givenwhenthen.builders.*;
 import com.envimate.httpmate.tests.givenwhenthen.client.HttpClientResponse;
-import com.envimate.httpmate.tests.givenwhenthen.builders.MultipartElement;
 import com.envimate.httpmate.tests.givenwhenthen.client.HttpClientWrapper;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -117,14 +113,18 @@ public final class When implements PathBuilder, MethodBuilder, BodyBuilder, Head
     @SuppressWarnings("unchecked")
     @Override
     public Then isIssued() {
-        final HttpClientResponse response;
-        if(body == null) {
-            response = clientWrapper.issueRequestWithoutBody(path, method, headers);
-        } else if(body instanceof String) {
-            response = clientWrapper.issueRequestWithStringBody(path, method, headers, (String) body);
-        } else {
-            response = clientWrapper.issueRequestWithMultipartBody(path, method, headers, (List<MultipartElement>) body);
+        try (clientWrapper) {
+            final HttpClientResponse response;
+            if (body == null) {
+                response = clientWrapper.issueRequestWithoutBody(path, method, headers);
+            } else if (body instanceof String) {
+                response = clientWrapper.issueRequestWithStringBody(path, method, headers, (String) body);
+            } else {
+                response = clientWrapper.issueRequestWithMultipartBody(path, method, headers, (List<MultipartElement>) body);
+            }
+            return then(response);
+        } catch (Exception e) {
+            throw new RuntimeException("Could not close client", e);
         }
-        return then(response);
     }
 }

@@ -27,7 +27,6 @@ import com.envimate.httpmate.tests.givenwhenthen.client.ClientFactory;
 import com.envimate.httpmate.tests.givenwhenthen.deploy.Deployer;
 import com.envimate.httpmate.tests.givenwhenthen.deploy.Deployment;
 
-import java.io.IOException;
 import java.util.List;
 
 import static com.envimate.httpmate.jetty.JettyEndpoint.jettyEndpointFor;
@@ -35,7 +34,6 @@ import static com.envimate.httpmate.tests.givenwhenthen.client.real.RealHttpMate
 import static com.envimate.httpmate.tests.givenwhenthen.client.real.RealHttpMateClientWithConnectionReuseFactory.theRealHttpMateClientWithConnectionReuse;
 import static com.envimate.httpmate.tests.givenwhenthen.client.shitty.ShittyClientFactory.theShittyTestClient;
 import static com.envimate.httpmate.tests.givenwhenthen.deploy.Deployment.httpDeployment;
-import static com.envimate.httpmate.tests.givenwhenthen.deploy.FreePortPool.freePort;
 import static java.util.Arrays.asList;
 
 public final class JettyDeployer implements Deployer {
@@ -51,21 +49,10 @@ public final class JettyDeployer implements Deployer {
 
     @Override
     public Deployment deploy(final HttpMate httpMate) {
-        cleanUp();
-        for (int i = 0; i < 1000; i++) {
-            final int port = freePort();
-            try {
-                current = jettyEndpointFor(httpMate).listeningOnThePort(port);
-                return httpDeployment("localhost", port);
-            } catch (RuntimeException e) {
-                final Throwable cause = e.getCause();
-                final boolean isPortInUseException = cause instanceof IOException && cause.getMessage().contains("Failed to bind to");
-                if (!isPortInUseException) {
-                    throw e;
-                }
-            }
-        }
-        throw new UnsupportedOperationException("Could not find a free port to run jetty on");
+        return retryUntilFreePortFound(port -> {
+            current = jettyEndpointFor(httpMate).listeningOnThePort(port);
+            return httpDeployment("localhost", port);
+        });
     }
 
     @Override

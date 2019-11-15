@@ -39,7 +39,6 @@ import static com.envimate.httpmate.tests.givenwhenthen.client.real.RealHttpMate
 import static com.envimate.httpmate.tests.givenwhenthen.client.real.RealHttpMateClientWithConnectionReuseFactory.theRealHttpMateClientWithConnectionReuse;
 import static com.envimate.httpmate.tests.givenwhenthen.client.shitty.ShittyClientFactory.theShittyTestClient;
 import static com.envimate.httpmate.tests.givenwhenthen.deploy.Deployment.httpDeployment;
-import static com.envimate.httpmate.tests.givenwhenthen.deploy.FreePortPool.freePort;
 import static java.util.Arrays.asList;
 
 public final class ServletDeployer implements Deployer {
@@ -54,23 +53,23 @@ public final class ServletDeployer implements Deployer {
 
     @Override
     public Deployment deploy(final HttpMate httpMate) {
-        cleanUp();
-        final int port = freePort();
-        current = new Server(port);
+        return retryUntilFreePortFound(port -> {
+            current = new Server(port);
 
-        final HttpConnectionFactory connectionFactory = extractConnectionFactory(current);
-        connectionFactory.getHttpConfiguration().setFormEncodedMethods();
+            final HttpConnectionFactory connectionFactory = extractConnectionFactory(current);
+            connectionFactory.getHttpConfiguration().setFormEncodedMethods();
 
-        final ServletHandler servletHandler = new ServletHandler();
-        current.setHandler(servletHandler);
-        final ServletHolder servletHolder = new ServletHolder(servletEndpointFor(httpMate));
-        servletHandler.addServletWithMapping(servletHolder, "/*");
-        try {
-            current.start();
-        } catch (final Exception e) {
-            throw new RuntimeException(e);
-        }
-        return httpDeployment("localhost", port);
+            final ServletHandler servletHandler = new ServletHandler();
+            current.setHandler(servletHandler);
+            final ServletHolder servletHolder = new ServletHolder(servletEndpointFor(httpMate));
+            servletHandler.addServletWithMapping(servletHolder, "/*");
+            try {
+                current.start();
+            } catch (final Exception e) {
+                throw new RuntimeException(e);
+            }
+            return httpDeployment("localhost", port);
+        });
     }
 
     @Override

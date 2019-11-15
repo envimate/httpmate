@@ -21,8 +21,8 @@
 
 package com.envimate.httpmate.tests.givenwhenthen.client.shitty;
 
-import com.envimate.httpmate.tests.givenwhenthen.client.HttpClientResponse;
 import com.envimate.httpmate.tests.givenwhenthen.builders.MultipartElement;
+import com.envimate.httpmate.tests.givenwhenthen.client.HttpClientResponse;
 import com.envimate.httpmate.tests.givenwhenthen.client.HttpClientWrapper;
 import com.envimate.httpmate.tests.givenwhenthen.deploy.Deployment;
 import com.envimate.httpmate.util.Streams;
@@ -126,9 +126,8 @@ public final class ShittyHttpClientWrapper implements HttpClientWrapper {
         final HttpEntityEnclosingRequest request = new BasicHttpEntityEnclosingRequest(method, url);
         headers.forEach(request::addHeader);
         bodyAppender.accept(request);
-        final DefaultBHttpClientConnection connection = new DefaultBHttpClientConnection(8 * 1024);
-        try {
-            final Socket socket = createSocket(deployment);
+        try (final DefaultBHttpClientConnection connection = new DefaultBHttpClientConnection(8 * 1024);
+             final Socket socket = createSocket(deployment)) {
             connection.bind(socket);
             final HttpProcessor httpProcessor = create()
                     .add(new RequestContent())
@@ -190,5 +189,9 @@ public final class ShittyHttpClientWrapper implements HttpClientWrapper {
         } catch (final IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    public void close() {
     }
 }

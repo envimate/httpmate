@@ -26,7 +26,7 @@ import com.envimate.httpmate.tests.givenwhenthen.builders.MultipartElement;
 import java.util.List;
 import java.util.Map;
 
-public interface HttpClientWrapper {
+public interface HttpClientWrapper extends AutoCloseable {
     HttpClientResponse issueRequestWithoutBody(
             String path, String method, Map<String, String> headers);
 

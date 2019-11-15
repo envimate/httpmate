@@ -115,4 +115,9 @@ public final class HttpMateClientWrapper implements HttpClientWrapper {
         final SimpleHttpResponseObject response = this.client.issue(requestBuilder);
         return httpClientResponse(response.getStatusCode(), response.getHeaders(), response.getBody());
     }
+
+    @Override
+    public void close() throws Exception {
+        client.close();
+    }
 }

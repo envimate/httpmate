@@ -99,4 +99,9 @@ public final class RealIssuer implements Issuer {
             throw new RuntimeException(e);
         }
     }
+
+    @Override
+    public void close() throws Exception {
+        connectionFactory.close();
+    }
 }

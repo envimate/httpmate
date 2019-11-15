@@ -23,7 +23,10 @@ package com.envimate.httpmate.client.issuer.bypass;
 
 import com.envimate.httpmate.HttpMate;
 import com.envimate.httpmate.chains.MetaData;
-import com.envimate.httpmate.client.*;
+import com.envimate.httpmate.client.HttpClientRequest;
+import com.envimate.httpmate.client.RawClientResponse;
+import com.envimate.httpmate.client.RequestPath;
+import com.envimate.httpmate.client.UriString;
 import com.envimate.httpmate.client.issuer.Issuer;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -75,5 +78,9 @@ public final class BypassIssuer implements Issuer {
 
         final RawClientResponse response = rawClientResponse(responseStatus, responseHeaders, responseBody);
         return responseMapper.apply(response);
+    }
+
+    @Override
+    public void close() {
     }
 }

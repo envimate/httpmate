@@ -34,7 +34,6 @@ import static com.envimate.httpmate.tests.givenwhenthen.client.real.RealHttpMate
 import static com.envimate.httpmate.tests.givenwhenthen.client.real.RealHttpMateClientWithConnectionReuseFactory.theRealHttpMateClientWithConnectionReuse;
 import static com.envimate.httpmate.tests.givenwhenthen.client.shitty.ShittyClientFactory.theShittyTestClient;
 import static com.envimate.httpmate.tests.givenwhenthen.deploy.Deployment.httpDeployment;
-import static com.envimate.httpmate.tests.givenwhenthen.deploy.FreePortPool.freePort;
 import static java.util.Arrays.asList;
 
 public final class PureJavaDeployer implements Deployer {
@@ -50,10 +49,10 @@ public final class PureJavaDeployer implements Deployer {
 
     @Override
     public Deployment deploy(final HttpMate httpMate) {
-        cleanUp();
-        final int port = freePort();
-        current = pureJavaEndpointFor(httpMate).listeningOnThePort(port);
-        return httpDeployment("localhost", port);
+        return retryUntilFreePortFound(port -> {
+            current = pureJavaEndpointFor(httpMate).listeningOnThePort(port);
+            return httpDeployment("localhost", port);
+        });
     }
 
     @Override

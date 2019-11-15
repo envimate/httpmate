@@ -26,8 +26,7 @@ import com.envimate.httpmate.client.RawClientResponse;
 
 import java.util.function.Function;
 
-public interface Issuer {
+public interface Issuer extends AutoCloseable {
     <T> T issue(HttpClientRequest<T> request,
-                //BasePath basePath,
                 Function<RawClientResponse, T> responseMapper);
 }

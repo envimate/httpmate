@@ -59,4 +59,9 @@ final class PooledConnectionFactory implements ConnectionFactory {
         }
         throw new RuntimeException("This should never happen");
     }
+
+    @Override
+    public void close() throws Exception {
+        connectionPool.shutdown();
+    }
 }

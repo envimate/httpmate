@@ -52,4 +52,8 @@ public final class NormalConnectionFactory implements ConnectionFactory {
             throw new RuntimeException(e);
         }
     }
+
+    @Override
+    public void close() {
+    }
 }
