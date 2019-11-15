@@ -24,16 +24,25 @@ package com.envimate.httpmate.tests;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.Set;
+
 import static com.envimate.httpmate.tests.givenwhenthen.Given.givenAnHttpServer;
 
 public final class ClientSpecs {
     private static final String charactersThatNeedEncoding = "[]{}\"§#";
 
     @Test
-    public void clientDoesNotAppendATrailingSlashToPath() {
+    public void clientDoesNotAppendATrailingSlashToPathToDirectory() {
         givenAnHttpServer()
                 .when().aRequestIsMadeToThePath("/qwer")
                 .theServerReceivedARequestToThePath("/qwer");
+    }
+
+    @Test
+    public void clientDoesNotAppendATrailingSlashToPathToFile() {
+        givenAnHttpServer()
+                .when().aRequestIsMadeToThePath("/qwer/tweet.json")
+                .theServerReceivedARequestToThePath("/qwer/tweet.json");
     }
 
     @Test

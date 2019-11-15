@@ -31,6 +31,12 @@ public final class FreePortPool {
     }
 
     public static int freePort() {
-        return currentPort.incrementAndGet();
+        final int port = currentPort.incrementAndGet();
+        if (port >= 65535) {
+            currentPort.set(START_PORT);
+            return freePort();
+        } else {
+            return port;
+        }
     }
 }

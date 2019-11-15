@@ -22,6 +22,7 @@
 package com.envimate.httpmate.jetty;
 
 import com.envimate.httpmate.HttpMate;
+import com.envimate.httpmate.closing.ClosingAction;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import org.eclipse.jetty.server.ConnectionFactory;
@@ -44,17 +45,22 @@ public final class JettyEndpoint implements AutoCloseable {
                 connectionFactory.getHttpConfiguration().setFormEncodedMethods();
                 server.setHandler(jettyEndpointHandler(httpMate));
                 server.start();
-                httpMate.getMetaDatum(CLOSING_ACTIONS).addClosingAction(() -> {
-                    try {
-                        server.stop();
-                    } catch (final Exception e) {
-                        throw new RuntimeException(e);
-                    }
-                });
+                httpMate.getMetaDatum(CLOSING_ACTIONS).addClosingAction(closeJetty(server));
             } catch (final Exception e) {
-                throw new RuntimeException(e);
+                throw new RuntimeException("Could not create Jetty Endpoint", e);
             }
             return new JettyEndpoint(httpMate);
+        };
+    }
+
+    private static ClosingAction closeJetty(Server server) {
+        return () -> {
+            try {
+                server.stop();
+                server.destroy();
+            } catch (final Exception e) {
+                throw new RuntimeException("Could not stop Jetty Endpoint", e);
+            }
         };
     }
 

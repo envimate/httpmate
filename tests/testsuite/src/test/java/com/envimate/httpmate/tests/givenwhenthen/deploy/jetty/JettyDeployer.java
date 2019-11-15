@@ -27,6 +27,7 @@ import com.envimate.httpmate.tests.givenwhenthen.client.ClientFactory;
 import com.envimate.httpmate.tests.givenwhenthen.deploy.Deployer;
 import com.envimate.httpmate.tests.givenwhenthen.deploy.Deployment;
 
+import java.io.IOException;
 import java.util.List;
 
 import static com.envimate.httpmate.jetty.JettyEndpoint.jettyEndpointFor;
@@ -51,9 +52,20 @@ public final class JettyDeployer implements Deployer {
     @Override
     public Deployment deploy(final HttpMate httpMate) {
         cleanUp();
-        final int port = freePort();
-        current = jettyEndpointFor(httpMate).listeningOnThePort(port);
-        return httpDeployment("localhost", port);
+        for (int i = 0; i < 1000; i++) {
+            final int port = freePort();
+            try {
+                current = jettyEndpointFor(httpMate).listeningOnThePort(port);
+                return httpDeployment("localhost", port);
+            } catch (RuntimeException e) {
+                final Throwable cause = e.getCause();
+                final boolean isPortInUseException = cause instanceof IOException && cause.getMessage().contains("Failed to bind to");
+                if (!isPortInUseException) {
+                    throw e;
+                }
+            }
+        }
+        throw new UnsupportedOperationException("Could not find a free port to run jetty on");
     }
 
     @Override
@@ -61,8 +73,8 @@ public final class JettyDeployer implements Deployer {
         if (current != null) {
             try {
                 current.close();
-            } catch (final Exception e) {
-                e.printStackTrace();
+            } catch (Exception e) {
+                throw new UnsupportedOperationException("Could not stop JettyEndpoint", e);
             }
         }
     }

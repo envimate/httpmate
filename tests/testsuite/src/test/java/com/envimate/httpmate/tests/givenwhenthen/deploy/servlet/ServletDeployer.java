@@ -77,9 +77,10 @@ public final class ServletDeployer implements Deployer {
     public void cleanUp() {
         if (current != null) {
             try {
+                current.stop();
                 current.destroy();
-            } catch (final Exception e) {
-                e.printStackTrace();
+            } catch (Exception e) {
+                throw new UnsupportedOperationException("Could not stop jetty", e);
             }
         }
     }
