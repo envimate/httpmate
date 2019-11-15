@@ -27,7 +27,7 @@
     <parent>
         <groupId>com.envimate.httpmate.tests</groupId>
         <artifactId>parent</artifactId>
-        <version>1.0.25</version>
+        <version>1.0.26</version>
     </parent>
 
     <artifactId>testsuite</artifactId>
@@ -79,7 +79,7 @@
         <dependency>
             <groupId>com.envimate.httpmate.integrations</groupId>
             <artifactId>httpmate-client</artifactId>
-            <version>1.0.25</version>
+            <version>1.0.26</version>
         </dependency>
         <dependency>
             <groupId>com.envimate.httpmate.integrations</groupId>
