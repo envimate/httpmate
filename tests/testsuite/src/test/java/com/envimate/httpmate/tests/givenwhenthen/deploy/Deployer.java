@@ -24,31 +24,16 @@ package com.envimate.httpmate.tests.givenwhenthen.deploy;
 import com.envimate.httpmate.HttpMate;
 import com.envimate.httpmate.tests.givenwhenthen.client.ClientFactory;
 
-import java.io.IOException;
 import java.util.List;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 
-import static com.envimate.httpmate.jetty.JettyEndpoint.jettyEndpointFor;
-import static com.envimate.httpmate.tests.givenwhenthen.deploy.Deployment.httpDeployment;
 import static com.envimate.httpmate.tests.givenwhenthen.deploy.FreePortPool.freePort;
 
 public interface Deployer {
     default Deployment retryUntilFreePortFound(final Function<Integer, Deployment> deploymentFactory) {
         cleanUp();
-        for (int i = 0; i < 1000; i++) {
-            final int port = freePort();
-            try {
-                return deploymentFactory.apply(port);
-            } catch (RuntimeException e) {
-                final Throwable cause = e.getCause();
-                final boolean isPortInUseException = cause instanceof IOException && cause.getMessage().contains("Failed to bind to");
-                if (!isPortInUseException) {
-                    throw e;
-                }
-            }
-        }
-        throw new UnsupportedOperationException("Could not find a free port to run jetty on");
+        final int port = freePort();
+        return deploymentFactory.apply(port);
     }
 
     Deployment deploy(HttpMate httpMate);

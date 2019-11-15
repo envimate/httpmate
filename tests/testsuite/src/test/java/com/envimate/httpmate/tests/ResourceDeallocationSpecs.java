@@ -26,6 +26,10 @@ import com.envimate.httpmate.tests.givenwhenthen.TestEnvironment;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import java.time.Duration;
+import java.time.Instant;
+import java.util.Optional;
+
 import static com.envimate.httpmate.HttpMate.anHttpMate;
 import static com.envimate.httpmate.tests.givenwhenthen.TestEnvironment.ALL_ENVIRONMENTS;
 
@@ -34,15 +38,29 @@ public final class ResourceDeallocationSpecs {
     @ParameterizedTest
     @MethodSource(ALL_ENVIRONMENTS)
     public void createTestAndDestroyALotOfTimes(final TestEnvironment testEnvironment) {
-        for (int i = 0; i < 10000; i++) {
-            try (final HttpMate httpMate = anHttpMate()
-                    .get("/hello", (request, response) -> response.setBody("World"))
-                    .build()) {
-                testEnvironment.given(httpMate)
-                        .when()
-                        .aRequestToThePath("/hello").viaTheGetMethod().withAnEmptyBody().isIssued()
-                        .theResponseBodyWas("World");
+        final Boolean runThisTest = Optional.ofNullable(System.getProperty("testMode")).map(s -> s.equals("RELEASE")).orElse(false);
+        if (runThisTest) {
+            final Instant start = Instant.now();
+            int max = 100000;
+            Instant partStart = Instant.now();
+            for (int i = 0; i < max; i++) {
+                if (i % 100 == 0) {
+                    final Duration durationPerTest = Duration.between(partStart, Instant.now()).dividedBy(100);
+                    System.out.println(i + "/" + max + ", " + durationPerTest.toNanos() / 1000000d + "ms/testCall");
+                    partStart = Instant.now();
+                }
+                try (final HttpMate httpMate = anHttpMate()
+                        .get("/hello", (request, response) -> response.setBody("World"))
+                        .build()) {
+                    testEnvironment.given(httpMate)
+                            .when()
+                            .aRequestToThePath("/hello").viaTheGetMethod().withAnEmptyBody().isIssued()
+                            .theResponseBodyWas("World");
+                }
             }
+            System.out.println("Took " + Duration.between(start, Instant.now()).dividedBy(max).toMillis() + "ms/testCall");
+        } else {
+            System.out.println("Skipping this test, since system property testMode is not set to RELEASE");
         }
     }
 }

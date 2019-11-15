@@ -53,7 +53,7 @@ public final class JettyEndpoint implements AutoCloseable {
         };
     }
 
-    private static ClosingAction closeJetty(Server server) {
+    private static ClosingAction closeJetty(final Server server) {
         return () -> {
             try {
                 server.stop();

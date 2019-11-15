@@ -34,7 +34,7 @@ import static java.lang.Thread.currentThread;
 
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 final class PooledConnectionFactory implements ConnectionFactory {
-    private static final int MAX_CONNECTIONS = 200;
+    private static final int MAX_CONNECTIONS = 10;
     private static final int MAX_CONNECTIONS_PER_ROUTE = 10;
     private final BasicConnPool connectionPool;
 

@@ -85,9 +85,9 @@ public final class RealIssuer implements Issuer {
             final HttpCoreContext context = HttpCoreContext.create();
             context.setTargetHost(new HttpHost(this.endpoint.host()));
             httpProcessor.process(lowLevelRequest, context);
-            final HttpRequestExecutor httpexecutor = new HttpRequestExecutor();
+            final HttpRequestExecutor httpRequestExecutor = new HttpRequestExecutor();
             final HttpClientConnection connectionObject = connection.connectionObject();
-            final HttpResponse response = httpexecutor.execute(lowLevelRequest, connectionObject, context);
+            final HttpResponse response = httpRequestExecutor.execute(lowLevelRequest, connectionObject, context);
             final int statusCode = response.getStatusLine().getStatusCode();
             final Map<String, String> headers = new HashMap<>();
             stream(response.getAllHeaders())

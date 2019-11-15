@@ -21,6 +21,8 @@
 
 package com.envimate.httpmate.tests.givenwhenthen.deploy;
 
+import java.io.IOException;
+import java.net.ServerSocket;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public final class FreePortPool {
@@ -36,7 +38,15 @@ public final class FreePortPool {
             currentPort.set(START_PORT);
             return freePort();
         } else {
-            return port;
+            try {
+                final ServerSocket serverSocket = new ServerSocket(port);
+                serverSocket.close();
+                return port;
+            } catch (IOException ex) {
+                System.out.println("port " + port + " in use, trying next one");
+                return freePort();
+            }
         }
     }
+
 }
