@@ -21,15 +21,22 @@
 
 package com.envimate.httpmate.tests.givenwhenthen;
 
+import com.envimate.httpmate.client.HttpClientRequestBuilder;
 import com.envimate.httpmate.client.HttpMateClient;
+import com.envimate.httpmate.tests.givenwhenthen.domain.ACustomPrimitive;
+import com.envimate.mapmate.builder.MapMate;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
+import java.util.function.Consumer;
+
 import static com.envimate.httpmate.client.HttpClientRequest.aGetRequestToThePath;
 import static com.envimate.httpmate.client.HttpMateClient.aHttpMateClientForTheHost;
 import static com.envimate.httpmate.tests.givenwhenthen.Then.then;
+import static com.envimate.httpmate.util.Streams.inputStreamToString;
+import static com.envimate.mapmate.builder.MapMate.aMapMate;
 
 @ToString
 @EqualsAndHashCode
@@ -44,11 +51,24 @@ public final class When {
     }
 
     public Then aRequestIsMadeToThePath(final String path) {
+        return aRequestIsMade(httpMateClient -> httpMateClient.issue(aGetRequestToThePath(path)));
+    }
+
+    public Then aRequestIsMade(final HttpClientRequestBuilder<?> requestBuilder) {
+        return aRequestIsMade(httpMateClient -> httpMateClient.issue(requestBuilder));
+    }
+
+    public Then aRequestIsMade(final Consumer<HttpMateClient> clientConsumer) {
+        final MapMate mapMate = aMapMate(ACustomPrimitive.class.getPackageName()).build();
         final HttpMateClient client = aHttpMateClientForTheHost("localhost")
                 .withThePort(port)
                 .viaHttp()
+                .withDefaultResponseMapping((response, targetType) -> {
+                    final String stringContent = inputStreamToString(response.content());
+                    return mapMate.deserializeJson(stringContent, targetType);
+                })
                 .build();
-        client.issue(aGetRequestToThePath(path));
+        clientConsumer.accept(client);
         return then(requestLog);
     }
 }

@@ -41,7 +41,7 @@
     <parent>
         <groupId>com.envimate.httpmate</groupId>
         <artifactId>integrations-parent</artifactId>
-        <version>1.0.27</version>
+        <version>1.0.28</version>
     </parent>
 
     <groupId>com.envimate.httpmate.integrations</groupId>
@@ -106,7 +106,7 @@
         <dependency>
             <groupId>com.envimate.httpmate.integrations</groupId>
             <artifactId>httpmate-client</artifactId>
-            <version>1.0.27</version>
+            <version>1.0.28</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -124,13 +124,13 @@
         <dependency>
             <groupId>com.envimate.httpmate.integrations</groupId>
             <artifactId>httpmate-multipart</artifactId>
-            <version>1.0.27</version>
+            <version>1.0.28</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.envimate.httpmate.integrations</groupId>
             <artifactId>httpmate-websockets-usecases</artifactId>
-            <version>1.0.27</version>
+            <version>1.0.28</version>
             <scope>test</scope>
         </dependency>
 

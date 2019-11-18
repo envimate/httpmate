@@ -24,8 +24,7 @@ package com.envimate.httpmate.tests;
 
 import org.junit.jupiter.api.Test;
 
-import java.util.Set;
-
+import static com.envimate.httpmate.client.HttpClientRequest.aPostRequestToThePath;
 import static com.envimate.httpmate.tests.givenwhenthen.Given.givenAnHttpServer;
 
 public final class ClientSpecs {
@@ -57,5 +56,12 @@ public final class ClientSpecs {
         givenAnHttpServer()
                 .when().aRequestIsMadeToThePath("/" + charactersThatNeedEncoding)
                 .theServerReceivedARequestToThePath("/%5B%5D%7B%7D%22%C2%A7%23");
+    }
+
+    @Test
+    public void emptyBodyValuesWithMapMateDoNotCauseProblems() {
+        givenAnHttpServer()
+                .when().aRequestIsMade(aPostRequestToThePath("/test"))
+                .theServerReceivedARequestToThePath("/test");
     }
 }

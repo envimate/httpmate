@@ -23,6 +23,8 @@ package com.envimate.httpmate.tests.lowlevel.usecase;
 
 import com.envimate.httpmate.tests.givenwhenthen.TestEnvironment;
 import com.envimate.httpmate.tests.lowlevel.usecase.usecases.FailInInitializerUseCase;
+import com.envimate.httpmate.tests.lowlevel.usecase.usecases.SomeCheckedException;
+import com.envimate.httpmate.tests.lowlevel.usecase.usecases.ThrowCheckedExceptionUseCase;
 import com.envimate.httpmate.tests.lowlevel.usecase.usecases.VoidUseCase;
 import com.envimate.messageMate.useCases.useCaseAdapter.usecaseInstantiating.ZeroArgumentsConstructorUseCaseInstantiatorException;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -76,5 +78,26 @@ public final class UseCaseSpecs {
                 .when().aRequestToThePath("/").viaTheGetMethod().withAnEmptyBody().isIssued()
                 .theStatusCodeWas(500)
                 .theResponseBodyWas("");
+    }
+
+    @ParameterizedTest
+    @MethodSource(ALL_ENVIRONMENTS)
+    public void checkedExceptionInUseCaseCanBeCaughtInSpecializedHandler(final TestEnvironment testEnvironment) {
+        testEnvironment.given(
+                anHttpMate()
+                        .get("/", ThrowCheckedExceptionUseCase.class)
+                        .configured(toMapExceptionsOfType(SomeCheckedException.class, (exception, response) -> {
+                            response.setBody("The correct exception has been thrown");
+                            response.setStatus(505);
+                        }))
+                        .configured(toMapExceptionsByDefaultUsing((exception, response) -> {
+                            response.setBody("The incorrect exception has been thrown");
+                            response.setStatus(501);
+                        }))
+                        .build()
+        )
+                .when().aRequestToThePath("/").viaTheGetMethod().withAnEmptyBody().isIssued()
+                .theStatusCodeWas(505)
+                .theResponseBodyWas("The correct exception has been thrown");
     }
 }

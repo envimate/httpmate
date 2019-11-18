@@ -28,7 +28,7 @@
     <parent>
         <groupId>com.envimate.httpmate</groupId>
         <artifactId>integrations-parent</artifactId>
-        <version>1.0.27</version>
+        <version>1.0.28</version>
     </parent>
 
     <groupId>com.envimate.httpmate.integrations</groupId>
@@ -74,6 +74,12 @@
         <dependency>
             <groupId>org.junit.platform</groupId>
             <artifactId>junit-platform-runner</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.envimate.mapmate</groupId>
+            <artifactId>core</artifactId>
+            <version>1.6.23</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

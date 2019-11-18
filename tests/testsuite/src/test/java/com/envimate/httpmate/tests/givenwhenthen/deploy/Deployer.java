@@ -24,6 +24,7 @@ package com.envimate.httpmate.tests.givenwhenthen.deploy;
 import com.envimate.httpmate.HttpMate;
 import com.envimate.httpmate.tests.givenwhenthen.client.ClientFactory;
 
+import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Function;
 
@@ -32,8 +33,20 @@ import static com.envimate.httpmate.tests.givenwhenthen.deploy.FreePortPool.free
 public interface Deployer {
     default Deployment retryUntilFreePortFound(final Function<Integer, Deployment> deploymentFactory) {
         cleanUp();
-        final int port = freePort();
-        return deploymentFactory.apply(port);
+        final List<Exception> exceptions = new LinkedList<>();
+        for (int i = 0; i < 3; ++i) {
+            final int port = freePort();
+            try {
+                return deploymentFactory.apply(port);
+            } catch (final Exception e) {
+                exceptions.add(e);
+            }
+        }
+        final String message = "Failed three times to use supposedly free port.";
+        System.err.println(message);
+        exceptions.forEach(Throwable::printStackTrace);
+        final Exception lastException = exceptions.get(exceptions.size() - 1);
+        throw new IllegalStateException(message, lastException);
     }
 
     Deployment deploy(HttpMate httpMate);
